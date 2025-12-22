@@ -1,0 +1,150 @@
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║                         WDP-Start Messages                                  ║
+# ║                    Supports hex colors: &#RRGGBB                            ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+# Prefix for all messages
+prefix: "&#FFD700[WDP-Start]&#FFFFFF "
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                           Welcome Message                                    │
+# └─────────────────────────────────────────────────────────────────────────────┘
+welcome:
+  enabled: true
+  delay-ticks: 60  # 3 seconds after join
+  messages:
+    - ""
+    - "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    - ""
+    - "        &#FFFFFF&lWelcome to WDP Server!"
+    - ""
+    - "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    - ""
+    - "    &#AAAAAANew here? Start your adventure!"
+    - ""
+    - "         &#55FFFF&l▶ /start"
+    - ""
+    - "    &#AAAAAAComplete quests to earn rewards"
+    - "    &#AAAAAAand learn about the server!"
+    - ""
+    - "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    - ""
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                            Quest Messages                                    │
+# └─────────────────────────────────────────────────────────────────────────────┘
+quest:
+  # Starting quests
+  started: "&aQuest chain started! Complete each quest in order."
+  already-started: "&cYou've already started the quest chain!"
+  already-completed: "&aYou've already completed all quests!"
+  
+  # Progress
+  objective-complete: "&#55FF55&l✓ &#55FF55{objective}"
+  quest-complete: "&#FFD700&l★ &#FFD700Quest Complete: &#FFFFFF{quest}"
+  
+  # Specific quest messages
+  quest1:
+    step1: "&#55FFFF➤ &#FFFFFFStep into the wild..."
+    step2: "&#55FFFF➤ &#FFFFFFYou're being teleported to safety!"
+    complete: "&#55FF55&l✓ &#55FF55Welcome to the wilderness! Your adventure begins."
+  
+  quest2:
+    progress: "&#FFFF55➤ &#FFFFFFForaging Level: &#55FFFF{level}&#FFFFFF/&#55FFFF1"
+    complete: "&#55FF55&l✓ &#55FF55Foraging level reached!"
+  
+  quest3:
+    step1: "&#55FFFF➤ &#FFFFFFOpened the shop!"
+    topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} SkillCoins &#FFFFFFto buy items!"
+    complete: "&#55FF55&l✓ &#55FF55Item purchased! You know how to use the shop!"
+  
+  quest4:
+    step1: "&#55FFFF➤ &#FFFFFFOpened the token exchange!"
+    topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} SkillCoins &#FFFFFFto complete your purchase!"
+    complete: "&#55FF55&l✓ &#55FF55Token purchased! You can now buy skill upgrades."
+  
+  quest5:
+    complete: "&#55FF55&l✓ &#55FF55You've learned how the quest menu works!"
+  
+  quest6:
+    complete: "&#55FF55&l✓ &#55FF55All quests complete! Good luck on your adventure!"
+  
+  # All complete
+  all-complete:
+    - ""
+    - "&#FFD700&l★═══════════════════════════════════════★"
+    - "&#FFFFFF&l     CONGRATULATIONS!"
+    - "&#FFD700&l★═══════════════════════════════════════★"
+    - ""
+    - "&#55FF55  You've completed all starter quests!"
+    - ""
+    - "&#FFFFFF  Final Rewards:"
+    - "&#FFD700  ✦ 500 SkillCoins"
+    - "&#FF55FF  ✦ 25 SkillTokens"
+    - "&#55FFFF  ✦ 3 Diamonds"
+    - "&#AAAAAA  ✦ 16 Iron Ingots"
+    - "&#FFFF55  ✦ 32 Bread"
+    - ""
+    - "&#AAAAAAJoin our Discord for help:"
+    - "&#55FFFF{discord}"
+    - ""
+    - "&#FFD700&l★═══════════════════════════════════════★"
+    - ""
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                          Cancellation Messages                               │
+# └─────────────────────────────────────────────────────────────────────────────┘
+cancel:
+  confirm: "&eAre you sure you want to cancel? Type &c/start cancel confirm &eto confirm."
+  cancelled: "&cQuest chain cancelled."
+  refunded: "&aRefunded &e{amount} SkillCoins &athat were not spent."
+  no-refund: "&7No SkillCoins to refund."
+  cannot-cancel: "&cYou cannot cancel at this point."
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                             Reward Messages                                  │
+# └─────────────────────────────────────────────────────────────────────────────┘
+rewards:
+  header: "&#FFD700&l✦ &#FFD700Rewards:"
+  skillcoins: "&#FFD700  ✦ {amount} SkillCoins"
+  skilltokens: "&#FF55FF  ✦ {amount} SkillTokens"
+  item: "&#55FFFF  ✦ {amount}x {item}"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                            Command Messages                                  │
+# └─────────────────────────────────────────────────────────────────────────────┘
+commands:
+  help:
+    - ""
+    - "&#FFD700&l═══════════════════════════════════════"
+    - "&#FFFFFF&l  WDP-Start Commands"
+    - "&#FFD700&l═══════════════════════════════════════"
+    - ""
+    - "&#55FFFF/start &#AAAAAA- Open quest menu"
+    - "&#55FFFF/start cancel &#AAAAAA- Cancel quest chain"
+    - "&#55FFFF/start help &#AAAAAA- Show this help"
+    - ""
+    - "&#FFD700&l═══════════════════════════════════════"
+    - ""
+  
+  no-permission: "&cYou don't have permission to use this command!"
+  player-only: "&cThis command can only be used by players!"
+  unknown: "&cUnknown subcommand. Use &e/start help &cfor help."
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                            Admin Messages                                    │
+# └─────────────────────────────────────────────────────────────────────────────┘
+admin:
+  reload: "&aConfiguration reloaded successfully!"
+  reset: "&aReset quest progress for &e{player}&a."
+  complete: "&aForce completed quest &e{quest} &afor &e{player}&a."
+  player-not-found: "&cPlayer not found: &e{player}"
+  invalid-quest: "&cInvalid quest number: &e{quest}"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                             Error Messages                                   │
+# └─────────────────────────────────────────────────────────────────────────────┘
+errors:
+  generic: "&cAn error occurred. Please contact an administrator."
+  not-started: "&cYou haven't started the quest chain yet! Use &e/start &cto begin."
+  quest-locked: "&cThis quest is locked. Complete the previous quest first!"
