@@ -66,6 +66,26 @@ public class QuestListener implements Listener {
         
         // Use PortalZoneManager to check zone entry
         plugin.getPortalZoneManager().onPlayerMove(player, event.getTo());
+        
+        // Check if player just entered the zone and trigger RTP
+        if (progress.hasData("entered_zone") && (boolean) progress.getData("entered_zone") &&
+            !progress.hasData("teleported")) {
+            
+            // Mark as teleported to prevent repeated RTP attempts
+            progress.setData("teleported", true);
+            
+            // Perform RTP after a short delay
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                plugin.getRtpManager().performRTP(player).thenAccept(success -> {
+                    if (success) {
+                        // Complete Quest 1 after successful RTP
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            plugin.getQuestManager().completeQuest(player, 1);
+                        });
+                    }
+                });
+            }, 10L);
+        }
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

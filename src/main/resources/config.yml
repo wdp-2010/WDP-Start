@@ -59,7 +59,8 @@ particle-path:
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                          Quest 1: Leave & Teleport                          │
 # │       Portal Zone - Area player must enter before being teleported          │
-# │       Use /quests debug to visualize this zone with particles               │
+# │       Use /start debug to visualize this zone with particles                │
+# │       After portal, player is RTP'd near a tree (away from bases)           │
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest1:
   # Rewards
@@ -88,6 +89,51 @@ portal-zone:
   max-y: 180
   min-z: 200
   max-z: 210
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                    RTP Settings (After Portal Zone)                         │
+# │    Teleports player to random location near a tree, away from bases         │
+# │    Uses WDP-BaseDet to ensure location is not near existing bases           │
+# └─────────────────────────────────────────────────────────────────────────────┘
+rtp:
+  # Enable RTP after entering portal zone
+  enabled: true
+  
+  # World for RTP destination
+  world: "world"
+  
+  # Distance range from spawn center (min-max blocks)
+  min-distance: 1000
+  max-distance: 5000
+  
+  # Maximum world border to respect
+  world-border-buffer: 100
+  
+  # Tree search settings
+  tree-search:
+    # How close to land near a tree (blocks)
+    min-distance-from-tree: 5
+    max-distance-from-tree: 30
+    # Max attempts to find a valid tree location
+    max-attempts: 50
+  
+  # Base avoidance (WDP-BaseDet integration)
+  base-detection:
+    # Minimum distance from any detected base
+    min-distance-from-base: 200
+    # Include pending/unconfirmed bases
+    include-pending: true
+  
+  # Safe landing checks
+  safety:
+    # Ensure solid ground below
+    require-solid-ground: true
+    # Avoid lava/water
+    avoid-liquids: true
+    # Min Y level
+    min-y: 63
+    # Max Y level
+    max-y: 200
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                       Quest 2: Foraging Kickstart                           │

@@ -302,47 +302,76 @@ public class QuestMenu {
     }
     
     /**
-     * Add the SkillCoins-style navbar
+     * Add the Quest-style navbar (matching WDP-Quest plugin exactly)
+     * Row 5 (slots 45-53): Navigation bar
      */
     private void addNavbar(Inventory inv, PlayerData data) {
-        // Home (slot 45)
-        ItemStack home = createItem(Material.NETHER_STAR,
-            hex("&#55FFFF⌂ Home"),
-            "",
-            hex("&#AAAAAAMain quest menu"),
-            ""
+        // Fill row 5 with black glass
+        ItemStack blackGlass = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemMeta glassMeta = blackGlass.getItemMeta();
+        if (glassMeta != null) {
+            glassMeta.setDisplayName(" ");
+            blackGlass.setItemMeta(glassMeta);
+        }
+        for (int i = 45; i <= 53; i++) {
+            inv.setItem(i, blackGlass);
+        }
+        
+        // Page info (slot 45) - using book
+        int completed = data.getCompletedQuestCount();
+        ItemStack pageInfo = createItem(Material.BOOK,
+            hex("&#FFFF55&lPage 1/1"),
+            hex("&#AAAAAAViewing quests 1-6")
         );
-        inv.setItem(45, home);
+        inv.setItem(45, pageInfo);
         
-        // Decorations (slots 46-48, 50-52)
-        ItemStack deco = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-        ItemMeta decoMeta = deco.getItemMeta();
-        decoMeta.setDisplayName(" ");
-        deco.setItemMeta(decoMeta);
+        // Player info with currency (slot 46)
+        double coins = 0;
+        int tokens = 0;
+        if (plugin.getVaultIntegration() != null) {
+            coins = plugin.getVaultIntegration().getBalance(
+                Bukkit.getPlayer(data.getUuid()) != null ? 
+                Bukkit.getPlayer(data.getUuid()) : null);
+        }
+        ItemStack playerInfo = new ItemStack(Material.PLAYER_HEAD);
+        ItemMeta playerMeta = playerInfo.getItemMeta();
+        if (playerMeta != null) {
+            playerMeta.setDisplayName(hex("&#FFD700" + (Bukkit.getPlayer(data.getUuid()) != null ? 
+                Bukkit.getPlayer(data.getUuid()).getName() : "Player")));
+            List<String> playerLore = new ArrayList<>();
+            playerLore.add(hex("&#FFD700Coins: &#FFFF55" + String.format("%.0f", coins)));
+            playerLore.add(hex("&#55FFFFTokens: &#22AAAA" + tokens));
+            playerMeta.setLore(playerLore);
+            playerInfo.setItemMeta(playerMeta);
+        }
+        inv.setItem(46, playerInfo);
         
-        inv.setItem(46, deco);
-        inv.setItem(47, deco);
-        inv.setItem(48, deco);
-        inv.setItem(50, deco);
-        inv.setItem(51, deco);
-        inv.setItem(52, deco);
-        
-        // Info (slot 49)
-        ItemStack info = createItem(Material.PAPER,
-            hex("&#FFD700WDP-Start"),
-            "",
-            hex("&#AAAAAANew player quest system"),
-            hex("&#AAAAAAv1.0.0"),
-            ""
+        // Back button (slot 48) - Arrow
+        ItemStack back = createItem(Material.ARROW, 
+            hex("&#FF5555&l← Back"), 
+            hex("&#AAAAAAReturn to previous menu")
         );
-        inv.setItem(49, info);
+        inv.setItem(48, back);
         
-        // Close (slot 53)
+        // Progress overview (slot 49) - Center
+        ItemStack progress = createItem(Material.CLOCK,
+            hex("&#FFD700&l✦ Progress Overview"),
+            "",
+            hex("&#AAAAAACompleted: &#55FF55" + completed + "&#AAAAAA/&#55FF556"),
+            createProgressBar(completed, 6),
+            "",
+            data.isCompleted() 
+                ? hex("&#55FF55&l✓ All quests complete!") 
+                : hex("&#FFFFFFCurrent: &#55FFFF" + plugin.getQuestManager().getQuestName(data.getCurrentQuest()))
+        );
+        inv.setItem(49, progress);
+        
+        // Next page would be slot 50 if needed
+        
+        // Close button (slot 53) - Barrier
         ItemStack close = createItem(Material.BARRIER,
-            hex("&#FF5555✗ Close"),
-            "",
-            hex("&#AAAAAAClose this menu"),
-            ""
+            hex("&#FF5555&l✗ Close"),
+            hex("&#AAAAAAClick to close menu")
         );
         inv.setItem(53, close);
     }

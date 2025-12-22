@@ -15,10 +15,10 @@ softdepend:
   - DiscordSRV
 
 commands:
-  quests:
-    description: Open the quest menu or manage quests
-    usage: /<command> [start|cancel|help|reload]
-    aliases: [quest, getstarted, wdpstart, start]
+  start:
+    description: Open the get started menu
+    usage: /<command> [cancel|help|reload]
+    aliases: [quests, quest, getstarted, wdpstart]
 
 permissions:
   wdpstart.use:

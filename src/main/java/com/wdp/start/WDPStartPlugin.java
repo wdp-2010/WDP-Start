@@ -11,6 +11,7 @@ import com.wdp.start.listener.PlayerListener;
 import com.wdp.start.listener.QuestListener;
 import com.wdp.start.path.PathGuideManager;
 import com.wdp.start.path.PortalZoneManager;
+import com.wdp.start.path.RTPManager;
 import com.wdp.start.player.PlayerDataManager;
 import com.wdp.start.quest.QuestManager;
 import com.wdp.start.storage.DatabaseManager;
@@ -43,6 +44,7 @@ public class WDPStartPlugin extends JavaPlugin {
     private QuestMenu questMenu;
     private PathGuideManager pathGuideManager;
     private PortalZoneManager portalZoneManager;
+    private RTPManager rtpManager;
     
     // Integrations
     private VaultIntegration vaultIntegration;
@@ -136,6 +138,9 @@ public class WDPStartPlugin extends JavaPlugin {
         // Portal zone manager
         portalZoneManager = new PortalZoneManager(this);
         
+        // RTP manager (for teleporting after portal zone)
+        rtpManager = new RTPManager(this);
+        
         getLogger().info("Managers initialized successfully.");
         getLogger().info("Database: SQLite (playerdata.db)");
     }
@@ -186,8 +191,8 @@ public class WDPStartPlugin extends JavaPlugin {
     
     private void registerCommands() {
         QuestCommand questCommand = new QuestCommand(this);
-        getCommand("quests").setExecutor(questCommand);
-        getCommand("quests").setTabCompleter(questCommand);
+        getCommand("start").setExecutor(questCommand);
+        getCommand("start").setTabCompleter(questCommand);
         
         getLogger().info("Commands registered successfully.");
     }
@@ -260,6 +265,10 @@ public class WDPStartPlugin extends JavaPlugin {
     
     public PortalZoneManager getPortalZoneManager() {
         return portalZoneManager;
+    }
+    
+    public RTPManager getRtpManager() {
+        return rtpManager;
     }
     
     public DatabaseManager getDatabaseManager() {
