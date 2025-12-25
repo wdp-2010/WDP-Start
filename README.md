@@ -15,7 +15,7 @@ WDP-Start is a professional quest system designed to guide new players through t
 ### Key Features
 
 - ✅ **6 Guided Quests**: Step-by-step introduction to server features
-- ✅ **Clean GUI**: SkillCoins-style navigation bar
+- ✅ **Clean GUI**: ⛃-style navigation bar
 - ✅ **Smart Rewards**: SkillCoins, items, and tokens
 - ✅ **Auto Top-up**: Ensures players can complete token purchase
 - ✅ **Refundable**: Cancel anytime, get unspent coins back

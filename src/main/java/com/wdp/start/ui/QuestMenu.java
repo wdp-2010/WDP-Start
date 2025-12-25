@@ -99,33 +99,33 @@ public class QuestMenu {
         // Welcome title item (slot 13)
         ItemStack welcome = createItem(Material.NETHER_STAR,
             hex("&#FFD700&l✦ &#FFFFFF&lWelcome to WDP! &#FFD700&l✦"),
-            "",
+            " ",
             hex("&#AAAAAATake your first steps on the server"),
             hex("&#AAAAAAby completing starter quests!"),
-            "",
+            " ",
             hex("&#55FF55You'll learn about:"),
             hex("&#FFFFFF• Exploration & Teleportation"),
             hex("&#FFFFFF• Skills & Leveling"),
             hex("&#FFFFFF• Progress Tracking"),
             hex("&#FFFFFF• Economy & Shopping"),
-            "",
+            " ",
             hex("&#FFD700&lRewards:"),
-            hex("&#FFD700✦ 300 SkillCoins"),
-            hex("&#FF55FF✦ 10 SkillTokens"),
+            hex("&#FFD700✦ 300 ⛃"),
+            hex("&#FF55FF✦ 10 🎟"),
             hex("&#55FFFF✦ Starter Items"),
-            ""
+            " "
         );
         inv.setItem(13, welcome);
         
         // Start button (slot 31)
         ItemStack start = createItem(Material.LIME_CONCRETE,
             hex("&#55FF55&l▶ START QUESTS"),
-            "",
+            " ",
             hex("&#AAAAAAClick to begin your adventure!"),
-            "",
+            " ",
             hex("&#FFFF55Tip: You can cancel anytime"),
             hex("&#FFFFFFwith /quests cancel"),
-            ""
+            " "
         );
         addGlow(start);
         inv.setItem(31, start);
@@ -156,42 +156,42 @@ public class QuestMenu {
         int completed = data.getCompletedQuestCount();
         ItemStack progress = createItem(Material.CLOCK,
             hex("&#FFD700&l✦ Progress Overview"),
-            "",
+            " ",
             hex("&#AAAAAACompleted: &#55FF55" + completed + "&#AAAAAA/&#55FF556"),
             createProgressBar(completed, 6),
-            "",
+            " ",
             data.isCompleted() 
                 ? hex("&#55FF55&l✓ All quests complete!") 
                 : hex("&#FFFFFFCurrent: &#55FFFF" + plugin.getQuestManager().getQuestName(data.getCurrentQuest())),
-            ""
+            " "
         );
         inv.setItem(49, progress);
         
-        // Cancel button (slot 47) - only if started and not completed
+        // Cancel button (slot 45) - only if started and not completed
         if (data.isStarted() && !data.isCompleted()) {
             ItemStack cancel = createItem(Material.RED_CONCRETE,
                 hex("&#FF5555✗ Cancel Quests"),
-                "",
+                " ",
                 hex("&#AAAAAAClick to cancel the quest chain."),
-                hex("&#FFFF55Unspent coins will be refunded."),
-                ""
+                hex("&#FFFF55Unspent SkillCoins will be refunded."),
+                " "
             );
-            inv.setItem(47, cancel);
+            inv.setItem(45, cancel);
         }
         
-        // Help (slot 51)
+        // Help (slot 53)
         ItemStack help = createItem(Material.WRITABLE_BOOK,
             hex("&#55FFFF? Help"),
-            "",
+            " ",
             hex("&#AAAAAACommands:"),
             hex("&#FFFFFF/quests &#AAAAAA- Open this menu"),
             hex("&#FFFFFF/quests cancel &#AAAAAA- Cancel quests"),
-            "",
+            " ",
             hex("&#AAAAAANeed more help?"),
             hex("&#55FFFF" + plugin.getConfigManager().getDiscordLink()),
-            ""
+            " "
         );
-        inv.setItem(51, help);
+        inv.setItem(53, help);
     }
     
     /**
@@ -230,12 +230,12 @@ public class QuestMenu {
         }
         
         lore.add(hex("&#555555━━━━━━━━━━━━━━━━━"));
-        lore.add("");
+        lore.add(" ");
         
         // Objective
         lore.add(hex("&#FFFFFFObjective:"));
         lore.add(hex("&#AAAAAA" + desc));
-        lore.add("");
+        lore.add(" ");
         
         // Progress (if in progress)
         if (data.getCurrentQuest() == quest && !progress.isCompleted()) {
@@ -245,26 +245,27 @@ public class QuestMenu {
                 int levelPercent = getLevelProgressPercent(player, data);
                 lore.add(hex("&#FFFFFFForaging Level: &#55FFFF0&#FFFFFF → &#55FFFF" + targetLevel));
                 lore.add(createProgressBar(levelPercent, 100));
+                lore.add(" ");
             } else {
                 lore.add(hex("&#FFFFFFProgress: &#55FFFF" + currentStep + "&#FFFFFF/&#55FFFF" + totalSteps));
                 lore.add(createProgressBar(currentStep, totalSteps));
+                lore.add(" ");
             }
-            lore.add("");
         }
         
-        // Reward
+        // Rewards
         lore.add(hex("&#FFFFFFReward:"));
-        lore.add(hex("&#FFD700✦ " + reward + " SkillCoins"));
+        lore.add(hex("&#FFD700+ " + reward + " ⛃ SkillCoins"));
         
         // Extra rewards for specific quests
         if (quest == 1) {
-            lore.add(hex("&#55FFFF✦ 3x Apples"));
+            lore.add(hex("&#55FFFF+ 3x Apples"));
         } else if (quest == 6) {
-            lore.add(hex("&#FF55FF✦ 10 SkillTokens"));
-            lore.add(hex("&#55FFFF✦ 1x Diamond + more"));
+            lore.add(hex("&#FF55FF+ 10 🎟 SkillTokens"));
+            lore.add(hex("&#55FFFF+ 1x Diamond + more"));
         }
         
-        lore.add("");
+        lore.add(" ");
         lore.add(hex("&#555555━━━━━━━━━━━━━━━━━"));
         
         // Action hint
@@ -620,8 +621,8 @@ public class QuestMenu {
             }
         }
         
-        // Cancel button (slot 47)
-        if (slot == 47 && data.isStarted() && !data.isCompleted()) {
+        // Cancel button (slot 45)
+        if (slot == 45 && data.isStarted() && !data.isCompleted()) {
             player.closeInventory();
             plugin.getMessageManager().send(player, "cancel.confirm");
             return;

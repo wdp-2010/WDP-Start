@@ -152,7 +152,7 @@ WDP-Start is a professional quest system designed to guide new players through t
 ### Quest 6: Good Luck! (Discord & Farewell)
 **Icon:** 🎧 Music Disc (Cat)  
 **Category:** Community  
-**Reward:** 500 SkillCoins + 25 SkillTokens + Starter Items
+**Reward:** 500 ⛃ + 25 🎟 + Starter Items
 
 **Objective:** Complete the onboarding and join Discord for help.
 
