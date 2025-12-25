@@ -573,13 +573,13 @@ public class QuestManager {
         
         // Quest completion
         player.sendMessage(WDPStartPlugin.hex("  &#FFD700✦ &#55FF55&lQUEST COMPLETE: &#FFFFFFForaging Kickstart"));
-        player.sendMessage(WDPStartPlugin.hex("  &#AAAAAAYou earned &#FFD700" + reward + " SkillCoins&#AAAAAA!"));
+        player.sendMessage(WDPStartPlugin.hex("  &#AAAAAAYou earned &#FFD700" + reward + " ⛃&#AAAAAA!"));
         player.sendMessage("");
         
         // Next objective - consistent AuraSkills style
         player.sendMessage(WDPStartPlugin.hex("  &#55FFFF&l➤ NEXT OBJECTIVE"));
         player.sendMessage(WDPStartPlugin.hex("  &#FFFFFFOpen &#FFFF55/shop &#FFFFFFand buy an item"));
-        player.sendMessage(WDPStartPlugin.hex("  &#AAAAAASpend your SkillCoins in the shop!"));
+        player.sendMessage(WDPStartPlugin.hex("  &#AAAAAASpend ⛃ in the shop!"));
         player.sendMessage("");
         
         // Footer
@@ -641,7 +641,7 @@ public class QuestManager {
         player.sendMessage(WDPStartPlugin.hex("  &#FFD700✦ &#55FF55&lQUEST COMPLETE"));
         player.sendMessage(WDPStartPlugin.hex("  &#FFFFFF" + questName));
         if (reward > 0) {
-            player.sendMessage(WDPStartPlugin.hex("  &#AAAAAAYou earned &#FFD700" + reward + " SkillCoins&#AAAAAA!"));
+            player.sendMessage(WDPStartPlugin.hex("  &#AAAAAAYou earned &#FFD700" + reward + " ⛃&#AAAAAA!"));
         }
         player.sendMessage("");
         
