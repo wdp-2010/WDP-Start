@@ -31,6 +31,11 @@
             <id>sk89q-repo</id>
             <url>https://maven.enginehub.org/repo/</url>
         </repository>
+        <!-- Slate framework repository -->
+        <repository>
+            <id>aurelium-repo</id>
+            <url>https://repo.aurelium.dev/releases</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -48,6 +53,13 @@
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- Slate framework for menu system -->
+        <dependency>
+            <groupId>dev.aurelium</groupId>
+            <artifactId>slate</artifactId>
+            <version>1.2.0</version>
         </dependency>
 
         <!-- Gson for JSON serialization -->

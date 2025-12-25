@@ -72,6 +72,10 @@
       <id>sk89q-repo</id>
       <url>https://maven.enginehub.org/repo/</url>
     </repository>
+    <repository>
+      <id>aurelium-repo</id>
+      <url>https://repo.aurelium.dev/releases</url>
+    </repository>
   </repositories>
   <dependencies>
     <dependency>

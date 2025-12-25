@@ -3,6 +3,7 @@ package com.wdp.start.ui;
 import com.wdp.start.WDPStartPlugin;
 import com.wdp.start.player.PlayerData;
 import com.wdp.start.quest.QuestManager;
+import com.wdp.start.ui.menu.UnifiedMenuManager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,7 +16,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -27,6 +30,7 @@ import java.util.regex.Pattern;
 public class QuestMenu {
     
     private final WDPStartPlugin plugin;
+    private final UnifiedMenuManager unifiedMenuManager;
     
     // Track open menus
     private final ConcurrentHashMap<UUID, MenuSession> openMenus = new ConcurrentHashMap<>();
@@ -39,6 +43,7 @@ public class QuestMenu {
     
     public QuestMenu(WDPStartPlugin plugin) {
         this.plugin = plugin;
+        this.unifiedMenuManager = new UnifiedMenuManager(plugin);
     }
     
     /**
@@ -306,26 +311,19 @@ public class QuestMenu {
      * Row 5 (slots 45-53): Navigation bar
      */
     private void addNavbar(Inventory inv, PlayerData data) {
-        // Fill row 5 with black glass
-        ItemStack blackGlass = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-        ItemMeta glassMeta = blackGlass.getItemMeta();
-        if (glassMeta != null) {
-            glassMeta.setDisplayName(" ");
-            blackGlass.setItemMeta(glassMeta);
-        }
-        for (int i = 45; i <= 53; i++) {
-            inv.setItem(i, blackGlass);
-        }
+        // Use unified navbar system
+        Map<String, Object> context = new HashMap<>();
+        context.put("menu_name", "Get Started Quests");
+        context.put("menu_description", "Complete starter quests to learn about the server");
+        context.put("page", 1);
+        context.put("total_pages", 1);
         
-        // Page info (slot 45) - using book
+        // Add quest-specific info
         int completed = data.getCompletedQuestCount();
-        ItemStack pageInfo = createItem(Material.BOOK,
-            hex("&#FFFF55&lPage 1/1"),
-            hex("&#AAAAAAViewing quests 1-6")
-        );
-        inv.setItem(45, pageInfo);
+        context.put("completed_quests", completed);
+        context.put("total_quests", 6);
         
-        // Player info with currency (slot 46)
+        // Add currency info if available
         double coins = 0;
         int tokens = 0;
         if (plugin.getVaultIntegration() != null) {
@@ -333,47 +331,10 @@ public class QuestMenu {
                 Bukkit.getPlayer(data.getUuid()) != null ? 
                 Bukkit.getPlayer(data.getUuid()) : null);
         }
-        ItemStack playerInfo = new ItemStack(Material.PLAYER_HEAD);
-        ItemMeta playerMeta = playerInfo.getItemMeta();
-        if (playerMeta != null) {
-            playerMeta.setDisplayName(hex("&#FFD700" + (Bukkit.getPlayer(data.getUuid()) != null ? 
-                Bukkit.getPlayer(data.getUuid()).getName() : "Player")));
-            List<String> playerLore = new ArrayList<>();
-            playerLore.add(hex("&#FFD700Coins: &#FFFF55" + String.format("%.0f", coins)));
-            playerLore.add(hex("&#55FFFFTokens: &#22AAAA" + tokens));
-            playerMeta.setLore(playerLore);
-            playerInfo.setItemMeta(playerMeta);
-        }
-        inv.setItem(46, playerInfo);
+        context.put("balance", coins);
+        context.put("tokens", tokens);
         
-        // Back button (slot 48) - Arrow
-        ItemStack back = createItem(Material.ARROW, 
-            hex("&#FF5555&l← Back"), 
-            hex("&#AAAAAAReturn to previous menu")
-        );
-        inv.setItem(48, back);
-        
-        // Progress overview (slot 49) - Center
-        ItemStack progress = createItem(Material.CLOCK,
-            hex("&#FFD700&l✦ Progress Overview"),
-            "",
-            hex("&#AAAAAACompleted: &#55FF55" + completed + "&#AAAAAA/&#55FF556"),
-            createProgressBar(completed, 6),
-            "",
-            data.isCompleted() 
-                ? hex("&#55FF55&l✓ All quests complete!") 
-                : hex("&#FFFFFFCurrent: &#55FFFF" + plugin.getQuestManager().getQuestName(data.getCurrentQuest()))
-        );
-        inv.setItem(49, progress);
-        
-        // Next page would be slot 50 if needed
-        
-        // Close button (slot 53) - Barrier
-        ItemStack close = createItem(Material.BARRIER,
-            hex("&#FF5555&l✗ Close"),
-            hex("&#AAAAAAClick to close menu")
-        );
-        inv.setItem(53, close);
+        unifiedMenuManager.applyNavbar(inv, Bukkit.getPlayer(data.getUuid()), "main", context);
     }
     
     /**
@@ -392,22 +353,27 @@ public class QuestMenu {
         
         String menuType = session.getMenuType();
         
-        // Close button (slot 53 for all menus)
-        if (slot == 53) {
-            // Check if this is a sub-menu that should go back
-            if (menuType.startsWith("skillcoins_shop_section") || 
-                menuType.equals("token_exchange") ||
-                menuType.startsWith("skillcoins_transaction")) {
-                // Go back to main shop menu
-                if (session.getCurrentQuest() == 3) {
-                    openSimplifiedShopItems(player);
-                } else {
-                    openSimplifiedShop(player);
-                }
-                return;
+        // Handle unified navbar clicks (slots 45-53)
+        if (slot >= 45 && slot <= 53) {
+            UnifiedMenuManager.NavbarAction action = unifiedMenuManager.getNavbarAction(slot);
+            switch (action) {
+                case BACK:
+                    // Back button - return to main menu
+                    if (session.getCurrentQuest() == 3) {
+                        openSimplifiedShopItems(player);
+                    } else {
+                        openSimplifiedShop(player);
+                    }
+                    return;
+                case CLOSE:
+                    // Close button - close inventory
+                    player.closeInventory();
+                    return;
+                case NONE:
+                default:
+                    // Not a navbar action, continue with menu-specific handling
+                    break;
             }
-            player.closeInventory();
-            return;
         }
         
         // ========== SKILLCOINS SHOP MAIN MENU (Quest 3) ==========
@@ -918,14 +884,14 @@ public class QuestMenu {
             "Various blocks for construction!",
             20, true));
         
-        // Close button (slot 53)
-        ItemStack close = new ItemStack(Material.BARRIER);
+        // Back button (slot 53)
+        ItemStack close = new ItemStack(Material.ARROW);
         ItemMeta closeMeta = close.getItemMeta();
         if (closeMeta != null) {
-            closeMeta.setDisplayName(ChatColor.of("#FF5555") + "✖ Close");
+            closeMeta.setDisplayName(ChatColor.of("#55FF55") + "← Back");
             List<String> closeLore = new ArrayList<>();
             closeLore.add("");
-            closeLore.add(ChatColor.of("#808080") + "Close this menu");
+            closeLore.add(ChatColor.of("#808080") + "Return to main shop");
             closeMeta.setLore(closeLore);
             close.setItemMeta(closeMeta);
         }
@@ -1252,14 +1218,14 @@ public class QuestMenu {
         addGlow(tokenExchange);
         inv.setItem(31, tokenExchange);
         
-        // Close button (slot 53)
-        ItemStack close = new ItemStack(Material.BARRIER);
+        // Back button (slot 53)
+        ItemStack close = new ItemStack(Material.ARROW);
         ItemMeta closeMeta = close.getItemMeta();
         if (closeMeta != null) {
-            closeMeta.setDisplayName(ChatColor.of("#FF5555") + "✖ Close");
+            closeMeta.setDisplayName(ChatColor.of("#55FF55") + "← Back");
             List<String> closeLore = new ArrayList<>();
             closeLore.add("");
-            closeLore.add(ChatColor.of("#808080") + "Close this menu");
+            closeLore.add(ChatColor.of("#808080") + "Return to main shop");
             closeMeta.setLore(closeLore);
             close.setItemMeta(closeMeta);
         }
@@ -1566,11 +1532,11 @@ public class QuestMenu {
             inv.setItem(49, incompleteButton);
         }
         
-        // Close button (slot 53)
+        // Back button (slot 53)
         inv.setItem(53, createItem(
-            Material.BARRIER,
-            ChatColor.of("#FF5555") + "§lClose",
-            ChatColor.of("#808080") + "Click to close menu"
+            Material.ARROW,
+            ChatColor.of("#55FF55") + "§l← Back",
+            ChatColor.of("#808080") + "Return to main menu"
         ));
         
         // Track menu

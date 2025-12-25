@@ -67,25 +67,7 @@ public class QuestListener implements Listener {
         // Use PortalZoneManager to check zone entry
         plugin.getPortalZoneManager().onPlayerMove(player, event.getTo());
         
-        // Check if player just entered the zone and trigger RTP
-        if (progress.hasData("entered_zone") && (boolean) progress.getData("entered_zone") &&
-            !progress.hasData("teleported")) {
-            
-            // Mark as teleported to prevent repeated RTP attempts
-            progress.setData("teleported", true);
-            
-            // Perform RTP after a short delay
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                plugin.getRtpManager().performRTP(player).thenAccept(success -> {
-                    if (success) {
-                        // Complete Quest 1 after successful RTP
-                        Bukkit.getScheduler().runTask(plugin, () -> {
-                            plugin.getQuestManager().completeQuest(player, 1);
-                        });
-                    }
-                });
-            }, 10L);
-        }
+        // Zone entry is now tracked, but RTP happens after portal teleport
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -112,6 +94,14 @@ public class QuestListener implements Listener {
             return;
         }
         
+        // Only trigger on portal teleports (Nether, End, or custom portals)
+        PlayerTeleportEvent.TeleportCause cause = event.getCause();
+        if (cause != PlayerTeleportEvent.TeleportCause.NETHER_PORTAL && 
+            cause != PlayerTeleportEvent.TeleportCause.END_PORTAL &&
+            cause != PlayerTeleportEvent.TeleportCause.PLUGIN) {
+            return;
+        }
+        
         // Console debug message
         plugin.getLogger().info("[DEBUG] [QuestListener] " + player.getName() + 
             " TELEPORTED from " + formatLocation(event.getFrom()) + " to " + formatLocation(event.getTo()));
@@ -120,18 +110,32 @@ public class QuestListener implements Listener {
         // Notify portal zone manager
         plugin.getPortalZoneManager().onPlayerTeleport(player, event.getFrom(), event.getTo());
         
-        // Teleport detected after region entry - complete Quest 1
+        // Teleport detected after region entry - perform RTP first
+        plugin.getLogger().info("[DEBUG] [QuestListener] " + player.getName() + 
+            " teleported - triggering RTP...");
+        
+        // Mark as teleported to prevent repeated attempts
+        progress.setData("teleported", true);
+        
+        // Complete step 2 (teleported) immediately
         plugin.getQuestManager().completeStep(player, 1, 2, "teleported");
         
-        // Small delay before completing quest (for dramatic effect)
+        // Perform RTP after a short delay
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            plugin.getQuestManager().completeQuest(player, 1);
-        }, 20L);
-        
-        enteredSpawnExit.remove(player.getUniqueId());
-        
-        plugin.getLogger().info("[DEBUG] [QuestListener] " + player.getName() + " completed Quest 1 - Teleport detected!");
-        plugin.debug("Player " + player.getName() + " was teleported - Quest 1 complete!");
+            plugin.getRtpManager().performRTP(player).thenAccept(success -> {
+                if (success) {
+                    // Complete Quest 1 after successful RTP
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        plugin.getQuestManager().completeQuest(player, 1);
+                    }, 20L);
+                    
+                    plugin.getLogger().info("[DEBUG] [QuestListener] " + player.getName() + " completed Quest 1 - RTP successful!");
+                    plugin.debug("Player " + player.getName() + " was teleported via portal - Quest 1 complete!");
+                } else {
+                    plugin.getLogger().warning("[DEBUG] [QuestListener] RTP failed for " + player.getName() + " - quest step completed but RTP failed");
+                }
+            });
+        }, 10L);
     }
     
     /**
