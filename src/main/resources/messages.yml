@@ -38,6 +38,7 @@ quest:
   started: "&aQuest chain started! Complete each quest in order."
   already-started: "&cYou've already started the quest chain!"
   already-completed: "&aYou've already completed all quests!"
+  already-experienced: "&cYou are already experienced! No need for starter quests."
   
   # Progress
   objective-complete: "&#55FF55&l✓ &#55FF55{objective}"

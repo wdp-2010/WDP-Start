@@ -72,6 +72,10 @@ public class WDPStartPlugin extends JavaPlugin {
         // Initialize managers
         initializeManagers();
         
+        // Initialize API (must be after managers)
+        com.wdp.start.api.WDPStartAPI.init(this);
+        getLogger().info("WDP-Start API initialized.");
+        
         // Setup integrations
         setupIntegrations();
         

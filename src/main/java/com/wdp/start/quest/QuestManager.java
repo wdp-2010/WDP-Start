@@ -39,6 +39,17 @@ public class QuestManager {
             return;
         }
         
+        // Check if player is already experienced (Foraging level 1 or higher)
+        String targetSkill = plugin.getConfigManager().getQuest2Skill();
+        int targetLevel = plugin.getConfigManager().getQuest2TargetLevel();
+        if (plugin.getAuraSkillsIntegration() != null) {
+            int currentLevel = plugin.getAuraSkillsIntegration().getSkillLevel(player, targetSkill);
+            if (currentLevel >= targetLevel) {
+                plugin.getMessageManager().send(player, "quest.already-experienced");
+                return;
+            }
+        }
+        
         data.setStarted(true);
         data.setCurrentQuest(1);
         data.getQuestProgress(1).setStarted(true);
@@ -485,6 +496,17 @@ public class QuestManager {
     }
     
     /**
+     * Check if a player is currently doing Quest 2
+     * Used by AuraSkills integration to suppress messages
+     */
+    public boolean isPlayerDoingQuest2(Player player) {
+        PlayerData data = plugin.getPlayerDataManager().getData(player);
+        return data.isStarted() && 
+               data.getCurrentQuest() == 2 && 
+               !data.isQuestCompleted(2);
+    }
+    
+    /**
      * Check if player is already at target level for Quest 2
      * If so, complete it immediately
      */
@@ -579,7 +601,7 @@ public class QuestManager {
         // Next objective - consistent AuraSkills style
         player.sendMessage(WDPStartPlugin.hex("  &#55FFFF&l➤ NEXT OBJECTIVE"));
         player.sendMessage(WDPStartPlugin.hex("  &#FFFFFFOpen &#FFFF55/shop &#FFFFFFand buy an item"));
-        player.sendMessage(WDPStartPlugin.hex("  &#AAAAAASpend ⛃ in the shop!"));
+        player.sendMessage(WDPStartPlugin.hex("  &#AAAAAASpend Skillcoins in the shop!"));
         player.sendMessage("");
         
         // Footer

@@ -61,6 +61,13 @@
             <artifactId>slate</artifactId>
             <version>1.2.0</version>
         </dependency>
+        <!-- AuraSkills API for skill integration -->
+        <dependency>
+            <groupId>dev.aurelium</groupId>
+            <artifactId>auraskills-api-bukkit</artifactId>
+            <version>2.2.4</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Gson for JSON serialization -->
         <dependency>
