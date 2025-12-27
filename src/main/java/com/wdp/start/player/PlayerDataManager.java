@@ -1,7 +1,5 @@
 package com.wdp.start.player;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.wdp.start.WDPStartPlugin;
 import com.wdp.start.storage.DatabaseManager;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -23,13 +21,11 @@ public class PlayerDataManager {
     private final DatabaseManager databaseManager;
     private final Map<UUID, PlayerData> cache = new ConcurrentHashMap<>();
     private final File dataFolder;
-    private final Gson gson;
     
     public PlayerDataManager(WDPStartPlugin plugin, DatabaseManager databaseManager) {
         this.plugin = plugin;
         this.databaseManager = databaseManager;
         this.dataFolder = new File(plugin.getDataFolder(), "players");
-        this.gson = new GsonBuilder().setPrettyPrinting().create();
         
         if (!dataFolder.exists()) {
             dataFolder.mkdirs();

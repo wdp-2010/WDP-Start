@@ -183,7 +183,6 @@ public class RTPManager {
                     }
 
                     if (cfObj instanceof CompletableFuture) {
-                        @SuppressWarnings("unchecked")
                         CompletableFuture<?> chunkFuture = (CompletableFuture<?>) cfObj;
                         chunkFuture.whenComplete((chunk, ex) -> {
                             Bukkit.getScheduler().runTask(plugin, () -> {
