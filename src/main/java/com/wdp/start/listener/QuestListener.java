@@ -374,6 +374,9 @@ public class QuestListener implements Listener {
         
         // Complete when reached 5
         if (newCount >= 5) {
+            // Complete the step
+            plugin.getQuestManager().completeStep(player, 5, 1, "mined_stone");
+            
             player.sendMessage("");
             player.sendMessage(ChatColor.of("#FFD700") + "§l✓ Objective Complete!");
             player.sendMessage(ChatColor.of("#FFFFFF") + "Type " + ChatColor.of("#55FF55") + "/quest" + 

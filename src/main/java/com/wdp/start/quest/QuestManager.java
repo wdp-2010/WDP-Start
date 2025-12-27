@@ -29,53 +29,84 @@ public class QuestManager {
     public void startQuests(Player player) {
         PlayerData data = plugin.getPlayerDataManager().getData(player);
         
-        if (data.isStarted()) {
-            plugin.getMessageManager().send(player, "quest.already-started");
-            return;
-        }
-        
         if (data.isCompleted()) {
             plugin.getMessageManager().send(player, "quest.already-completed");
             return;
         }
         
-        // Check if player is already experienced (Foraging level 1 or higher)
-        String targetSkill = plugin.getConfigManager().getQuest2Skill();
-        int targetLevel = plugin.getConfigManager().getQuest2TargetLevel();
-        if (plugin.getAuraSkillsIntegration() != null) {
-            int currentLevel = plugin.getAuraSkillsIntegration().getSkillLevel(player, targetSkill);
-            if (currentLevel >= targetLevel) {
-                plugin.getMessageManager().send(player, "quest.already-experienced");
+        // If not started at all, start the first quest
+        if (!data.isStarted()) {
+            // Check if player is already experienced (Foraging level 1 or higher)
+            String targetSkill = plugin.getConfigManager().getQuest2Skill();
+            int targetLevel = plugin.getConfigManager().getQuest2TargetLevel();
+            if (plugin.getAuraSkillsIntegration() != null) {
+                int currentLevel = plugin.getAuraSkillsIntegration().getSkillLevel(player, targetSkill);
+                if (currentLevel >= targetLevel) {
+                    plugin.getMessageManager().send(player, "quest.already-experienced");
+                    return;
+                }
+            }
+            
+            data.setStarted(true);
+            data.setCurrentQuest(1);
+            data.getQuestProgress(1).setStarted(true);
+            
+            // Save data IMMEDIATELY to database
+            plugin.getPlayerDataManager().saveData(data);
+            plugin.getPlayerDataManager().forceSave(player.getUniqueId());
+            
+            plugin.getMessageManager().send(player, "quest.started");
+            
+            // Console debug
+            plugin.getLogger().info("[DEBUG] [QuestManager] " + player.getName() + " STARTED quest chain. Saved to database.");
+            
+            // Start particle path guide for Quest 1
+            if (plugin.getPathGuideManager() != null) {
+                plugin.debug("Starting particle path guide for " + player.getName());
+                plugin.getPathGuideManager().startPath(player);
+            }
+            
+            // Play sound
+            if (plugin.getConfigManager().isSoundsEnabled()) {
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+            }
+            
+            // Open the quest menu
+            plugin.getQuestMenu().openMainMenu(player);
+            return;
+        }
+        
+        // If already started, check if we can start the next quest
+        int currentQuest = data.getCurrentQuest();
+        if (currentQuest < TOTAL_QUESTS) {
+            PlayerData.QuestProgress nextProgress = data.getQuestProgress(currentQuest + 1);
+            if (nextProgress != null && !nextProgress.isStarted()) {
+                // Start the next quest
+                data.setCurrentQuest(currentQuest + 1);
+                nextProgress.setStarted(true);
+                
+                // Save data IMMEDIATELY to database
+                plugin.getPlayerDataManager().saveData(data);
+                plugin.getPlayerDataManager().forceSave(player.getUniqueId());
+                
+                plugin.getMessageManager().send(player, "quest.next-started", "quest", String.valueOf(currentQuest + 1));
+                
+                // Console debug
+                plugin.getLogger().info("[DEBUG] [QuestManager] " + player.getName() + " STARTED next quest: " + (currentQuest + 1));
+                
+                // Play sound
+                if (plugin.getConfigManager().isSoundsEnabled()) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                }
+                
+                // Open the quest menu
+                plugin.getQuestMenu().openMainMenu(player);
                 return;
             }
         }
         
-        data.setStarted(true);
-        data.setCurrentQuest(1);
-        data.getQuestProgress(1).setStarted(true);
-        
-        // Save data IMMEDIATELY to database
-        plugin.getPlayerDataManager().saveData(data);
-        plugin.getPlayerDataManager().forceSave(player.getUniqueId());
-        
-        plugin.getMessageManager().send(player, "quest.started");
-        
-        // Console debug
-        plugin.getLogger().info("[DEBUG] [QuestManager] " + player.getName() + " STARTED quest chain. Saved to database.");
-        
-        // Start particle path guide for Quest 1
-        if (plugin.getPathGuideManager() != null) {
-            plugin.debug("Starting particle path guide for " + player.getName());
-            plugin.getPathGuideManager().startPath(player);
-        }
-        
-        // Play sound
-        if (plugin.getConfigManager().isSoundsEnabled()) {
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-        }
-        
-        // Open the quest menu
-        plugin.getQuestMenu().openMainMenu(player);
+        // Already on the last quest or next quest already started
+        plugin.getMessageManager().send(player, "quest.already-started");
     }
     
     /**
@@ -193,8 +224,9 @@ public class QuestManager {
         
         // Advance to next quest or complete
         if (quest < TOTAL_QUESTS) {
-            data.setCurrentQuest(quest + 1);
-            data.getQuestProgress(quest + 1).setStarted(true);
+            // Do not auto-progress to next quest - player must manually start next quest
+            // data.setCurrentQuest(quest + 1);
+            // data.getQuestProgress(quest + 1).setStarted(true);
             
             // Send consistent AuraSkills-style completion + next objective message
             // Skip for Quest 2 since it has its own special level up message
@@ -561,6 +593,14 @@ public class QuestManager {
         data.getQuestProgress(2).setData("level_progress", Math.min(progress, 100));
         
         if (newLevel >= targetLevel) {
+            // Temporarily suppress AuraSkills' own messages to avoid race conditions
+            data.setSuppressLevelUpUntil(System.currentTimeMillis() + 2000);
+            // Clear suppression after a short delay to avoid lingering state
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                data.clearSuppressLevelUp();
+                plugin.getPlayerDataManager().saveData(data);
+            }, 40L); // 40 ticks = 2 seconds
+
             // Complete Quest 2
             completeQuest(player, 2);
             

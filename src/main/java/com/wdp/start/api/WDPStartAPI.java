@@ -205,12 +205,37 @@ public class WDPStartAPI {
      * When true, the calling plugin should NOT show level up titles/sounds
      */
     public static boolean shouldSuppressLevelUpMessages(Player player) {
-        if (!isAvailable()) return false;
+        if (!isAvailable()) {
+            plugin.getLogger().info("[DEBUG] WDP-Start API: Not available");
+            return false;
+        }
         
-        PlayerData data = plugin.getPlayerDataManager().getData(player);
-        return data.isStarted() && 
-               data.getCurrentQuest() == 2 && 
-               !data.isQuestCompleted(2);
+        try {
+            PlayerData data = plugin.getPlayerDataManager().getData(player);
+            boolean transientSuppress = data.isSuppressLevelUpActive();
+            if (transientSuppress) {
+                plugin.getLogger().info("[DEBUG] WDP-Start API: Transient suppression active for " + player.getName());
+            }
+            boolean shouldSuppress = transientSuppress || (data.isStarted() && 
+                                    data.getCurrentQuest() == 2 && 
+                                    !data.isQuestCompleted(2));
+            
+            plugin.getLogger().info("[DEBUG] WDP-Start API: Level up check for " + player.getName() + " at " + System.currentTimeMillis());
+            plugin.getLogger().info("  - Started: " + data.isStarted());
+            plugin.getLogger().info("  - Current Quest: " + data.getCurrentQuest());
+            plugin.getLogger().info("  - Quest 2 Completed: " + data.isQuestCompleted(2));
+            plugin.getLogger().info("  - Transient: " + transientSuppress);
+            plugin.getLogger().info("  - Should Suppress: " + shouldSuppress);
+            
+            if (shouldSuppress) {
+                plugin.getLogger().info("[DEBUG] WDP-Start API: Suppressing level up messages for " + player.getName());
+            }
+            
+            return shouldSuppress;
+        } catch (Exception e) {
+            plugin.getLogger().warning("[DEBUG] WDP-Start API: Error checking player data for " + player.getName() + ": " + e.getMessage());
+            return false;
+        }
     }
     
     /**

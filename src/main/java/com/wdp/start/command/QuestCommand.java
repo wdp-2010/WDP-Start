@@ -72,10 +72,10 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             plugin.getMessageManager().sendList(player, "commands.help");
         } else {
             sender.sendMessage("§6WDP-Start Commands:");
-            sender.sendMessage("§f/quests §7- Open quest menu");
-            sender.sendMessage("§f/quests cancel §7- Cancel quest chain");
-            sender.sendMessage("§f/quests reload §7- Reload config (admin)");
-            sender.sendMessage("§f/quests reset <player> §7- Reset player (admin)");
+            sender.sendMessage("§f/start §7- Open quests menu");
+            sender.sendMessage("§f/start cancel §7- Cancel quest chain");
+            sender.sendMessage("§f/start reload §7- Reload config (admin)");
+            sender.sendMessage("§f/start reset <player> §7- Reset player (admin)");
         }
     }
     

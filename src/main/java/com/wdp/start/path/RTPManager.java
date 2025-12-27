@@ -86,89 +86,161 @@ public class RTPManager {
         double borderSize = border.getSize() / 2 - worldBorderBuffer;
         Location borderCenter = border.getCenter();
         
-        // Send searching message
-        player.sendMessage(WDPStartPlugin.hex("&#FFD700&l✦ Finding the perfect spot..."));
+        // Apply blindness and show searching title (on main thread)
+        player.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS, 200, 1, false, false, false));
+        player.sendTitle(WDPStartPlugin.hex("&#FFFF55&lSearching..."), WDPStartPlugin.hex("&#AAAAAAFinding a safe spot for you"), 10, 200, 10);
         
-        // Run async to not block main thread
+        // Run async to generate candidate coordinates and minimize main-thread work
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Location rtpLocation = null;
             
             for (int attempt = 0; attempt < maxAttempts; attempt++) {
+                if (!player.isOnline()) break; // Abort if player disconnected
+
                 // Generate random angle and distance
                 double angle = random.nextDouble() * 2 * Math.PI;
                 int distance = minDistance + random.nextInt(maxDistance - minDistance);
-                
+
                 // Calculate coordinates
                 int x = (int) (borderCenter.getX() + Math.cos(angle) * distance);
                 int z = (int) (borderCenter.getZ() + Math.sin(angle) * distance);
-                
-                // Check world border
-                if (Math.abs(x - borderCenter.getX()) > borderSize || 
+
+                // Check world border (pure math, safe async)
+                if (Math.abs(x - borderCenter.getX()) > borderSize ||
                     Math.abs(z - borderCenter.getZ()) > borderSize) {
                     continue;
                 }
-                
-                // Check if near a base (WDP-BaseDet integration)
-                if (isNearBase(world, x, z, minDistanceFromBase)) {
-                    plugin.debug("[RTP] Attempt " + attempt + ": Location near base, skipping");
+
+                // Run small world checks on the main thread to avoid unsafe asynchronous access
+                try {
+                    // Check near base on main thread
+                    Boolean nearBase = Bukkit.getScheduler().callSyncMethod(plugin, () -> isNearBase(world, x, z, minDistanceFromBase)).get();
+                    if (nearBase != null && nearBase) {
+                        plugin.debug("[RTP] Attempt " + attempt + ": Location near base, skipping");
+                        continue;
+                    }
+
+                    // Find a tree near this location on main thread
+                    Location treeLocation = Bukkit.getScheduler().callSyncMethod(plugin, () -> findNearbyTree(world, x, z, maxDistanceFromTree * 2)).get();
+                    if (treeLocation == null) {
+                        plugin.debug("[RTP] Attempt " + attempt + ": No tree found near (" + x + ", " + z + ")");
+                        continue;
+                    }
+
+                    // Find safe landing spot near the tree on main thread
+                    Location safe = Bukkit.getScheduler().callSyncMethod(plugin, () -> findSafeLandingNearTree(world, treeLocation, minDistanceFromTree, maxDistanceFromTree)).get();
+                    if (safe != null) {
+                        rtpLocation = safe;
+                        plugin.debug("[RTP] Found valid location after " + (attempt + 1) + " attempts");
+                        break;
+                    }
+                } catch (Exception e) {
+                    plugin.debug("[RTP] Error during sync checks: " + e.getMessage());
+                    // If callSyncMethod failed, fall back to next attempt
                     continue;
-                }
-                
-                // Find a tree near this location
-                Location treeLocation = findNearbyTree(world, x, z, maxDistanceFromTree * 2);
-                if (treeLocation == null) {
-                    plugin.debug("[RTP] Attempt " + attempt + ": No tree found near (" + x + ", " + z + ")");
-                    continue;
-                }
-                
-                // Find safe landing spot near the tree
-                rtpLocation = findSafeLandingNearTree(world, treeLocation, minDistanceFromTree, maxDistanceFromTree);
-                if (rtpLocation != null) {
-                    plugin.debug("[RTP] Found valid location after " + (attempt + 1) + " attempts");
-                    break;
                 }
             }
-            
+
             final Location finalLocation = rtpLocation;
-            
-            // Teleport on main thread
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                if (finalLocation == null) {
+
+            if (finalLocation == null) {
+                // Ensure UI updates happen on main thread
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    // Remove blindness and inform player
+                    player.removePotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS);
+                    player.sendTitle(WDPStartPlugin.hex("&#FF5555&lSearch failed"), WDPStartPlugin.hex("&#AAAAAAPlease try again or contact staff."), 10, 100, 10);
                     player.sendMessage(WDPStartPlugin.hex("&#FF5555&l✗ Could not find a safe location!"));
                     player.sendMessage(WDPStartPlugin.hex("&#AAAAAAPlease try again or contact staff."));
                     future.complete(false);
+                });
+                return;
+            }
+
+            // Try to load the chunk asynchronously if supported (Paper API), otherwise teleport will load sync on main thread
+            try {
+                int chunkX = finalLocation.getBlockX() >> 4;
+                int chunkZ = finalLocation.getBlockZ() >> 4;
+
+                java.lang.reflect.Method getChunkAtAsync = null;
+                try {
+                    getChunkAtAsync = world.getClass().getMethod("getChunkAtAsync", int.class, int.class);
+                } catch (NoSuchMethodException ignored) {
+                    // Some implementations may have getChunkAtAsync(int,int,boolean) or not support it at all
+                    try {
+                        getChunkAtAsync = world.getClass().getMethod("getChunkAtAsync", int.class, int.class, boolean.class);
+                    } catch (NoSuchMethodException ignored2) {
+                        getChunkAtAsync = null;
+                    }
+                }
+
+                if (getChunkAtAsync != null) {
+                    // Call the async chunk loader and then teleport on completion
+                    Object cfObj;
+                    if (getChunkAtAsync.getParameterCount() == 2) {
+                        cfObj = getChunkAtAsync.invoke(world, chunkX, chunkZ);
+                    } else {
+                        cfObj = getChunkAtAsync.invoke(world, chunkX, chunkZ, true);
+                    }
+
+                    if (cfObj instanceof CompletableFuture) {
+                        @SuppressWarnings("unchecked")
+                        CompletableFuture<?> chunkFuture = (CompletableFuture<?>) cfObj;
+                        chunkFuture.whenComplete((chunk, ex) -> {
+                            Bukkit.getScheduler().runTask(plugin, () -> {
+                                // Teleport player now that the chunk is available
+                                if (!player.isOnline()) {
+                                    player.removePotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS);
+                                    future.complete(false);
+                                    return;
+                                }
+
+                                player.teleport(finalLocation);
+                                // Remove blindness and show success title
+                                player.removePotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS);
+                                player.sendTitle(WDPStartPlugin.hex("&#55FF55&l✦ Welcome to your starting area! ✦"), WDPStartPlugin.hex("&#AAAAAAYou've been teleported near a tree."), 10, 80, 10);
+
+                                if (plugin.getConfigManager().isSoundsEnabled()) {
+                                    player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+                                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.5f);
+                                }
+                                world.spawnParticle(Particle.TOTEM_OF_UNDYING, finalLocation, 50, 1, 1, 1, 0.1);
+                                plugin.getLogger().info("[RTP] " + player.getName() + " teleported to " + String.format("(%.1f, %.1f, %.1f)", finalLocation.getX(), finalLocation.getY(), finalLocation.getZ()));
+                                future.complete(true);
+                            });
+                        });
+                        return; // Return; teleport will happen in callback
+                    }
+                }
+            } catch (Exception e) {
+                plugin.debug("[RTP] Async chunk load not available or failed: " + e.getMessage());
+            }
+
+            // Fallback: teleport on main thread and synchronously load chunk
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (!player.isOnline()) {
+                    player.removePotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS);
+                    future.complete(false);
                     return;
                 }
-                
-                // Load the chunk first
+
+                // Load chunk synchronously
                 finalLocation.getChunk().load(true);
-                
-                // Teleport player
                 player.teleport(finalLocation);
-                
-                // Success messages
-                player.sendMessage("");
-                player.sendMessage(WDPStartPlugin.hex("&#55FF55&l✦ Welcome to your starting area! ✦"));
-                player.sendMessage(WDPStartPlugin.hex("&#AAAAAAYou've been teleported near a tree."));
-                player.sendMessage(WDPStartPlugin.hex("&#AAAAAAStart gathering wood to begin!"));
-                player.sendMessage("");
-                
-                // Play success sound
+
+                // Remove blindness and show success title
+                player.removePotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS);
+                player.sendTitle(WDPStartPlugin.hex("&#55FF55&l✦ Welcome to your starting area! ✦"), WDPStartPlugin.hex("&#AAAAAAYou've been teleported near a tree."), 10, 80, 10);
+
                 if (plugin.getConfigManager().isSoundsEnabled()) {
                     player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.5f);
                 }
-                
-                // Spawn particles at location
                 world.spawnParticle(Particle.TOTEM_OF_UNDYING, finalLocation, 50, 1, 1, 1, 0.1);
-                
-                plugin.getLogger().info("[RTP] " + player.getName() + " teleported to " + 
-                    String.format("(%.1f, %.1f, %.1f)", finalLocation.getX(), finalLocation.getY(), finalLocation.getZ()));
-                
+                plugin.getLogger().info("[RTP] " + player.getName() + " teleported to " + String.format("(%.1f, %.1f, %.1f)", finalLocation.getX(), finalLocation.getY(), finalLocation.getZ()));
                 future.complete(true);
             });
         });
-        
+
         return future;
     }
     

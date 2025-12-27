@@ -3,11 +3,11 @@ package com.wdp.start.ui;
 import com.wdp.start.WDPStartPlugin;
 import com.wdp.start.player.PlayerData;
 import com.wdp.start.quest.QuestManager;
-import com.wdp.start.ui.menu.UnifiedMenuManager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
 public class QuestMenu {
     
     private final WDPStartPlugin plugin;
-    private final UnifiedMenuManager unifiedMenuManager;
     
     // Track open menus
     private final ConcurrentHashMap<UUID, MenuSession> openMenus = new ConcurrentHashMap<>();
@@ -43,7 +42,6 @@ public class QuestMenu {
     
     public QuestMenu(WDPStartPlugin plugin) {
         this.plugin = plugin;
-        this.unifiedMenuManager = new UnifiedMenuManager(plugin);
     }
     
     /**
@@ -78,7 +76,7 @@ public class QuestMenu {
         }
         
         // Add navbar (always present)
-        addNavbar(inv, data);
+        addNavbar(inv, player, data);
         
         // Open and track
         player.openInventory(inv);
@@ -311,7 +309,7 @@ public class QuestMenu {
      * Add the Quest-style navbar (matching WDP-Quest plugin exactly)
      * Row 5 (slots 45-53): Navigation bar
      */
-    private void addNavbar(Inventory inv, PlayerData data) {
+    private void addNavbar(Inventory inv, Player player, PlayerData data) {
         // Use unified navbar system
         Map<String, Object> context = new HashMap<>();
         context.put("menu_name", "Get Started Quests");
@@ -328,14 +326,12 @@ public class QuestMenu {
         double coins = 0;
         int tokens = 0;
         if (plugin.getVaultIntegration() != null) {
-            coins = plugin.getVaultIntegration().getBalance(
-                Bukkit.getPlayer(data.getUuid()) != null ? 
-                Bukkit.getPlayer(data.getUuid()) : null);
+            coins = plugin.getVaultIntegration().getBalance(player);
         }
         context.put("balance", coins);
         context.put("tokens", tokens);
         
-        unifiedMenuManager.applyNavbar(inv, Bukkit.getPlayer(data.getUuid()), "main", context);
+        applyUniversalNavbar(inv, player, "main", context);
     }
     
     /**
@@ -354,27 +350,23 @@ public class QuestMenu {
         
         String menuType = session.getMenuType();
         
-        // Handle unified navbar clicks (slots 45-53)
+        // Handle universal navbar clicks (slots 45-53)
         if (slot >= 45 && slot <= 53) {
-            UnifiedMenuManager.NavbarAction action = unifiedMenuManager.getNavbarAction(slot);
-            switch (action) {
-                case BACK:
-                    // Back button - return to main menu
-                    if (session.getCurrentQuest() == 3) {
-                        openSimplifiedShopItems(player);
-                    } else {
-                        openSimplifiedShop(player);
-                    }
-                    return;
-                case CLOSE:
-                    // Close button - close inventory
+            if (slot == 45) { // Back button
+                if ("quest_detail".equals(menuType)) {
+                    openSimplifiedQuestView(player);
+                } else {
+                    // For main menu or other menus, back button closes the menu
                     player.closeInventory();
-                    return;
-                case NONE:
-                default:
-                    // Not a navbar action, continue with menu-specific handling
-                    break;
+                }
+                return;
             }
+            if (slot == 53) { // Close button
+                player.closeInventory();
+                return;
+            }
+            // Other navbar slots are decorative
+            return;
         }
         
         // ========== SKILLCOINS SHOP MAIN MENU (Quest 3) ==========
@@ -513,17 +505,38 @@ public class QuestMenu {
         
         // ========== SIMPLIFIED QUEST MENU (Quest 5) ==========
         if (menuType.equals("simplified_quest")) {
-            // Quest icon (slot 0) or Complete button (slot 49)
-            if (slot == 0 || slot == 49) {
-                plugin.getQuestManager().completeQuest(player, 5);
-                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                    openMainMenu(player);
-                }, 5L);
+            // Quest icon click (slot 9) - complete if ready, otherwise open detail
+            if (slot == 9) {
+                PlayerData.QuestProgress progress = data.getQuestProgress(5);
+                int stoneMined = progress != null ? progress.getCounter("stone_mined", 0) : 0;
+                if (stoneMined >= 5) {
+                    // Quest is complete - complete it instantly
+                    plugin.getQuestManager().completeQuest(player, 5);
+                    player.sendMessage(hex("&#55FF55&l✓ &#55FF55Quest completed! Type /start to continue your journey!"));
+                    player.closeInventory();
+                } else {
+                    // Quest not complete - open detail view
+                    openQuestDetailView(player);
+                }
                 return;
             }
             
-            // Close button (slot 53)
-            // Already handled at top
+            // Navbar handling
+            if (slot == 45) { // Back button
+                openMainMenu(player);
+                return;
+            }
+            if (slot == 53) { // Close button
+                player.closeInventory();
+                return;
+            }
+            
+            return;
+        }
+        
+        // ========== QUEST DETAIL MENU ==========
+        if (menuType.equals("quest_detail")) {
+            // No specific clicks needed - navbar handles back/close
             return;
         }
         
@@ -805,7 +818,7 @@ public class QuestMenu {
         String title = ChatColor.of("#00FFFF") + "❖ " + ChatColor.of("#FFFFFF") + "SkillCoins Shop";
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
-        PlayerData data = plugin.getPlayerDataManager().getData(player);
+
         
         // Fill with black glass pane border (EXACT SkillCoins style)
         ItemStack border = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
@@ -913,8 +926,6 @@ public class QuestMenu {
     public void openShopSection(Player player, String category, Material icon) {
         String title = ChatColor.of("#00FFFF") + category + " Shop";
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
-        
-        PlayerData data = plugin.getPlayerDataManager().getData(player);
         
         // Fill bottom row with border
         ItemStack border = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
@@ -1124,8 +1135,6 @@ public class QuestMenu {
     public void openSimplifiedShop(Player player) {
         String title = ChatColor.of("#00FFFF") + "❖ " + ChatColor.of("#FFFFFF") + "SkillCoins Shop";
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
-        
-        PlayerData data = plugin.getPlayerDataManager().getData(player);
         
         // Fill with black glass pane border
         ItemStack border = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
@@ -1381,11 +1390,12 @@ public class QuestMenu {
     }
     
     /**
-     * Open simplified quest menu for Quest 5 - EXACT WDP-Quest structure
+     * Open simplified quest menu for Quest 5 - EXACT WDP-Quest main menu structure
      * Double chest with ONE quest + 8 progress bar segments using Custom Model Data
+     * Universal navbar from navbar.yml
      */
     public void openSimplifiedQuestView(Player player) {
-        String title = ChatColor.of("#FFD700") + "Quest Menu Tutorial";
+        String title = ChatColor.of("#FFD700") + "Quest Menu";
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
         PlayerData data = plugin.getPlayerDataManager().getData(player);
@@ -1397,12 +1407,55 @@ public class QuestMenu {
         double completion = Math.min(100.0, (stoneMined * 100.0) / stoneTarget);
         boolean isComplete = stoneMined >= stoneTarget;
         
-        // Fill entire background with gray glass panes (like WDP-Quest)
-        fillBackground(inv, Material.GRAY_STAINED_GLASS_PANE);
+        // Fill background with black glass panes (like WDP-Quest)
+        fillBackground(inv, Material.BLACK_STAINED_GLASS_PANE);
         
-        // === ROW 0: Quest icon (slot 4) and status (slot 8) ===
+        // Get player balance
+        double coins = 0;
+        int tokens = 0;
+        if (plugin.getVaultIntegration() != null) {
+            coins = plugin.getVaultIntegration().getBalance(player);
+        }
+        
+        // === HEADER ROW (Row 0: slots 0-8) ===
+        // Player head (slot 0)
+        ItemStack playerHead = new ItemStack(Material.PLAYER_HEAD);
+        ItemMeta headMeta = playerHead.getItemMeta();
+        if (headMeta instanceof org.bukkit.inventory.meta.SkullMeta skullMeta) {
+            skullMeta.setOwningPlayer(player);
+            skullMeta.setDisplayName(ChatColor.of("#FFD700") + player.getName());
+            List<String> headLore = new ArrayList<>();
+            headLore.add(ChatColor.of("#808080") + "Welcome to the quest menu!");
+            headLore.add("");
+            headLore.add(ChatColor.of("#FFD700") + "Coins: " + ChatColor.of("#FFFF00") + String.format("%.0f", coins));
+            headLore.add(ChatColor.of("#55FF55") + "Tokens: " + ChatColor.of("#00FF00") + tokens);
+            skullMeta.setLore(headLore);
+            playerHead.setItemMeta(skullMeta);
+        }
+        inv.setItem(0, playerHead);
+        
+        // Title (slot 4)
+        inv.setItem(4, createItem(
+            Material.BOOK,
+            ChatColor.of("#FFD700") + "§lQuest Menu",
+            "",
+            ChatColor.of("#808080") + "Complete quests to earn rewards!",
+            ""
+        ));
+        
+        // Progress display (slot 8)
+        inv.setItem(8, createItem(
+            Material.EXPERIENCE_BOTTLE,
+            ChatColor.of("#00FFFF") + "§lProgress",
+            "",
+            ChatColor.of("#FFFF00") + "Overall Progress: " + ChatColor.of("#FFFFFF") + String.format("%.0f", completion) + "%",
+            "",
+            ChatColor.of("#808080") + "Complete quests to level up!"
+        ));
+        
+        // === QUEST ROW (Row 1: slots 9-17) ===
+        // Quest icon (slot 9)
         String statusPrefix = isComplete ? ChatColor.of("#55FF55") + "✓ " : ChatColor.of("#FFFF00") + "● ";
-        
         ItemStack questIcon = createItem(
             isComplete ? Material.EMERALD : Material.COMPASS,
             statusPrefix + ChatColor.of("#FFD700") + "Quest Menu Tutorial",
@@ -1412,133 +1465,29 @@ public class QuestMenu {
             ChatColor.of("#808080") + "Progress: " + ChatColor.of("#FFFF00") + String.format("%.0f", completion) + "%"
         );
         if (isComplete) addGlow(questIcon);
-        inv.setItem(4, questIcon);
+        inv.setItem(9, questIcon);
         
-        // Status indicator (slot 8)
-        Material statusMat = isComplete ? Material.LIME_DYE : Material.YELLOW_DYE;
-        String statusText = isComplete ? "§a§lCOMPLETED" : "§e§lACTIVE";
-        inv.setItem(8, createItem(
-            statusMat,
-            statusText,
-            "",
-            ChatColor.of("#808080") + "Quest Status",
-            isComplete ? ChatColor.of("#55FF55") + "Ready to turn in!" : ChatColor.of("#FFFF00") + "In progress..."
-        ));
-        
-        // === ROW 1: 8 progress segments (slots 10-17) ===
-        int segments = 8;
-        for (int seg = 0; seg < segments; seg++) {
-            int slot = 10 + seg;
-            inv.setItem(slot, createWDPQuestProgressSegment(seg, completion, false));
+        // Progress bar (8 segments, slots 10-17)
+        for (int seg = 0; seg < 8; seg++) {
+            inv.setItem(10 + seg, createWDPQuestProgressSegment(seg, completion, false));
         }
         
-        // === ROW 2: Objectives (slots 18-26) ===
-        inv.setItem(18, createItem(
-            Material.PAPER,
-            ChatColor.of("#FFD700") + "§lObjectives",
-            ChatColor.of("#808080") + "Complete all to finish"
-        ));
+        // === SEPARATOR (Row 2: slots 18-26) ===
+        fillRow(inv, 2, Material.GRAY_STAINED_GLASS_PANE);
         
-        // Objective - Mine 5 Stone (slot 19)
-        Material objMat = isComplete ? Material.LIME_DYE : Material.GRAY_DYE;
-        String objPrefix = isComplete ? ChatColor.of("#55FF55") + "✓ " : ChatColor.of("#808080") + "○ ";
-        String objProgress = isComplete ? ChatColor.of("#55FF55") + "Complete!" : 
-                ChatColor.of("#808080") + "" + stoneMined + "/" + stoneTarget;
+        // === EMPTY QUEST SLOTS (Rows 3-4: simulate 2 more quests but empty) ===
+        // Row 3 separator
+        fillRow(inv, 3, Material.GRAY_STAINED_GLASS_PANE);
+        // Row 4 separator  
+        fillRow(inv, 4, Material.GRAY_STAINED_GLASS_PANE);
         
-        inv.setItem(19, createItem(
-            objMat,
-            objPrefix + ChatColor.of("#FFFFFF") + "Mine 5 Stone",
-            objProgress
-        ));
-        
-        // === ROW 3: Rewards (slots 27-34) ===
-        inv.setItem(27, createItem(
-            Material.CHEST,
-            ChatColor.of("#FFD700") + "§lRewards",
-            ChatColor.of("#808080") + "What you'll receive"
-        ));
-        
-        inv.setItem(28, createItem(
-            Material.GOLD_NUGGET,
-            ChatColor.of("#FFFF00") + "20 SkillCoins"
-        ));
-        
-        // === ROW 4: Empty (gray glass fills this) ===
-        
-        // === ROW 5: WDP-Quest style navbar (slots 45-53) ===
-        // Fill navbar row with black glass panes
-        for (int i = 45; i < 54; i++) {
-            ItemStack pane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-            ItemMeta meta = pane.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(" ");
-                pane.setItemMeta(meta);
-            }
-            inv.setItem(i, pane);
-        }
-        
-        // Page info (slot 45)
-        inv.setItem(45, createItem(
-            Material.BOOK,
-            ChatColor.of("#FFFF00") + "§lPage 1/1",
-            ChatColor.of("#808080") + "Viewing quest 1-1"
-        ));
-        
-        // Player info (slot 46)
-        double coins = 0;
-        int tokens = 0;
-        if (plugin.getVaultIntegration() != null) {
-            coins = plugin.getVaultIntegration().getBalance(player);
-        }
-        
-        ItemStack playerHead = new ItemStack(Material.PLAYER_HEAD);
-        ItemMeta headMeta = playerHead.getItemMeta();
-        if (headMeta instanceof org.bukkit.inventory.meta.SkullMeta skullMeta) {
-            skullMeta.setOwningPlayer(player);
-            skullMeta.setDisplayName(ChatColor.of("#FFD700") + player.getName());
-            List<String> headLore = new ArrayList<>();
-            headLore.add(ChatColor.of("#FFD700") + "Coins: " + ChatColor.of("#FFFF00") + String.format("%.0f", coins));
-            headLore.add(ChatColor.of("#55FF55") + "Tokens: " + ChatColor.of("#00FF00") + tokens);
-            skullMeta.setLore(headLore);
-            playerHead.setItemMeta(skullMeta);
-        }
-        inv.setItem(46, playerHead);
-        
-        // Back button (slot 48)
-        inv.setItem(48, createItem(
-            Material.ARROW,
-            ChatColor.of("#FF5555") + "§l← Back",
-            ChatColor.of("#808080") + "Return to quest menu"
-        ));
-        
-        // Complete button (slot 49) - only active when stone mined
-        if (isComplete) {
-            ItemStack completeButton = createItem(
-                Material.EMERALD,
-                ChatColor.of("#55FF55") + "§l✓ Complete Quest",
-                "",
-                ChatColor.of("#FFFFFF") + "Click to finish Quest 5!",
-                ""
-            );
-            addGlow(completeButton);
-            inv.setItem(49, completeButton);
-        } else {
-            ItemStack incompleteButton = createItem(
-                Material.GRAY_DYE,
-                ChatColor.of("#808080") + "§lIncomplete",
-                "",
-                ChatColor.of("#808080") + "Mine 5 stone to continue",
-                ""
-            );
-            inv.setItem(49, incompleteButton);
-        }
-        
-        // Back button (slot 53)
-        inv.setItem(53, createItem(
-            Material.ARROW,
-            ChatColor.of("#55FF55") + "§l← Back",
-            ChatColor.of("#808080") + "Return to main menu"
-        ));
+        // === UNIVERSAL NAVBAR (Row 5: slots 45-53) ===
+        applyUniversalNavbar(inv, player, "main", new HashMap<>() {{
+            put("page", 1);
+            put("total_pages", 1);
+            put("menu_name", "Quest Menu");
+            put("menu_description", "Daily quest management");
+        }});
         
         // Track menu
         player.openInventory(inv);
@@ -1550,55 +1499,174 @@ public class QuestMenu {
     }
     
     /**
-     * Create WDP-Quest style progress segment with Custom Model Data
-     * @param segmentIndex Segment number (0-7)
-     * @param completion Overall completion percentage (0-100)
-     * @param isHard Whether this is a hard quest (red vs green)
+     * Apply universal navbar from navbar.yml configuration
      */
-    private ItemStack createWDPQuestProgressSegment(int segmentIndex, double completion, boolean isHard) {
-        int segments = 8;
-        int fillsPerSegment = 5;
-        int totalUnits = segments * fillsPerSegment; // 40
-        
-        // Convert percentage to units (0-40)
-        int totalFilledUnits = (int) Math.round(completion / 100.0 * totalUnits);
-        
-        // Calculate this segment's fill level (0-5)
-        int unitsBeforeThis = segmentIndex * fillsPerSegment;
-        int unitsInThisSegment = Math.max(0, Math.min(fillsPerSegment, totalFilledUnits - unitsBeforeThis));
-        
-        // Custom Model Data: 1000+fill for normal (green), 1010+fill for hard (red)
-        int cmdBase = isHard ? 1010 : 1000;
-        
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        
-        if (meta != null) {
-            meta.setCustomModelData(cmdBase + unitsInThisSegment);
+    private void applyUniversalNavbar(Inventory inv, Player player, String menuType, Map<String, Object> context) {
+        // Load navbar configuration
+        FileConfiguration config = plugin.getConfig();
+        if (!config.contains("navbar")) {
+            // Fallback navbar
+            createFallbackNavbar(inv, context);
+            return;
+        }
+
+        // Apply each navbar item
+        for (String itemName : config.getConfigurationSection("navbar").getKeys(false)) {
+            Map<String, Object> itemConfig = config.getConfigurationSection("navbar." + itemName).getValues(false);
             
-            // Visual feedback (fallback without resource pack)
-            String color = isHard ? ChatColor.of("#FF5555") + "" : ChatColor.of("#55FF55") + "";
-            String emptyColor = ChatColor.of("#808080") + "";
+            Integer slot = (Integer) itemConfig.get("slot");
+            if (slot == null || slot < 45 || slot > 53) continue;
             
-            StringBuilder segmentBar = new StringBuilder();
-            for (int i = 0; i < fillsPerSegment; i++) {
-                segmentBar.append(i < unitsInThisSegment ? color + "█" : emptyColor + "░");
+            // Handle special cases
+            if ("back".equals(itemName)) {
+                // Always show back button - it can close the menu if no previous menu
+                // if (context == null || !context.containsKey("previous_menu")) {
+                //     inv.setItem(slot, createGlassPane());
+                //     continue;
+                // }
             }
             
-            meta.setDisplayName(segmentBar.toString());
+            if ("close".equals(itemName)) {
+                // Always show close button
+                // if (context != null && context.containsKey("previous_menu")) {
+                //     inv.setItem(slot, createGlassPane());
+                //     continue;
+                // }
+            }
             
-            List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.of("#808080") + "Segment " + (segmentIndex + 1) + "/8");
-            lore.add(ChatColor.of("#808080") + "Fill: " + color + unitsInThisSegment + "/5");
-            lore.add("");
-            lore.add(ChatColor.of("#808080") + "Overall: " + ChatColor.of("#FFFFFF") + String.format("%.0f", completion) + "%");
+            if ("previous_page".equals(itemName) || "next_page".equals(itemName)) {
+                if (context == null || !context.containsKey("page") || !context.containsKey("total_pages")) {
+                    inv.setItem(slot, createGlassPane());
+                    continue;
+                }
+                
+                int page = (Integer) context.get("page");
+                int totalPages = (Integer) context.get("total_pages");
+                
+                if ("previous_page".equals(itemName) && page <= 1) {
+                    inv.setItem(slot, createGlassPane());
+                    continue;
+                }
+                
+                if ("next_page".equals(itemName) && page >= totalPages) {
+                    inv.setItem(slot, createGlassPane());
+                    continue;
+                }
+            }
             
-            meta.setLore(lore);
-            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
-            item.setItemMeta(meta);
+            if ("page_info".equals(itemName)) {
+                if (context == null || !context.containsKey("page") || !context.containsKey("total_pages")) {
+                    inv.setItem(slot, createGlassPane());
+                    continue;
+                }
+            }
+            
+            ItemStack item = createNavbarItem(itemName, itemConfig, player, menuType, context);
+            if (item != null) {
+                inv.setItem(slot, item);
+            }
+        }
+    }
+    
+    /**
+     * Create a navbar item from configuration
+     */
+    private ItemStack createNavbarItem(String itemName, Map<String, Object> config, Player player, String menuType, Map<String, Object> context) {
+        String materialStr = (String) config.get("material");
+        String displayName = (String) config.get("display_name");
+        @SuppressWarnings("unchecked")
+        List<String> lore = (List<String>) config.get("lore");
+        
+        if (materialStr == null) return null;
+        
+        Material material = Material.getMaterial(materialStr.toUpperCase());
+        if (material == null) return null;
+        
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        
+        if (displayName != null) {
+            meta.setDisplayName(replacePlaceholders(displayName, context));
         }
         
+        if (lore != null) {
+            List<String> processedLore = new ArrayList<>();
+            for (String line : lore) {
+                processedLore.add(replacePlaceholders(line, context));
+            }
+            meta.setLore(processedLore);
+        }
+        
+        item.setItemMeta(meta);
         return item;
+    }
+    
+    /**
+     * Replace placeholders in text
+     */
+    private String replacePlaceholders(String text, Map<String, Object> context) {
+        if (text == null || context == null) return text;
+        
+        String result = text;
+        for (Map.Entry<String, Object> entry : context.entrySet()) {
+            result = result.replace("{" + entry.getKey() + "}", String.valueOf(entry.getValue()));
+        }
+        return result;
+    }
+    
+    /**
+     * Create fallback navbar
+     */
+    private void createFallbackNavbar(Inventory inv, Map<String, Object> context) {
+        // Fill navbar row with black glass panes
+        for (int i = 45; i < 54; i++) {
+            inv.setItem(i, createGlassPane());
+        }
+        
+        // Page info (slot 49)
+        int page = context != null && context.containsKey("page") ? (Integer) context.get("page") : 1;
+        int totalPages = context != null && context.containsKey("total_pages") ? (Integer) context.get("total_pages") : 1;
+        inv.setItem(49, createItem(
+            Material.PAPER,
+            ChatColor.of("#FFFF00") + "§lPage " + page + "/" + totalPages,
+            ChatColor.of("#808080") + "Current page"
+        ));
+        
+        // Close button (slot 53)
+        inv.setItem(53, createItem(
+            Material.BARRIER,
+            ChatColor.of("#FF5555") + "§l✗ Close",
+            ChatColor.of("#808080") + "Close this menu"
+        ));
+    }
+    
+    /**
+     * Create a glass pane item
+     */
+    private ItemStack createGlassPane() {
+        ItemStack item = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(" ");
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+    
+    /**
+     * Fill a row with material
+     */
+    private void fillRow(Inventory inv, int row, Material material) {
+        int startSlot = row * 9;
+        for (int i = 0; i < 9; i++) {
+            ItemStack item = new ItemStack(material);
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(" ");
+                item.setItemMeta(meta);
+            }
+            inv.setItem(startSlot + i, item);
+        }
     }
     
     // ==================== HELPER METHODS ====================
@@ -1699,6 +1767,176 @@ public class QuestMenu {
             this.sellPrice = sellPrice;
             this.canSell = canSell;
         }
+    }
+    
+    /**
+     * Create WDP-Quest style progress segment with Custom Model Data
+     * @param segmentIndex Segment number (0-7)
+     * @param completion Overall completion percentage (0-100)
+     * @param isHard Whether this is a hard quest (red vs green)
+     */
+    private ItemStack createWDPQuestProgressSegment(int segmentIndex, double completion, boolean isHard) {
+        // Progress bar constants (EXACTLY matching WDP-Quest)
+        final int SEGMENTS = 8;
+        final int FILLS_PER_SEGMENT = 5;
+        final int TOTAL_UNITS = SEGMENTS * FILLS_PER_SEGMENT; // 40
+        final int CMD_NORMAL = 1000;
+        final int CMD_HARD = 1010;
+        
+        // Convert percentage to units (0-40)
+        int totalFilledUnits = (int) Math.round(completion / 100.0 * TOTAL_UNITS);
+        
+        // Calculate this segment's fill level (0-5)
+        int unitsBeforeThis = segmentIndex * FILLS_PER_SEGMENT;
+        int unitsInThisSegment = Math.max(0, Math.min(FILLS_PER_SEGMENT, totalFilledUnits - unitsBeforeThis));
+        
+        // Simple CMD: 1000+fill for normal, 1010+fill for hard
+        int cmdBase = isHard ? CMD_HARD : CMD_NORMAL;
+        
+        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta meta = item.getItemMeta();
+        
+        if (meta != null) {
+            meta.setCustomModelData(cmdBase + unitsInThisSegment);
+            
+            // Visual feedback in name and lore (fallback without resource pack)
+            String color = isHard ? "§c" : "§a";
+            String segmentBar = createSegmentVisual(unitsInThisSegment, isHard);
+            
+            meta.setDisplayName(segmentBar);
+            
+            List<String> lore = new ArrayList<>();
+            lore.add("§7Segment " + (segmentIndex + 1) + "/8");
+            lore.add("§7Fill: " + color + unitsInThisSegment + "/5");
+            lore.add("");
+            lore.add("§7Overall: §f" + String.format("%.0f", completion) + "%");
+            
+            meta.setLore(lore);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+            item.setItemMeta(meta);
+        }
+        
+        return item;
+    }
+    
+    /**
+     * Open quest detail view for the simplified quest (Quest 5)
+     */
+    private void openQuestDetailView(Player player) {
+        String title = ChatColor.of("#FFD700") + "Quest Details";
+        Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
+        
+        PlayerData data = plugin.getPlayerDataManager().getData(player);
+        PlayerData.QuestProgress progress = data.getQuestProgress(5);
+        
+        // Get stone mining progress
+        int stoneMined = progress != null ? progress.getCounter("stone_mined", 0) : 0;
+        int stoneTarget = 5;
+        double completion = Math.min(100.0, (stoneMined * 100.0) / stoneTarget);
+        boolean isComplete = stoneMined >= stoneTarget;
+        
+        // Fill background with gray glass panes (like WDP-Quest detail view)
+        fillBackground(inv, Material.GRAY_STAINED_GLASS_PANE);
+        
+        // === ROW 0: Header ===
+        // Quest icon (slot 4)
+        String statusPrefix = isComplete ? ChatColor.of("#55FF55") + "✓ " : ChatColor.of("#FFFF00") + "● ";
+        ItemStack questIcon = createItem(
+            isComplete ? Material.EMERALD : Material.COMPASS,
+            statusPrefix + ChatColor.of("#FFD700") + "Quest Menu Tutorial",
+            "",
+            ChatColor.of("#808080") + "Learn how the quest menu works!",
+            "",
+            ChatColor.of("#808080") + "Required Progress: " + ChatColor.of("#FFFF00") + "0%",
+            isComplete ? ChatColor.of("#55FF55") + "Repeatable: No" : ""
+        );
+        if (isComplete) addGlow(questIcon);
+        inv.setItem(4, questIcon);
+        
+        // Status indicator (slot 8)
+        Material statusMat = isComplete ? Material.LIME_DYE : Material.YELLOW_DYE;
+        String statusText = isComplete ? "§a§lCOMPLETED" : "§e§lACTIVE";
+        inv.setItem(8, createItem(
+            statusMat,
+            statusText,
+            "",
+            ChatColor.of("#808080") + "Quest Status",
+            isComplete ? ChatColor.of("#55FF55") + "Ready to turn in!" : ChatColor.of("#FFFF00") + "In progress..."
+        ));
+        
+        // === ROW 1: Full-width progress bar ===
+        for (int seg = 0; seg < 8; seg++) {
+            int slot = 10 + seg;
+            inv.setItem(slot, createWDPQuestProgressSegment(seg, completion, false));
+        }
+        
+        // === ROW 2: Objectives ===
+        inv.setItem(18, createItem(
+            Material.PAPER,
+            ChatColor.of("#FFD700") + "§lObjectives",
+            ChatColor.of("#808080") + "Complete all to finish"
+        ));
+        
+        // Objective - Mine 5 Stone (slot 19)
+        Material objMat = isComplete ? Material.LIME_DYE : Material.GRAY_DYE;
+        String objPrefix = isComplete ? ChatColor.of("#55FF55") + "✓ " : ChatColor.of("#808080") + "○ ";
+        String objProgress = isComplete ? ChatColor.of("#55FF55") + "Complete!" : 
+                ChatColor.of("#808080") + "" + stoneMined + "/" + stoneTarget + " Stone mined";
+        
+        inv.setItem(19, createItem(
+            objMat,
+            objPrefix + ChatColor.of("#FFFFFF") + "Mine 5 Stone",
+            "",
+            objProgress,
+            "",
+            ChatColor.of("#808080") + "Mine stone blocks to complete this objective"
+        ));
+        
+        // === ROW 3: Rewards ===
+        inv.setItem(27, createItem(
+            Material.CHEST,
+            ChatColor.of("#FFD700") + "§lRewards",
+            ChatColor.of("#808080") + "What you'll receive"
+        ));
+        
+        inv.setItem(28, createItem(
+            Material.GOLD_NUGGET,
+            ChatColor.of("#FFFF00") + "20 SkillCoins",
+            "",
+            ChatColor.of("#808080") + "Currency for the shop"
+        ));
+        
+        // === ROW 4: Empty ===
+        
+        // === ROW 5: Universal navbar ===
+        Map<String, Object> context = new HashMap<>();
+        context.put("previous_menu", "simplified_quest");
+        context.put("menu_name", "Quest Details");
+        context.put("menu_description", "Detailed quest information");
+        
+        applyUniversalNavbar(inv, player, "quest_detail", context);
+        
+        // Track menu
+        player.openInventory(inv);
+        openMenus.put(player.getUniqueId(), new MenuSession(player, "quest_detail", 5));
+        
+        if (plugin.getConfigManager().isSoundsEnabled()) {
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
+        }
+    }
+    
+    /**
+     * Creates a visual representation of a single segment (fallback).
+     */
+    private String createSegmentVisual(int fillLevel, boolean isHard) {
+        String filled = isHard ? "§c█" : "§a█";
+        String empty = "§7░";
+        
+        StringBuilder bar = new StringBuilder();
+        for (int i = 0; i < 5; i++) {
+            bar.append(i < fillLevel ? filled : empty);
+        }
+        return bar.toString();
     }
     
     // ==================== INNER CLASS ====================
