@@ -1,200 +1,76 @@
-# WDP-Start - Get Started Quest System
+# WDP-Start
 
-**Professional New Player Onboarding System for WDP Server**
-
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)]()
-[![Minecraft](https://img.shields.io/badge/minecraft-1.21+-green.svg)]()
-[![Java](https://img.shields.io/badge/java-21+-orange.svg)]()
+**AI Authorship Notice:** **The full plugin (WDP-Start) was written by an AI due to a time shortage.** Please review code and configs before production use.
 
 ---
 
-## 📋 Overview
+## 🚀 What is WDP-Start?
 
-WDP-Start is a professional quest system designed to guide new players through their first experience on the WDP server. It provides an intuitive, step-by-step onboarding experience with rewards and helpful guidance.
+WDP-Start is a focused New Player Onboarding plugin for Paper/Spigot servers. It provides a short, guided quest chain that introduces new players to server features, rewards them, and optionally integrates with SkillCoins / AuraSkills.
 
-### Key Features
+## ✨ Key Features
 
-- ✅ **6 Guided Quests**: Step-by-step introduction to server features
-- ✅ **Clean GUI**: ⛃-style navigation bar
-- ✅ **Smart Rewards**: SkillCoins, items, and tokens
-- ✅ **Auto Top-up**: Ensures players can complete token purchase
-- ✅ **Refundable**: Cancel anytime, get unspent coins back
-- ✅ **Integration Ready**: Works with AuraSkills, WDP-Progress, and more
+- Clear 6-step onboarding quest chain
+- Clean GUI and simplified menus for new players
+- Rewards: SkillCoins and SkillTokens (where configured)
+- Integration points for Shop & Progress plugins
+- Configurable auto-topup and refund logic
 
----
+## ⚙️ Requirements
 
-## 🎯 Quest Overview
+- Minecraft: Paper/Spigot 1.21+
+- Java: 21+
+- Optional: Vault, AuraSkills, WDP-Progress
 
-| # | Quest Name | Objective | Reward |
-|---|------------|-----------|--------|
-| 1 | **Leave & Teleport** | Leave spawn, get auto-teleported | 30 SC + 3 Apples |
-| 2 | **Woodcutting Kickstart** | Reach Foraging level 2 | 40 SC |
-| 3 | **Track Your Journey** | Open /progress, view Statistics | 50 SC |
-| 4 | **Currency Converter** | Buy 1 SkillToken from shop | 60 SC |
-| 5 | **Quest Menu Guide** | View simplified quest menu | 20 SC |
-| 6 | **Good Luck!** | Complete & join Discord | 100 SC + 10 ST + Items |
+## 📋 Commands
 
-**Total Rewards:** 300 SkillCoins + 10 SkillTokens + Starter Items
+- `/start` (aliases: `quests`, `quest`, `getstarted`, `wdpstart`) — Open the onboarding menu
+- `/start cancel` — Cancel current onboarding (prompts)
+- `/start reload` — Reload plugin config (admin)
+- `/start reset <player>` — Reset a player's onboarding (admin)
 
----
+> NOTE: Command/permission names are defined in `src/main/resources/plugin.yml` — use those exact values for automations.
 
-## 💻 Commands
+## 🧩 Integration / API
 
-### Player Commands
+WDP-Start exposes a small API for other plugins (see `com.wdp.start.api.WDPStartAPI`). Use the API to:
+- Query quest progress
+- Notify about token purchases (Quest 4)
+- Respect simplified menus (check `shouldShowSimplifiedShop` / `shouldShowSimplifiedQuestMenu`)
 
-| Command | Description |
-|---------|-------------|
-| `/quests` | Open the quest menu |
-| `/quests cancel` | Cancel quests (prompts confirm) |
-| `/quests cancel confirm` | Confirm cancellation |
-| `/quests help` | Show help |
+Code examples and usage are included in the original README in the `API` section.
 
-### Admin Commands
+## 🛠 Configuration
 
-| Command | Permission | Description |
-|---------|------------|-------------|
-| `/quests reload` | `wdpstart.admin.reload` | Reload configuration |
-| `/quests reset <player>` | `wdpstart.admin.reset` | Reset player progress |
-| `/quests complete <player> <1-6>` | `wdpstart.admin.complete` | Force complete quest |
-| `/quests debug [player]` | `wdpstart.admin.debug` | View debug info |
+Default configuration is `plugins/WDP-Start/config.yml` (auto-created on first run). Important options:
+- `general.auto-start` — Start quests automatically on first join
+- `questX.*` — Per-quest triggers and requirements
+- `cancellation.refund-unspent` — Refund logic for unspent coins
 
----
-
-## 🔌 API Usage
-
-### Integration for Shop Plugins (SkillCoins, Economy)
-
-**CRITICAL:** Before opening your shop menu, check if WDP-Start wants to show the simplified version:
-
-```java
-import com.wdp.start.api.WDPStartAPI;
-
-public void onShopCommand(Player player) {
-    // Check if simplified view should be shown
-    if (WDPStartAPI.isAvailable() && WDPStartAPI.shouldShowSimplifiedShop(player)) {
-        // DO NOT open your menu - WDP-Start handles it
-        return;
-    }
-    
-    // Default: Open normal shop menu
-    openNormalShopMenu(player);
-}
-```
-
-### Integration for Quest/Progress Plugins
-
-```java
-public void onQuestCommand(Player player) {
-    // Check if simplified quest view should be shown
-    if (WDPStartAPI.isAvailable() && WDPStartAPI.shouldShowSimplifiedQuestMenu(player)) {
-        // DO NOT open your menu - WDP-Start handles it
-        return;
-    }
-    
-    // Default: Open normal quest menu
-    openNormalQuestMenu(player);
-}
-```
-
-### Notify Quest Completion
-
-```java
-// Notify token purchase for Quest 4 completion
-WDPStartAPI.notifyTokenPurchase(player, 1);
-
-// Track coin spending for refund calculation
-WDPStartAPI.trackCoinSpending(player, 50);
-
-// Notify stats click for Quest 3
-WDPStartAPI.notifyProgressStatsClick(player);
-```
-
-### Check Quest Progress
-
-```java
-// Check quest status
-int currentQuest = WDPStartAPI.getCurrentQuest(player);
-boolean started = WDPStartAPI.hasStartedQuests(player);
-boolean completed = WDPStartAPI.isQuestCompleted(player, 3);
-```
-
----
-
-## ⚙️ Configuration
-
-### config.yml
-
-```yaml
-general:
-  welcome-message: true      # Show welcome on join
-  auto-start: false          # Quests require manual start
-  enable-sounds: true        # Sound effects
-  enable-particles: true     # Particle effects
-
-quest1:
-  trigger-region: "spawn_exit"  # Region outside spawn
-  trigger-world: "world"
-  use-coordinates: false
-  # Or use coordinate box:
-  # use-coordinates: true
-  # min-x: -100
-  # max-x: 100
-  # min-z: -100
-  # max-z: 100
-
-quest2:
-  skill: "foraging"
-  target-level: 2
-  override-reward: true
-
-quest4:
-  tokens-required: 1
-  auto-topup: true           # Give coins if player is short
-  token-cost: 100
-
-quest6:
-  discord-link: "https://discord.gg/yourserver"
-
-cancellation:
-  enabled: true
-  refund-unspent: true       # Refund granted coins not spent
-```
-
----
+Always review `config.yml` after installing to adapt messages, regions, and costs.
 
 ## 📦 Installation
 
-1. **Download** the latest JAR from releases
-2. **Place** in your server's `plugins/` folder
-3. **Restart** the server
-4. **Configure** `plugins/WDP-Start/config.yml`
-5. **Reload** with `/quests reload`
+1. Place the built JAR in `plugins/`.
+2. Start/restart the server.
+3. Adjust `plugins/WDP-Start/config.yml` as needed.
+4. Use `/start reload` to apply changes.
 
-### Dependencies
+## 🧪 Building from source
 
-- **Required:** Spigot/Paper 1.21+, Java 21+
-- **Optional:** Vault (economy), AuraSkills, WDP-Progress
-
----
-
-## 🔧 Building from Source
+Maven build:
 
 ```bash
 cd WDP-Start
 mvn clean package
 ```
 
-The JAR will be in `target/WDP-Start-1.0.0.jar`
+Resulting artifact: `target/*.jar`
+
+## 📣 License & Attribution
+
+This repository copy is provided under the license stated in the project; see `LICENSE` or header files for details.
 
 ---
 
-## 📄 License
-
-Proprietary - WDP Server © 2025
-
----
-
-## 👥 Credits
-
-- **Design & Development:** WDP Development Team
-- **Inspired by:** SkillCoins, WDP-Progress, WDP-BaseDet
+If you'd like, I can now apply this same layout to the other READMEs and add a short review of each file's accuracy.✅
