@@ -224,17 +224,19 @@ public class QuestManager {
         
         // Advance to next quest or complete
         if (quest < TOTAL_QUESTS) {
-            // Do not auto-progress to next quest - player must manually start next quest
-            // data.setCurrentQuest(quest + 1);
-            // data.getQuestProgress(quest + 1).setStarted(true);
-            
-            // Send consistent AuraSkills-style completion + next objective message
-            // Skip for Quest 2 since it has its own special level up message
+            // Auto-start the next quest so the player sees the next objective (e.g., Foraging) as started
+            data.setCurrentQuest(quest + 1);
+            data.getQuestProgress(quest + 1).setStarted(true);
+
+            // Send consistent completion message (skip for Quest 2 which has its own flow)
             if (quest != 2) {
                 sendQuestCompleteMessage(player, quest, reward);
             }
-            
-            // Check if Quest 2 is already complete (player already at target level)
+
+            // Also notify player of the next objective explicitly
+            sendNextObjectiveMessage(player, quest + 1);
+
+            // Special handling: if quest 1 just completed, check and auto-complete quest 2 if player already meets requirements
             if (quest == 1) {
                 checkAndCompleteQuest2IfReady(player, data);
             }

@@ -2,7 +2,6 @@ package com.wdp.start.ui.menu;
 
 import com.wdp.start.WDPStartPlugin;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
