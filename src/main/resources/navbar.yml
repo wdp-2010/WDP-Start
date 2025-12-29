@@ -6,7 +6,7 @@ navbar:
   back:
     slot: 45
     material: spyglass
-    display_name: '§e§l← Back'
+    display_name: '§c§l← Back'
     lore:
       - '§7Return to previous menu'
   
@@ -30,7 +30,7 @@ navbar:
   page_info:
     slot: 49
     material: paper
-    display_name: '§e§lPage {page}/{total_pages}'
+    display_name: '§e§lPage §f§l{page} §8§l/ {total_pages}'
     lore:
       - ''
       - '§7Current page: {page}'

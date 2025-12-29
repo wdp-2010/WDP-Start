@@ -36,17 +36,10 @@ public class PathGuideManager {
      */
     public void startPath(Player player) {
         if (!plugin.getConfigManager().isPathEnabled()) {
-            plugin.debug("[PathGuide] Path disabled in config, not starting for " + player.getName());
             return;
         }
         
         UUID uuid = player.getUniqueId();
-        
-        plugin.debug("[PathGuide] Starting A* pathfinding for " + player.getName() + " at " + 
-            String.format("(%.1f, %.1f, %.1f)", 
-                player.getLocation().getX(), 
-                player.getLocation().getY(), 
-                player.getLocation().getZ()));
         
         // Stop existing path
         stopPath(player);
@@ -54,31 +47,24 @@ public class PathGuideManager {
         // Calculate initial path using A* algorithm
         List<Location> path = calculatePathAStar(player.getLocation());
         if (path.isEmpty()) {
-            plugin.debug("[PathGuide] A* pathfinding failed for " + player.getName() + " - trying fallback");
             // Fallback to simple path if A* fails
             path = calculateSimplePath(player.getLocation());
         }
         
         if (path.isEmpty()) {
-            plugin.debug("[PathGuide] Failed to calculate any path for " + player.getName());
             return;
         }
         
         PathSession session = new PathSession(player, path);
         activePaths.put(uuid, session);
         lastPathCalculation.put(uuid, System.currentTimeMillis());
-        
-        plugin.debug("[PathGuide] Path started for " + player.getName() + " with " + path.size() + " points (A*)");
     }
     
     /**
      * Stop showing path for a player
      */
     public void stopPath(Player player) {
-        PathSession session = activePaths.remove(player.getUniqueId());
-        if (session != null) {
-            plugin.debug("[PathGuide] Stopped path guide for " + player.getName());
-        }
+        activePaths.remove(player.getUniqueId());
     }
     
     /**
@@ -95,11 +81,9 @@ public class PathGuideManager {
     private List<Location> calculatePathAStar(Location from) {
         Location target = plugin.getConfigManager().getPathTarget();
         if (target == null) {
-            plugin.debug("[PathGuide] Cannot calculate A* path - target is null");
             return Collections.emptyList();
         }
         if (from.getWorld() == null) {
-            plugin.debug("[PathGuide] Cannot calculate A* path - player world is null");
             return Collections.emptyList();
         }
         
@@ -112,17 +96,10 @@ public class PathGuideManager {
             pathLength = Math.max(pathLength, (int) (distance * 2)); // Ensure we can reach target
         }
         
-        plugin.debug("[PathGuide] Calculating A* path from " + 
-            String.format("(%.1f, %.1f, %.1f) to (%.1f, %.1f, %.1f) [full path: %s]",
-                from.getX(), from.getY(), from.getZ(),
-                target.getX(), target.getY(), target.getZ(),
-                showFullPath));
-        
         // Use A* pathfinder with larger search radius
         List<Location> path = AStarPathfinder.findPath(from, target, pathLength * 3);
         
         if (path.isEmpty()) {
-            plugin.debug("[PathGuide] A* returned empty path");
             return Collections.emptyList();
         }
         
@@ -138,7 +115,6 @@ public class PathGuideManager {
             adjustedPath.add(loc);
         }
         
-        plugin.debug("[PathGuide] A* path calculated with " + adjustedPath.size() + " points (full path: " + showFullPath + ")");
         return adjustedPath;
     }
     
@@ -231,7 +207,6 @@ public class PathGuideManager {
                 
                 // Check if player is still valid
                 if (!player.isOnline()) {
-                    plugin.debug("[PathGuide] Removing path for " + player.getName() + " - player offline");
                     iter.remove();
                     continue;
                 }
@@ -239,7 +214,6 @@ public class PathGuideManager {
                 // Check if still on Quest 1
                 PlayerData data = plugin.getPlayerDataManager().getData(player);
                 if (!data.isStarted() || data.getCurrentQuest() != 1 || data.isQuestCompleted(1)) {
-                    plugin.debug("[PathGuide] Removing path for " + player.getName() + " - no longer on Quest 1");
                     iter.remove();
                     continue;
                 }
@@ -253,8 +227,6 @@ public class PathGuideManager {
                     Long lastCalc = lastPathCalculation.get(entry.getKey());
                     
                     if (lastCalc == null || now - lastCalc > PATH_RECALC_COOLDOWN) {
-                        plugin.debug("[PathGuide] Path ended for " + player.getName() + ", recalculating with A*...");
-                        
                         // Recalculate path using A*
                         List<Location> newPath = calculatePathAStar(player.getLocation());
                         if (newPath.isEmpty()) {
@@ -262,10 +234,8 @@ public class PathGuideManager {
                         }
                         
                         if (newPath.isEmpty()) {
-                            plugin.debug("[PathGuide] Cannot recalculate path for " + player.getName() + " - removing");
                             iter.remove();
                         } else {
-                            plugin.debug("[PathGuide] Path recalculated for " + player.getName() + " with " + newPath.size() + " points (A*)");
                             session.resetPath(newPath);
                             lastPathCalculation.put(entry.getKey(), now);
                         }
@@ -282,7 +252,6 @@ public class PathGuideManager {
      * Shutdown the manager
      */
     public void shutdown() {
-        plugin.debug("[PathGuide] Shutting down PathGuideManager, removing " + activePaths.size() + " active paths");
         if (animationTask != null) {
             animationTask.cancel();
         }
@@ -311,7 +280,6 @@ public class PathGuideManager {
         public void resetPath(List<Location> newPath) {
             this.path = newPath;
             this.currentIndex = 0;
-            plugin.debug("[PathGuide] Path reset for " + player.getName() + " with " + newPath.size() + " points");
         }
         
         public void restartAnimation() {
@@ -324,7 +292,6 @@ public class PathGuideManager {
          */
         public boolean animate() {
             if (path.isEmpty()) {
-                plugin.debug("[PathGuide] Path empty for " + player.getName());
                 return true;
             }
             
@@ -335,7 +302,6 @@ public class PathGuideManager {
             try {
                 particle = Particle.valueOf(plugin.getConfigManager().getParticleType());
             } catch (Exception e) {
-                plugin.debug("[PathGuide] Invalid particle type '" + plugin.getConfigManager().getParticleType() + "', using TOTEM_OF_UNDYING");
                 particle = Particle.TOTEM_OF_UNDYING;
             }
             
@@ -345,7 +311,7 @@ public class PathGuideManager {
             try {
                 player.spawnParticle(particle, loc, count, 0.1, 0.1, 0.1, 0.01);
             } catch (Exception e) {
-                plugin.debug("[PathGuide] Failed to spawn particle for " + player.getName() + ": " + e.getMessage());
+                // Ignore particle spawn errors
             }
             
             // Move to next position
@@ -353,7 +319,6 @@ public class PathGuideManager {
             
             // Check if we've reached the end
             if (currentIndex >= path.size()) {
-                plugin.debug("[PathGuide] Reached end of path for " + player.getName() + " (" + currentIndex + "/" + path.size() + ")");
                 return true; // Path ended, needs recalculation
             }
             
