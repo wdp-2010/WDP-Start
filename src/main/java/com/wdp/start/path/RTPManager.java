@@ -186,6 +186,15 @@ public class RTPManager {
                         CompletableFuture<?> chunkFuture = (CompletableFuture<?>) cfObj;
                         chunkFuture.whenComplete((chunk, ex) -> {
                             Bukkit.getScheduler().runTask(plugin, () -> {
+                                if (ex != null) {
+                                    plugin.getLogger().severe("[RTP] Failed to load chunk for random teleport for player " + player.getName() + ": " + ex.getMessage());
+                                    ex.printStackTrace();
+                                    if (player.isOnline()) {
+                                        player.removePotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS);
+                                    }
+                                    future.complete(false);
+                                    return;
+                                }
                                 // Teleport player now that the chunk is available
                                 if (!player.isOnline()) {
                                     player.removePotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS);
