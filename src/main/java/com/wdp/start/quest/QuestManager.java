@@ -233,9 +233,6 @@ public class QuestManager {
                 sendQuestCompleteMessage(player, quest, reward);
             }
 
-            // Also notify player of the next objective explicitly
-            sendNextObjectiveMessage(player, quest + 1);
-
             // Special handling: if quest 1 just completed, check and auto-complete quest 2 if player already meets requirements
             if (quest == 1) {
                 checkAndCompleteQuest2IfReady(player, data);

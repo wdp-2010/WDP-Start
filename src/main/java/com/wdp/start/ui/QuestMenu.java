@@ -23,6 +23,12 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 /**
  * Quest Menu GUI - SkillCoins-style navigation
@@ -355,6 +361,8 @@ public class QuestMenu {
             if (slot == 45) { // Back button
                 if ("quest_detail".equals(menuType)) {
                     openSimplifiedQuestView(player);
+                } else if (menuType.startsWith("skillcoins_shop_section")) {
+                    openSimplifiedShopItems(player);
                 } else {
                     // For main menu or other menus, back button closes the menu
                     player.closeInventory();
@@ -371,19 +379,31 @@ public class QuestMenu {
         
         // ========== SKILLCOINS SHOP MAIN MENU (Quest 3) ==========
         if (menuType.equals("skillcoins_shop_main")) {
-            // Category clicks
-            if (slot == 19) { // Food
-                openShopSection(player, "Food", Material.COOKED_BEEF);
-                return;
-            } else if (slot == 21) { // Tools
-                openShopSection(player, "Tools", Material.IRON_PICKAXE);
-                return;
-            } else if (slot == 23) { // Resources
-                openShopSection(player, "Resources", Material.OAK_LOG);
-                return;
-            } else if (slot == 25) { // Blocks
-                openShopSection(player, "Blocks", Material.STONE);
-                return;
+            // Dynamically resolve category files by slot
+            List<File> sections = listSectionFiles();
+            for (File sectionFile : sections) {
+                try {
+                    YamlConfiguration sec = YamlConfiguration.loadConfiguration(sectionFile);
+                    int secSlot = sec.getInt("slot", -1);
+                    String display = sec.getString("displayname", sectionFile.getName().replace(".yml", ""));
+                    if (secSlot == slot) {
+                        String fname = sectionFile.getName().replace(".yml", "").toLowerCase();
+                        // Skip skilllevels/tokens
+                        if (fname.contains("skilllevels") || fname.contains("tokens")) return;
+                        // If this is tokenexchange, open token exchange
+                        if (fname.contains("tokenexchange")) {
+                            openTokenExchange(player);
+                            return;
+                        }
+
+                        Material icon = Material.matchMaterial(sec.getString("material", "STONE"));
+                        if (icon == null) icon = Material.STONE;
+                        openShopSection(player, display, icon);
+                        return;
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
             }
             return;
         }
@@ -434,6 +454,10 @@ public class QuestMenu {
                 if (balance >= cost) {
                     plugin.getVaultIntegration().withdraw(player, cost);
                     player.getInventory().addItem(new ItemStack(item.material, quantity));
+
+                    // Track spending for refund and analytics
+                    com.wdp.start.api.WDPStartAPI.trackCoinSpending(player, (int) Math.round(cost));
+
                     player.sendMessage(ChatColor.of("#55FF55") + "✓ Purchased " + quantity + "x " + item.name + 
                             " for " + ChatColor.of("#FFD700") + String.format("%.0f", cost) + " SkillCoins" + 
                             ChatColor.of("#55FF55") + "!");
@@ -482,12 +506,20 @@ public class QuestMenu {
                 
                 if (balance >= tokenCost) {
                     plugin.getVaultIntegration().withdraw(player, tokenCost);
+
+                    // Give SkillTokens via AuraSkills integration if available
+                    if (plugin.getAuraSkillsIntegration() != null) {
+                        plugin.getAuraSkillsIntegration().giveSkillTokens(player, 1);
+                    }
+
+                    // Track spending and notify systems
+                    com.wdp.start.api.WDPStartAPI.trackCoinSpending(player, tokenCost);
+                    com.wdp.start.api.WDPStartAPI.notifyTokenPurchase(player, 1);
+
                     player.sendMessage(ChatColor.of("#55FF55") + "✓ Purchased " + ChatColor.of("#00FFFF") + 
                             "1 SkillToken" + ChatColor.of("#55FF55") + " for " + ChatColor.of("#FFD700") + 
                             tokenCost + " SkillCoins" + ChatColor.of("#55FF55") + "!");
                     
-                    // Notify quest listener for Quest 4
-                    plugin.getQuestListener().onTokenPurchase(player, 1);
                     player.closeInventory();
                 } else {
                     player.sendMessage(ChatColor.of("#FF5555") + "✗ Not enough SkillCoins! You need " + 
@@ -809,7 +841,125 @@ public class QuestMenu {
     }
     
     // ==================== SIMPLIFIED MENUS (SkillCoins-Style) ====================
-    
+
+    // --- AURASKILLS shop integration helpers ---
+    private File findAuraShopBaseDir() {
+        // Try a few likely locations
+        List<File> tries = Arrays.asList(
+            new File("plugins/AuraSkills/SkillCoinsShop"),
+            new File("SkillCoinsShop"),
+            new File("/root/WDP-Rework/SkillCoins/AuraSkills-Coins/bukkit/bin/main/SkillCoinsShop")
+        );
+        for (File f : tries) {
+            if (f.exists() && f.isDirectory()) {
+                return f;
+            }
+        }
+        return null;
+    }
+
+    private List<File> listSectionFiles() {
+        File base = findAuraShopBaseDir();
+        if (base == null) return Collections.emptyList();
+        File sections = new File(base, "sections");
+        if (!sections.exists() || !sections.isDirectory()) return Collections.emptyList();
+        File[] files = sections.listFiles((d, name) -> name.endsWith(".yml"));
+        if (files == null) return Collections.emptyList();
+        // Sort by slot if available
+        List<File> fileList = Arrays.stream(files).collect(Collectors.toList());
+        fileList.sort(Comparator.comparingInt(f -> getSectionSlotSafe(f)));
+        return fileList;
+    }
+
+    private int getSectionSlotSafe(File sectionFile) {
+        try {
+            YamlConfiguration cfg = YamlConfiguration.loadConfiguration(sectionFile);
+            return cfg.contains("slot") ? cfg.getInt("slot") : 999;
+        } catch (Exception e) {
+            return 999;
+        }
+    }
+
+    private List<ShopItemData> loadShopPageItems(String sectionName) {
+        File base = findAuraShopBaseDir();
+        if (base == null) return Collections.emptyList();
+        File shops = new File(base, "shops");
+        if (!shops.exists() || !shops.isDirectory()) return Collections.emptyList();
+        File shopFile = new File(shops, sectionName + ".yml");
+        if (!shopFile.exists()) {
+            // Try several common filename variants
+            List<String> variants = Arrays.asList(
+                sectionName,
+                sectionName.replace(" ", ""),
+                sectionName.toLowerCase(),
+                sectionName.substring(0,1).toUpperCase() + (sectionName.length() > 1 ? sectionName.substring(1) : ""),
+                sectionName.substring(0,1).toUpperCase() + sectionName.substring(1).toLowerCase()
+            );
+            boolean found = false;
+            for (String v : variants) {
+                File f = new File(shops, v + ".yml");
+                if (f.exists()) {
+                    shopFile = f;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return Collections.emptyList();
+        }
+
+        YamlConfiguration cfg = YamlConfiguration.loadConfiguration(shopFile);
+        if (!cfg.contains("pages")) return Collections.emptyList();
+        String firstPage = "page1";
+        if (!cfg.contains("pages." + firstPage + ".items")) {
+            // If pages are named differently, pick first key
+            if (cfg.getConfigurationSection("pages") != null) {
+                for (String key : cfg.getConfigurationSection("pages").getKeys(false)) {
+                    if (cfg.contains("pages." + key + ".items")) {
+                        firstPage = key;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!cfg.contains("pages." + firstPage + ".items")) return Collections.emptyList();
+
+        List<ShopItemData> items = new ArrayList<>();
+        Map<String, Object> itemsSection = cfg.getConfigurationSection("pages." + firstPage + ".items").getValues(false);
+
+        // Sort keys numerically if possible
+        List<String> keys = new ArrayList<>(itemsSection.keySet());
+        keys.sort((a, b) -> {
+            try { return Integer.compare(Integer.parseInt(a), Integer.parseInt(b)); } catch (Exception e) { return a.compareTo(b); }
+        });
+
+        for (String key : keys) {
+            Object val = itemsSection.get(key);
+            if (!(val instanceof Map)) continue;
+            @SuppressWarnings("unchecked")
+            Map<String, Object> itemCfg = (Map<String, Object>) val;
+            String materialStr = (String) itemCfg.get("material");
+            if (materialStr == null) continue;
+            Material mat = Material.getMaterial(materialStr.toUpperCase());
+            if (mat == null) continue;
+            double buy = itemCfg.containsKey("buy") ? Double.parseDouble(String.valueOf(itemCfg.get("buy"))) : 0;
+            double sell = itemCfg.containsKey("sell") ? Double.parseDouble(String.valueOf(itemCfg.get("sell"))) : 0;
+            String prettyName = prettifyMaterialName(mat);
+            items.add(new ShopItemData(mat, prettyName, buy, sell, sell > 0));
+        }
+
+        return items;
+    }
+
+    private String prettifyMaterialName(Material mat) {
+        String s = mat.name().toLowerCase().replace('_', ' ');
+        String[] parts = s.split(" ");
+        StringBuilder sb = new StringBuilder();
+        for (String p : parts) {
+            sb.append(Character.toUpperCase(p.charAt(0))).append(p.substring(1)).append(" ");
+        }
+        return sb.toString().trim();
+    }    
     /**
      * Open simplified shop menu for Quest 3 - EXACT SkillCoins ShopMainMenu style
      * Shows item categories (NOT token exchange) - player must buy an item
@@ -873,44 +1023,47 @@ public class QuestMenu {
         }
         inv.setItem(8, balanceItem);
         
-        // Shop categories - EXACT positions from SkillCoins (slots 10-35 area)
-        // Food category (slot 19)
-        inv.setItem(19, createShopCategory(Material.COOKED_BEEF, 
-            ChatColor.of("#FFAA00") + "✦ Food Shop",
-            "Buy food items to keep your hunger full!",
-            8, true));
-        
-        // Tools category (slot 21)
-        inv.setItem(21, createShopCategory(Material.IRON_PICKAXE,
-            ChatColor.of("#5555FF") + "⚒ Tools Shop", 
-            "Purchase tools for mining and building!",
-            12, true));
-        
-        // Resources category (slot 23)
-        inv.setItem(23, createShopCategory(Material.OAK_LOG,
-            ChatColor.of("#55FF55") + "❖ Resources Shop",
-            "Stock up on building materials!",
-            15, true));
-        
-        // Blocks category (slot 25)
-        inv.setItem(25, createShopCategory(Material.STONE,
-            ChatColor.of("#AAAAAA") + "▣ Blocks Shop",
-            "Various blocks for construction!",
-            20, true));
-        
-        // Back button (slot 53)
-        ItemStack close = new ItemStack(Material.SPYGLASS);
-        ItemMeta closeMeta = close.getItemMeta();
-        if (closeMeta != null) {
-            closeMeta.setDisplayName("§c§l← Back");
-            List<String> closeLore = new ArrayList<>();
-            closeLore.add("");
-            closeLore.add(ChatColor.of("#808080") + "Return to main shop");
-            closeMeta.setLore(closeLore);
-            close.setItemMeta(closeMeta);
+        // Shop categories - mirror AuraSkills sections but remove one row of categories
+        List<File> sections = listSectionFiles();
+        for (File sectionFile : sections) {
+            try {
+                YamlConfiguration sec = YamlConfiguration.loadConfiguration(sectionFile);
+                boolean enabled = sec.getBoolean("enable", true);
+                if (!enabled) continue;
+                String display = sec.getString("displayname", sectionFile.getName().replace(".yml", ""));
+                int slot = sec.getInt("slot", -1);
+
+                // Skip null slot or outside main area
+                if (slot < 0 || slot >= 54) continue;
+
+                // REMOVE one row: skip row 2 (slots 18-26) for the minimal layout
+                if (slot >= 18 && slot <= 26) continue;
+
+                // Skip SkillLevels and Tokens sections entirely for minimal view
+                String fname = sectionFile.getName().replace(".yml", "").toLowerCase();
+                if (fname.contains("skilllevels") || fname.contains("tokens")) continue;
+
+                Material icon = Material.matchMaterial(sec.getString("material", "STONE"));
+                int itemCount = loadShopPageItems(display).size();
+                if (icon == null) icon = Material.STONE;
+
+                inv.setItem(slot, createShopCategory(icon,
+                        ChatColor.of("#FFFFFF") + "" + display,
+                        "Open " + display + " shop",
+                        Math.max(1, itemCount), true));
+            } catch (Exception e) {
+                // ignore malformed section file
+            }
         }
-        inv.setItem(53, close);
         
+        // Apply navbar row (page info / balance / back buttons)
+        Map<String, Object> context = new HashMap<>();
+        context.put("page", 1);
+        context.put("total_pages", 1);
+        context.put("menu_name", "SkillCoins Shop");
+        context.put("menu_description", "SkillCoins simplified shop");
+        applyUniversalNavbar(inv, player, "main_shop", context);
+
         // Open and track
         player.openInventory(inv);
         openMenus.put(player.getUniqueId(), new MenuSession(player, "skillcoins_shop_main", 3));
@@ -927,49 +1080,29 @@ public class QuestMenu {
         String title = ChatColor.of("#00FFFF") + category + " Shop";
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
-        // Fill bottom row with border
-        ItemStack border = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-        ItemMeta borderMeta = border.getItemMeta();
-        if (borderMeta != null) {
-            borderMeta.setDisplayName(" ");
-            border.setItemMeta(borderMeta);
-        }
-        for (int i = 45; i < 54; i++) {
-            inv.setItem(i, border);
-        }
-        
-        // Add shop items based on category
+        // Add shop items based on category - load one page from AuraSkills shops if available
         List<ShopItemData> items = getShopItemsForCategory(category);
         int slot = 0;
         for (ShopItemData item : items) {
-            if (slot >= 45) break;
+            if (slot >= 45) break; // leave navbar row free for applyUniversalNavbar
             inv.setItem(slot, createShopItemDisplay(item));
             slot++;
         }
-        
+
         // Get balance
         double coins = 0;
         if (plugin.getVaultIntegration() != null) {
             coins = plugin.getVaultIntegration().getBalance(player);
         }
-        
-        // Page info (slot 45)
-        ItemStack pageInfo = new ItemStack(Material.BOOK);
-        ItemMeta pageMeta = pageInfo.getItemMeta();
-        if (pageMeta != null) {
-            pageMeta.setDisplayName(ChatColor.of("#00FFFF") + "Page 1 of 1");
-            pageInfo.setItemMeta(pageMeta);
-        }
-        inv.setItem(45, pageInfo);
-        
-        // Balance (slot 46)
-        ItemStack balanceItem = new ItemStack(Material.GOLD_NUGGET);
-        ItemMeta balanceMeta = balanceItem.getItemMeta();
-        if (balanceMeta != null) {
-            balanceMeta.setDisplayName(ChatColor.of("#FFFF00") + "Your Coins: " + ChatColor.of("#FFFFFF") + String.format("%.0f", coins));
-            balanceItem.setItemMeta(balanceMeta);
-        }
-        inv.setItem(46, balanceItem);
+
+        // Apply navbar row (page info / balance / back buttons) using universal navbar
+        Map<String, Object> context = new HashMap<>();
+        context.put("page", 1);
+        context.put("total_pages", 1);
+        context.put("menu_name", category + " Shop");
+        context.put("menu_description", "Shop category: " + category);
+        context.put("balance", (int) Math.round(coins));
+        applyUniversalNavbar(inv, player, "shop_section", context);
         
         // Back button (slot 53)
         ItemStack back = new ItemStack(Material.BARRIER);
@@ -1187,46 +1320,55 @@ public class QuestMenu {
         }
         inv.setItem(8, balanceItem);
         
-        // Shop categories - UNCLICKABLE (greyed out lore)
-        inv.setItem(19, createShopCategory(Material.COOKED_BEEF, 
-            ChatColor.of("#777777") + "✦ Food Shop",
-            "Buy food items to keep your hunger full!",
-            8, false));
-        
-        inv.setItem(21, createShopCategory(Material.IRON_PICKAXE,
-            ChatColor.of("#777777") + "⚒ Tools Shop", 
-            "Purchase tools for mining and building!",
-            12, false));
-        
-        inv.setItem(23, createShopCategory(Material.OAK_LOG,
-            ChatColor.of("#777777") + "❖ Resources Shop",
-            "Stock up on building materials!",
-            15, false));
-        
-        inv.setItem(25, createShopCategory(Material.STONE,
-            ChatColor.of("#777777") + "▣ Blocks Shop",
-            "Various blocks for construction!",
-            20, false));
-        
-        // TOKEN EXCHANGE - CLICKABLE (slot 31)
-        ItemStack tokenExchange = new ItemStack(Material.EMERALD);
-        ItemMeta tokenMeta = tokenExchange.getItemMeta();
-        if (tokenMeta != null) {
-            tokenMeta.setDisplayName(ChatColor.of("#55FF55") + "✦ Token Exchange");
-            List<String> tokenLore = new ArrayList<>();
-            tokenLore.add("");
-            tokenLore.add(ChatColor.of("#808080") + "Exchange SkillCoins for");
-            tokenLore.add(ChatColor.of("#808080") + "powerful SkillTokens!");
-            tokenLore.add("");
-            tokenLore.add(ChatColor.of("#808080") + "Rate: " + ChatColor.of("#FFD700") + "100 Coins" + 
-                    ChatColor.of("#808080") + " = " + ChatColor.of("#00FFFF") + "1 Token");
-            tokenLore.add("");
-            tokenLore.add(ChatColor.of("#FFFF00") + "▸ Click to open!");
-            tokenMeta.setLore(tokenLore);
-            tokenExchange.setItemMeta(tokenMeta);
+        // Shop categories - mirror AuraSkills sections but greyed out and skipping one row
+        List<File> sections = listSectionFiles();
+        for (File sectionFile : sections) {
+            try {
+                YamlConfiguration sec = YamlConfiguration.loadConfiguration(sectionFile);
+                boolean enabled = sec.getBoolean("enable", true);
+                if (!enabled) continue;
+                String display = sec.getString("displayname", sectionFile.getName().replace(".yml", ""));
+                int slot = sec.getInt("slot", -1);
+
+                if (slot < 0 || slot >= 54) continue;
+                // Skip the removed row (18-26)
+                if (slot >= 18 && slot <= 26) continue;
+
+                // Keep TokenExchange clickable if present
+                String fname = sectionFile.getName().replace(".yml", "").toLowerCase();
+                if (fname.contains("tokenexchange")) {
+                    ItemStack tokenExchange = new ItemStack(Material.EMERALD);
+                    ItemMeta tokenMeta = tokenExchange.getItemMeta();
+                    if (tokenMeta != null) {
+                        tokenMeta.setDisplayName(ChatColor.of("#55FF55") + "✦ Token Exchange");
+                        List<String> tokenLore = new ArrayList<>();
+                        tokenLore.add("");
+                        tokenLore.add(ChatColor.of("#808080") + "Exchange SkillCoins for");
+                        tokenLore.add(ChatColor.of("#808080") + "powerful SkillTokens!");
+                        tokenLore.add("");
+                        tokenLore.add(ChatColor.of("#808080") + "Rate: " + ChatColor.of("#FFD700") + "100 Coins" + 
+                                ChatColor.of("#808080") + " = " + ChatColor.of("#00FFFF") + "1 Token");
+                        tokenLore.add("");
+                        tokenLore.add(ChatColor.of("#FFFF00") + "▸ Click to open!");
+                        tokenMeta.setLore(tokenLore);
+                        tokenExchange.setItemMeta(tokenMeta);
+                    }
+                    addGlow(tokenExchange);
+                    inv.setItem(slot, tokenExchange);
+                    continue;
+                }
+
+                // Skip SkillLevels and Tokens as requested
+                if (fname.contains("skilllevels") || fname.contains("tokens")) continue;
+
+                Material icon = Material.matchMaterial(sec.getString("material", "STONE"));
+                if (icon == null) icon = Material.STONE;
+                int itemCount = loadShopPageItems(display).size();
+                inv.setItem(slot, createShopCategory(icon, ChatColor.of("#777777") + display, "Not available during tutorial", Math.max(1, itemCount), false));
+            } catch (Exception e) {
+                // ignore
+            }
         }
-        addGlow(tokenExchange);
-        inv.setItem(31, tokenExchange);
         
         // Back button (slot 53)
         ItemStack close = new ItemStack(Material.SPYGLASS);
@@ -1328,19 +1470,6 @@ public class QuestMenu {
         }
         inv.setItem(22, qtyDisplay);
         
-        // Balance display (slot 45)
-        ItemStack balanceItem = new ItemStack(Material.GOLD_INGOT);
-        ItemMeta balanceMeta = balanceItem.getItemMeta();
-        if (balanceMeta != null) {
-            balanceMeta.setDisplayName(ChatColor.of("#FFD700") + "Your Balance");
-            List<String> balanceLore = new ArrayList<>();
-            balanceLore.add("");
-            balanceLore.add(ChatColor.of("#FFD700") + "Coins: " + ChatColor.of("#FFFFFF") + String.format("%.0f", coinBalance));
-            balanceMeta.setLore(balanceLore);
-            balanceItem.setItemMeta(balanceMeta);
-        }
-        inv.setItem(45, balanceItem);
-        
         // Confirm button (slot 49)
         boolean canAfford = coinBalance >= totalCost;
         ItemStack confirm = new ItemStack(canAfford ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK);
@@ -1366,24 +1495,19 @@ public class QuestMenu {
             confirm.setItemMeta(confirmMeta);
         }
         inv.setItem(49, confirm);
-        
-        // Back button (slot 53)
-        ItemStack back = new ItemStack(Material.SPYGLASS);
-        ItemMeta backMeta = back.getItemMeta();
-        if (backMeta != null) {
-            backMeta.setDisplayName("§c§l← Back");
-            List<String> backLore = new ArrayList<>();
-            backLore.add("");
-            backLore.add(ChatColor.of("#808080") + "Return to main shop");
-            backMeta.setLore(backLore);
-            back.setItemMeta(backMeta);
-        }
-        inv.setItem(53, back);
-        
+
+        // Apply navbar row (page info / balance / back buttons)
+        Map<String, Object> context = new HashMap<>();
+        context.put("page", 1);
+        context.put("total_pages", 1);
+        context.put("menu_name", "Token Exchange");
+        context.put("menu_description", "Exchange coins for tokens");
+        context.put("balance", (int) Math.round(coinBalance));
+        applyUniversalNavbar(inv, player, "token_exchange", context);
+
         // Track
         player.openInventory(inv);
-        openMenus.put(player.getUniqueId(), new MenuSession(player, "token_exchange", 4));
-        
+        openMenus.put(player.getUniqueId(), new MenuSession(player, "token_exchange", 4));        
         if (plugin.getConfigManager().isSoundsEnabled()) {
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
         }
@@ -1718,6 +1842,11 @@ public class QuestMenu {
     }
     
     private List<ShopItemData> getShopItemsForCategory(String category) {
+        // Try to load from AuraSkills shop file first (page1)
+        List<ShopItemData> loaded = loadShopPageItems(category);
+        if (!loaded.isEmpty()) return loaded;
+
+        // Fallback to the small built-in list
         List<ShopItemData> items = new ArrayList<>();
         switch (category.toLowerCase()) {
             case "food":
