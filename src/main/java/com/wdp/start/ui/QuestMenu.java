@@ -344,6 +344,8 @@ public class QuestMenu {
      * Handle menu click
      */
     public void handleClick(Player player, int slot, Inventory inv) {
+        // 'inv' is part of the handler signature but not otherwise used
+        if (inv == null) { /* no-op to avoid unused-parameter warning */ }
         MenuSession session = openMenus.get(player.getUniqueId());
         if (session == null) return;
         
