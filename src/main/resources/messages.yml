@@ -120,6 +120,8 @@ commands:
     - ""
     - "&#55FFFF/start &#AAAAAA- Open quest menu"
     - "&#55FFFF/start cancel &#AAAAAA- Cancel quest chain"
+    - "&#55FFFF/start start &#AAAAAA- Start quest chain"
+    - "&#55FFFF/start start force &#AAAAAA- Force start (OP only)"
     - "&#55FFFF/start help &#AAAAAA- Show this help"
     - ""
     - "&#FFD700&l═══════════════════════════════════════"

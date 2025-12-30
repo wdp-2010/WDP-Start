@@ -58,6 +58,14 @@ public class QuestMenu {
         // Always get fresh data from database
         PlayerData data = plugin.getPlayerDataManager().getData(player);
         
+        // Check if current quest is completed and advance if needed
+        if (data.isStarted() && !data.isCompleted() && data.isQuestCompleted(data.getCurrentQuest())) {
+            plugin.debug("[QuestMenu] Current quest " + data.getCurrentQuest() + " is completed, advancing...");
+            data.advanceQuest();
+            plugin.getPlayerDataManager().saveData(data);
+            plugin.getPlayerDataManager().forceSave(player.getUniqueId());
+        }
+        
         // Debug log to console
         plugin.debug("[QuestMenu] Opening menu for " + player.getName() + 
             " | Started: " + data.isStarted() + 
@@ -128,7 +136,7 @@ public class QuestMenu {
             hex("&#AAAAAAClick to begin your adventure!"),
             " ",
             hex("&#FFFF55Tip: You can cancel anytime"),
-            hex("&#FFFFFFwith /quests cancel"),
+            hex("&#FFFFFFwith /quest cancel"),
             " "
         );
         addGlow(start);
@@ -188,8 +196,8 @@ public class QuestMenu {
             hex("&#55FFFF? Help"),
             " ",
             hex("&#AAAAAACommands:"),
-            hex("&#FFFFFF/quests &#AAAAAA- Open this menu"),
-            hex("&#FFFFFF/quests cancel &#AAAAAA- Cancel quests"),
+            hex("&#FFFFFF/quest &#AAAAAA- Open this menu"),
+            hex("&#FFFFFF/quest cancel &#AAAAAA- Cancel quests"),
             " ",
             hex("&#AAAAAANeed more help?"),
             hex("&#55FFFF" + plugin.getConfigManager().getDiscordLink()),
@@ -356,81 +364,14 @@ public class QuestMenu {
         
         String menuType = session.getMenuType();
         
-        // Handle universal navbar clicks (slots 45-53)
-        if (slot >= 45 && slot <= 53) {
-            if (slot == 45) { // Back button
-                if ("quest_detail".equals(menuType)) {
-                    openSimplifiedQuestView(player);
-                } else if (menuType.startsWith("skillcoins_shop_section")) {
-                    openSimplifiedShopItems(player);
-                } else {
-                    // For main menu or other menus, back button closes the menu
-                    player.closeInventory();
-                }
-                return;
-            }
-            if (slot == 53) { // Close button
-                player.closeInventory();
-                return;
-            }
-            // Other navbar slots are decorative
-            return;
-        }
-        
-        // ========== SKILLCOINS SHOP MAIN MENU (Quest 3) ==========
-        if (menuType.equals("skillcoins_shop_main")) {
-            // Dynamically resolve category files by slot
-            List<File> sections = listSectionFiles();
-            for (File sectionFile : sections) {
-                try {
-                    YamlConfiguration sec = YamlConfiguration.loadConfiguration(sectionFile);
-                    int secSlot = sec.getInt("slot", -1);
-                    String display = sec.getString("displayname", sectionFile.getName().replace(".yml", ""));
-                    if (secSlot == slot) {
-                        String fname = sectionFile.getName().replace(".yml", "").toLowerCase();
-                        // Skip skilllevels/tokens
-                        if (fname.contains("skilllevels") || fname.contains("tokens")) return;
-                        // If this is tokenexchange, open token exchange
-                        if (fname.contains("tokenexchange")) {
-                            openTokenExchange(player);
-                            return;
-                        }
-
-                        Material icon = Material.matchMaterial(sec.getString("material", "STONE"));
-                        if (icon == null) icon = Material.STONE;
-                        openShopSection(player, display, icon);
-                        return;
-                    }
-                } catch (Exception e) {
-                    // ignore
-                }
-            }
-            return;
-        }
-        
-        // ========== SHOP SECTION MENU (Quest 3 sub-menu) ==========
-        if (menuType.startsWith("skillcoins_shop_section")) {
-            String category = menuType.replace("skillcoins_shop_section_", "");
-            List<ShopItemData> items = getShopItemsForCategory(category);
-            
-            // Check if clicked slot has an item
-            if (slot >= 0 && slot < items.size()) {
-                ShopItemData item = items.get(slot);
-                // Open transaction menu - left click = buy
-                openItemTransaction(player, item, true);
-                return;
-            }
-            return;
-        }
-        
-        // ========== TRANSACTION MENU (Quest 3 buy/sell) ==========
+        // ========== TRANSACTION MENU (Quest 3 buy/sell) - Handle before navbar ==========
         if (menuType.startsWith("skillcoins_transaction")) {
             ShopItemData item = transactionItems.get(player.getUniqueId());
             Integer quantity = transactionQuantities.get(player.getUniqueId());
             if (item == null || quantity == null) return;
             
             // +1 button (slot 24)
-            if (slot == 24 && quantity < 5) {
+            if (slot == 24 && quantity < 3) {
                 transactionQuantities.put(player.getUniqueId(), quantity + 1);
                 openItemTransaction(player, item, true); // Refresh
                 return;
@@ -453,7 +394,11 @@ public class QuestMenu {
                 
                 if (balance >= cost) {
                     plugin.getVaultIntegration().withdraw(player, cost);
-                    player.getInventory().addItem(new ItemStack(item.material, quantity));
+                    ItemStack itemStack = new ItemStack(item.material, quantity);
+                    java.util.Map<Integer, ItemStack> leftovers = player.getInventory().addItem(itemStack);
+                    
+                    // Check if items were dropped due to full inventory
+                    boolean itemsDropped = !leftovers.isEmpty();
 
                     // Track spending for refund and analytics
                     com.wdp.start.api.WDPStartAPI.trackCoinSpending(player, (int) Math.round(cost));
@@ -462,6 +407,10 @@ public class QuestMenu {
                             " for " + ChatColor.of("#FFD700") + String.format("%.0f", cost) + " SkillCoins" + 
                             ChatColor.of("#55FF55") + "!");
                     
+                    if (itemsDropped) {
+                        player.sendMessage(ChatColor.of("#FFAA00") + "⚠ Your inventory was full! Some items may have dropped on the ground.");
+                    }
+                    
                     // Notify quest listener for Quest 3
                     plugin.getQuestListener().onShopItemPurchase(player);
                     
@@ -469,26 +418,23 @@ public class QuestMenu {
                     transactionItems.remove(player.getUniqueId());
                     transactionQuantities.remove(player.getUniqueId());
                     
-                    player.closeInventory();
+                    // Reopen main menu after short delay to show updated progress
+                    plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                        openMainMenu(player);
+                    }, 10L);
                 } else {
                     player.sendMessage(ChatColor.of("#FF5555") + "✗ Not enough SkillCoins! You need " + 
                             ChatColor.of("#FFD700") + String.format("%.0f", cost));
                 }
                 return;
             }
-            return;
-        }
-        
-        // ========== SKILLCOINS SHOP FOR TOKENS (Quest 4 main) ==========
-        if (menuType.equals("skillcoins_shop_tokens")) {
-            // Token exchange button (slot 31)
-            if (slot == 31) {
-                openTokenExchange(player);
-                return;
-            }
-            // Other categories are NOT clickable (greyed out)
-            if (slot == 19 || slot == 21 || slot == 23 || slot == 25) {
-                player.sendMessage(ChatColor.of("#777777") + "✖ This section is not available during the tutorial.");
+            
+            // Back button (slot 53) - handle here for transaction menu
+            if (slot == 53) {
+                // Clear transaction data
+                transactionItems.remove(player.getUniqueId());
+                transactionQuantities.remove(player.getUniqueId());
+                openSimplifiedShopItems(player);
                 return;
             }
             return;
@@ -496,6 +442,7 @@ public class QuestMenu {
         
         // ========== TOKEN EXCHANGE MENU (Quest 4 sub-menu) ==========
         if (menuType.equals("token_exchange")) {
+            // Handle token exchange clicks here
             // Confirm button (slot 49)
             if (slot == 49) {
                 int tokenCost = plugin.getConfigManager().getQuest4TokenCost();
@@ -520,18 +467,148 @@ public class QuestMenu {
                             "1 SkillToken" + ChatColor.of("#55FF55") + " for " + ChatColor.of("#FFD700") + 
                             tokenCost + " SkillCoins" + ChatColor.of("#55FF55") + "!");
                     
-                    player.closeInventory();
+                    // Notify quest listener for Quest 4
+                    plugin.getQuestListener().onTokenPurchase(player, 1);
+                    
+                    // Reopen main menu after short delay to show updated progress
+                    plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                        openMainMenu(player);
+                    }, 10L);
                 } else {
                     player.sendMessage(ChatColor.of("#FF5555") + "✗ Not enough SkillCoins! You need " + 
                             ChatColor.of("#FFD700") + tokenCost);
                 }
                 return;
             }
-            // +1 button does nothing (already at max 1 for tutorial)
-            if (slot == 24) {
-                player.sendMessage(ChatColor.of("#777777") + "Tutorial limit: 1 token per purchase");
+            
+            // Back button (slot 53) for token exchange
+            if (slot == 53) {
+                openSimplifiedShop(player);
                 return;
             }
+            
+            // Handle quantity adjustments for token exchange
+            // This would need to be implemented based on the token exchange menu layout
+            return;
+        }
+        
+        // Handle universal navbar clicks (slots 45-53) - AFTER specific menu handling
+        if (slot >= 45 && slot <= 53) {
+            if (slot == 45) { // Back button
+                if ("quest_detail".equals(menuType)) {
+                    openSimplifiedQuestView(player);
+                } else if (menuType.startsWith("skillcoins_shop_section")) {
+                    openSimplifiedShopItems(player);
+                } else {
+                    // For main menu or other menus, back button closes the menu
+                    player.closeInventory();
+                }
+                return;
+            }
+            if (slot == 53) { // Close button
+                player.closeInventory();
+                return;
+            }
+            // Other navbar slots are decorative
+            return;
+        }
+        
+        // ========== SKILLCOINS SHOP MAIN MENU (Quest 3) ==========
+        if (menuType.equals("skillcoins_shop_main")) {
+            // Check player's current quest for token exchange handling
+            boolean isQuest4 = data.getCurrentQuest() == 4 && !data.isQuestCompleted(4);
+            
+            // Dynamically resolve category files by slot from SkillCoinsShop/sections/
+            File sectionsDir = new File(plugin.getDataFolder(), "SkillCoinsShop/sections");
+            if (sectionsDir.exists() && sectionsDir.isDirectory()) {
+                File[] sectionFiles = sectionsDir.listFiles((dir, name) -> name.endsWith(".yml"));
+                if (sectionFiles != null) {
+                    for (File sectionFile : sectionFiles) {
+                        try {
+                            YamlConfiguration sec = YamlConfiguration.loadConfiguration(sectionFile);
+                            int secSlot = sec.getInt("slot", -1);
+                            String display = sec.getString("displayname", sectionFile.getName().replace(".yml", ""));
+                            if (secSlot == slot) {
+                                String fname = sectionFile.getName().replace(".yml", "").toLowerCase();
+                                // Handle token exchange differently for quest 4
+                                if (fname.contains("tokenexchange")) {
+                                    if (isQuest4) {
+                                        openTokenExchange(player);
+                                        return;
+                                    } else {
+                                        player.sendMessage(ChatColor.of("#777777") + "✖ Token exchange is not available during this tutorial.");
+                                        return;
+                                    }
+                                }
+                                // Skip skilllevels/tokens - not available in simplified view
+                                if (fname.contains("skilllevels") || fname.contains("tokens")) {
+                                    player.sendMessage(ChatColor.of("#777777") + "✖ This feature is not available during this tutorial.");
+                                    return;
+                                }
+
+                                String materialName = sec.getString("material", "STONE");
+                                Material icon = Material.matchMaterial(materialName);
+                                if (icon == null) icon = Material.STONE;
+                                openShopSection(player, display, icon);
+                                return;
+                            }
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Failed to load section for click: " + sectionFile.getName() + " - " + e.getMessage());
+                        }
+                    }
+                }
+            }
+            return;
+        }
+        
+        // ========== SHOP SECTION MENU (Quest 3 sub-menu) ==========
+        if (menuType.startsWith("skillcoins_shop_section")) {
+            String category = menuType.replace("skillcoins_shop_section_", "");
+            List<ShopItemData> items = getShopItemsForCategory(category);
+            
+            // Check if clicked slot has an item
+            if (slot >= 0 && slot < items.size()) {
+                ShopItemData item = items.get(slot);
+                // Open transaction menu - left click = buy
+                openItemTransaction(player, item, true);
+                return;
+            }
+            return;
+        }
+        
+        // ========== SKILLCOINS SHOP FOR TOKENS (Quest 4 main) ==========
+        if (menuType.equals("skillcoins_shop_tokens")) {
+            // Dynamically resolve token exchange button by checking sections
+            File sectionsDir = new File(plugin.getDataFolder(), "SkillCoinsShop/sections");
+            if (sectionsDir.exists() && sectionsDir.isDirectory()) {
+                File[] sectionFiles = sectionsDir.listFiles((dir, name) -> name.endsWith(".yml"));
+                if (sectionFiles != null) {
+                    for (File sectionFile : sectionFiles) {
+                        try {
+                            YamlConfiguration sec = YamlConfiguration.loadConfiguration(sectionFile);
+                            int secSlot = sec.getInt("slot", -1);
+                            if (secSlot == slot) {
+                                String fname = sectionFile.getName().replace(".yml", "").toLowerCase();
+                                if (fname.contains("tokenexchange")) {
+                                    openTokenExchange(player);
+                                    return;
+                                }
+                            }
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Failed to load section for click: " + sectionFile.getName() + " - " + e.getMessage());
+                        }
+                    }
+                }
+            }
+            
+            // Fallback: if no dynamic resolution worked, check hardcoded slots for backwards compatibility
+            if (slot == 31) {
+                openTokenExchange(player);
+                return;
+            }
+            
+            // Other categories are NOT clickable (greyed out)
+            player.sendMessage(ChatColor.of("#777777") + "✖ This section is not available during the tutorial.");
             return;
         }
         
@@ -608,10 +685,24 @@ public class QuestMenu {
                 double balance = plugin.getVaultIntegration().getBalance(player);
                 if (balance >= cost) {
                     plugin.getVaultIntegration().withdraw(player, cost);
-                    player.getInventory().addItem(new ItemStack(itemMat, itemAmount));
+                    ItemStack itemStack = new ItemStack(itemMat, itemAmount);
+                    java.util.Map<Integer, ItemStack> leftovers = player.getInventory().addItem(itemStack);
+                    
+                    // Check if items were dropped due to full inventory
+                    boolean itemsDropped = !leftovers.isEmpty();
+                    
                     player.sendMessage(hex("&#55FF55✓ You purchased " + itemName + " for &#FFD700" + cost + " SkillCoins&#55FF55!"));
+                    
+                    if (itemsDropped) {
+                        player.sendMessage(ChatColor.of("#FFAA00") + "⚠ Your inventory was full! Some items may have dropped on the ground.");
+                    }
+                    
                     plugin.getQuestListener().onShopItemPurchase(player);
-                    player.closeInventory();
+                    
+                    // Reopen main menu after short delay to show updated progress
+                    plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                        openMainMenu(player);
+                    }, 10L);
                 } else {
                     player.sendMessage(hex("&#FF5555✗ Not enough SkillCoins! You need &#FFD700" + cost + "&#FF5555."));
                 }
@@ -623,7 +714,11 @@ public class QuestMenu {
         if (menuType.equals("simplified_shop") && slot == 31) {
             plugin.getQuestListener().onTokenPurchase(player, 1);
             player.sendMessage(hex("&#55FF55✓ You purchased 1 SkillToken!"));
-            player.closeInventory();
+            
+            // Reopen main menu after short delay to show updated progress
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                openMainMenu(player);
+            }, 10L);
             return;
         }
         
@@ -699,7 +794,7 @@ public class QuestMenu {
             case 2 -> "Chop trees to reach Foraging level 1!";
             case 3 -> "Type /shop to open the shop and buy an item!";
             case 4 -> "Type /shop to open the token exchange!";
-            case 5 -> "Type /quests to see the quest menu!";
+            case 5 -> "Type /quest to see the quest menu!";
             default -> "Keep going!";
         };
         
@@ -844,16 +939,10 @@ public class QuestMenu {
 
     // --- AURASKILLS shop integration helpers ---
     private File findAuraShopBaseDir() {
-        // Try a few likely locations
-        List<File> tries = Arrays.asList(
-            new File("plugins/AuraSkills/SkillCoinsShop"),
-            new File("SkillCoinsShop"),
-            new File("/root/WDP-Rework/SkillCoins/AuraSkills-Coins/bukkit/bin/main/SkillCoinsShop")
-        );
-        for (File f : tries) {
-            if (f.exists() && f.isDirectory()) {
-                return f;
-            }
+        // Use WDP-Start's own SkillCoinsShop directory
+        File base = new File(plugin.getDataFolder(), "SkillCoinsShop");
+        if (base.exists() && base.isDirectory()) {
+            return base;
         }
         return null;
     }
@@ -951,6 +1040,10 @@ public class QuestMenu {
         return items;
     }
 
+    private int loadShopItemCount(String sectionName) {
+        return loadShopPageItems(sectionName).size();
+    }
+
     private String prettifyMaterialName(Material mat) {
         String s = mat.name().toLowerCase().replace('_', ' ');
         String[] parts = s.split(" ");
@@ -993,13 +1086,13 @@ public class QuestMenu {
         if (headMeta instanceof org.bukkit.inventory.meta.SkullMeta) {
             org.bukkit.inventory.meta.SkullMeta skullMeta = (org.bukkit.inventory.meta.SkullMeta) headMeta;
             skullMeta.setOwningPlayer(player);
-            skullMeta.setDisplayName(ChatColor.of("#00FFFF") + "SkillCoins Shop " + 
+            skullMeta.setDisplayName(ChatColor.of("#00FFFF") + "⛃ Shop " + 
                     ChatColor.of("#FFD700") + "♦ " + player.getName());
             List<String> headLore = new ArrayList<>();
             headLore.add("");
-            headLore.add(ChatColor.of("#808080") + "Welcome to the SkillCoins shop!");
+            headLore.add(ChatColor.of("#808080") + "Welcome to the ⛃ Shop!");
             headLore.add(ChatColor.of("#808080") + "Browse categories below to buy");
-            headLore.add(ChatColor.of("#808080") + "items using your earnings.");
+            headLore.add(ChatColor.of("#808080") + "and sell items using your earnings.");
             headLore.add("");
             headLore.add(ChatColor.of("#00FFFF") + "▸ Your balance is on the right →");
             skullMeta.setLore(headLore);
@@ -1014,7 +1107,8 @@ public class QuestMenu {
             balanceMeta.setDisplayName(ChatColor.of("#FFD700") + "⬥ Your Balance");
             List<String> balanceLore = new ArrayList<>();
             balanceLore.add("");
-            balanceLore.add(ChatColor.of("#FFFF00") + "SkillCoins: " + ChatColor.of("#FFFFFF") + String.format("%.0f", coins));
+            balanceLore.add(ChatColor.of("#FFD700") + "⛃: " + 
+                    ChatColor.of("#FFFFFF") + String.format("%.0f", coins) + " ⛃");
             balanceLore.add("");
             balanceLore.add(ChatColor.of("#808080") + "Earn more by leveling skills");
             balanceLore.add(ChatColor.of("#808080") + "and completing objectives!");
@@ -1023,47 +1117,74 @@ public class QuestMenu {
         }
         inv.setItem(8, balanceItem);
         
-        // Shop categories - mirror AuraSkills sections but remove one row of categories
-        List<File> sections = listSectionFiles();
-        for (File sectionFile : sections) {
-            try {
-                YamlConfiguration sec = YamlConfiguration.loadConfiguration(sectionFile);
-                boolean enabled = sec.getBoolean("enable", true);
-                if (!enabled) continue;
-                String display = sec.getString("displayname", sectionFile.getName().replace(".yml", ""));
-                int slot = sec.getInt("slot", -1);
-
-                // Skip null slot or outside main area
-                if (slot < 0 || slot >= 54) continue;
-
-                // REMOVE one row: skip row 2 (slots 18-26) for the minimal layout
-                if (slot >= 18 && slot <= 26) continue;
-
-                // Skip SkillLevels and Tokens sections entirely for minimal view
-                String fname = sectionFile.getName().replace(".yml", "").toLowerCase();
-                if (fname.contains("skilllevels") || fname.contains("tokens")) continue;
-
-                Material icon = Material.matchMaterial(sec.getString("material", "STONE"));
-                int itemCount = loadShopPageItems(display).size();
-                if (icon == null) icon = Material.STONE;
-
-                inv.setItem(slot, createShopCategory(icon,
-                        ChatColor.of("#FFFFFF") + "" + display,
-                        "Open " + display + " shop",
-                        Math.max(1, itemCount), true));
-            } catch (Exception e) {
-                // ignore malformed section file
+        // Load sections from SkillCoinsShop/sections/*.yml files
+        File sectionsDir = new File(plugin.getDataFolder(), "SkillCoinsShop/sections");
+        if (sectionsDir.exists() && sectionsDir.isDirectory()) {
+            File[] sectionFiles = sectionsDir.listFiles((dir, name) -> name.endsWith(".yml"));
+            if (sectionFiles != null) {
+                for (File sectionFile : sectionFiles) {
+                    try {
+                        YamlConfiguration sec = YamlConfiguration.loadConfiguration(sectionFile);
+                        boolean enabled = sec.getBoolean("enable", true);
+                        if (!enabled) continue;
+                        
+                        String display = sec.getString("displayname", sectionFile.getName().replace(".yml", ""));
+                        int slot = sec.getInt("slot", -1);
+                        String materialName = sec.getString("material", "STONE");
+                        
+                        // Skip invalid slots
+                        if (slot < 0 || slot >= 54) continue;
+                        
+                        // Skip SkillLevels and Tokens sections for simplified view
+                        String fname = sectionFile.getName().replace(".yml", "").toLowerCase();
+                        if (fname.contains("skilllevels") || fname.contains("tokens")) continue;
+                        
+                        Material icon = Material.matchMaterial(materialName);
+                        if (icon == null) icon = Material.STONE;
+                        
+                        // Load item count from corresponding shop file
+                        int itemCount = loadShopItemCount(display);
+                        
+                        inv.setItem(slot, createShopCategory(icon, 
+                                ChatColor.of("#FFFFFF") + display,
+                                "Open " + display + " shop",
+                                itemCount, true));
+                    } catch (Exception e) {
+                        plugin.getLogger().warning("Failed to load section: " + sectionFile.getName() + " - " + e.getMessage());
+                    }
+                }
             }
         }
         
-        // Apply navbar row (page info / balance / back buttons)
-        Map<String, Object> context = new HashMap<>();
-        context.put("page", 1);
-        context.put("total_pages", 1);
-        context.put("menu_name", "SkillCoins Shop");
-        context.put("menu_description", "SkillCoins simplified shop");
-        applyUniversalNavbar(inv, player, "main_shop", context);
-
+        // Token Exchange button (slot 38) - hardcoded for simplified view
+        ItemStack tokenItem = new ItemStack(Material.EMERALD);
+        ItemMeta tokenMeta = tokenItem.getItemMeta();
+        if (tokenMeta != null) {
+            tokenMeta.setDisplayName(ChatColor.of("#00FFFF") + "🎟 Token Exchange");
+            List<String> tokenLore = new ArrayList<>();
+            tokenLore.add("");
+            tokenLore.add(ChatColor.of("#808080") + "Exchange ⛃ for 🎟 tokens");
+            tokenLore.add(ChatColor.of("#808080") + "Tokens can be used for special purchases");
+            tokenLore.add("");
+            tokenLore.add(ChatColor.of("#FFFF00") + "▸ Click to open!");
+            tokenMeta.setLore(tokenLore);
+            tokenItem.setItemMeta(tokenMeta);
+        }
+        inv.setItem(38, tokenItem);
+        
+        // Close button (slot 53) - EXACT SkillCoins style
+        ItemStack close = new ItemStack(Material.BARRIER);
+        ItemMeta closeMeta = close.getItemMeta();
+        if (closeMeta != null) {
+            closeMeta.setDisplayName(ChatColor.of("#FF5555") + "✖ Close");
+            List<String> closeLore = new ArrayList<>();
+            closeLore.add("");
+            closeLore.add(ChatColor.of("#808080") + "Close this menu");
+            closeMeta.setLore(closeLore);
+            close.setItemMeta(closeMeta);
+        }
+        inv.setItem(53, close);
+        
         // Open and track
         player.openInventory(inv);
         openMenus.put(player.getUniqueId(), new MenuSession(player, "skillcoins_shop_main", 3));
@@ -1151,11 +1272,12 @@ public class QuestMenu {
             coins = plugin.getVaultIntegration().getBalance(player);
         }
         
-        int quantity = 1; // Fixed at 1 for simplified menu
+        // Get current quantity from stored data, default to 1
+        int quantity = transactionQuantities.getOrDefault(player.getUniqueId(), 1);
         double totalPrice = item.buyPrice * quantity;
         
         // Item display (slot 13)
-        ItemStack display = new ItemStack(item.material, Math.min(quantity, 64));
+        ItemStack display = new ItemStack(item.material, quantity);
         ItemMeta displayMeta = display.getItemMeta();
         if (displayMeta != null) {
             displayMeta.setDisplayName(ChatColor.of("#FFFFFF") + item.name);
@@ -1176,22 +1298,24 @@ public class QuestMenu {
         }
         inv.setItem(13, display);
         
-        // ONLY +1 button (slot 24) - simplified
-        ItemStack plus1 = new ItemStack(Material.LIME_TERRACOTTA);
-        ItemMeta plus1Meta = plus1.getItemMeta();
-        if (plus1Meta != null) {
-            plus1Meta.setDisplayName(ChatColor.of("#55FF55") + "▲ +1");
-            List<String> plus1Lore = new ArrayList<>();
-            plus1Lore.add("");
-            plus1Lore.add(ChatColor.of("#808080") + "Add 1 item");
-            plus1Lore.add(ChatColor.of("#808080") + "(Max: 5)");
-            plus1Meta.setLore(plus1Lore);
-            plus1.setItemMeta(plus1Meta);
+        // +1 button (slot 24) - only if under max (3)
+        if (quantity < 3) {
+            ItemStack plus1 = new ItemStack(Material.LIME_TERRACOTTA);
+            ItemMeta plus1Meta = plus1.getItemMeta();
+            if (plus1Meta != null) {
+                plus1Meta.setDisplayName(ChatColor.of("#55FF55") + "▲ +1");
+                List<String> plus1Lore = new ArrayList<>();
+                plus1Lore.add("");
+                plus1Lore.add(ChatColor.of("#808080") + "Add 1 item");
+                plus1Lore.add(ChatColor.of("#808080") + "(Max: 3)");
+                plus1Meta.setLore(plus1Lore);
+                plus1.setItemMeta(plus1Meta);
+            }
+            inv.setItem(24, plus1);
         }
-        inv.setItem(24, plus1);
         
-        // -1 button only if selling (slot 20)
-        if (!isBuying) {
+        // -1 button (slot 20) - only if above minimum (1)
+        if (quantity > 1) {
             ItemStack minus1 = new ItemStack(Material.RED_TERRACOTTA);
             ItemMeta minus1Meta = minus1.getItemMeta();
             if (minus1Meta != null) {
@@ -1206,7 +1330,7 @@ public class QuestMenu {
         }
         
         // Quantity display (slot 22)
-        ItemStack qtyDisplay = new ItemStack(Material.PAPER, Math.min(quantity, 64));
+        ItemStack qtyDisplay = new ItemStack(Material.PAPER, quantity);
         ItemMeta qtyMeta = qtyDisplay.getItemMeta();
         if (qtyMeta != null) {
             qtyMeta.setDisplayName(ChatColor.of("#FFFF00") + "Quantity: " + ChatColor.of("#FFFFFF") + quantity);
@@ -1496,14 +1620,33 @@ public class QuestMenu {
         }
         inv.setItem(49, confirm);
 
-        // Apply navbar row (page info / balance / back buttons)
-        Map<String, Object> context = new HashMap<>();
-        context.put("page", 1);
-        context.put("total_pages", 1);
-        context.put("menu_name", "Token Exchange");
-        context.put("menu_description", "Exchange coins for tokens");
-        context.put("balance", (int) Math.round(coinBalance));
-        applyUniversalNavbar(inv, player, "token_exchange", context);
+        // Balance display (slot 45)
+        ItemStack balanceItem = new ItemStack(Material.GOLD_INGOT);
+        ItemMeta balanceMeta = balanceItem.getItemMeta();
+        if (balanceMeta != null) {
+            balanceMeta.setDisplayName(ChatColor.of("#FFD700") + "⬥ Your Balance");
+            List<String> balanceLore = new ArrayList<>();
+            balanceLore.add("");
+            balanceLore.add(ChatColor.of("#FFD700") + "Coins: " + ChatColor.of("#FFFFFF") + String.format("%.0f", coinBalance));
+            balanceLore.add("");
+            balanceLore.add(ChatColor.of("#808080") + "Required: " + ChatColor.of("#FFFFFF") + totalCost + " coins");
+            balanceMeta.setLore(balanceLore);
+            balanceItem.setItemMeta(balanceMeta);
+        }
+        inv.setItem(45, balanceItem);
+        
+        // Back button (slot 53)
+        ItemStack back = new ItemStack(Material.SPYGLASS);
+        ItemMeta backMeta = back.getItemMeta();
+        if (backMeta != null) {
+            backMeta.setDisplayName(ChatColor.of("#FF5555") + "← Back");
+            List<String> backLore = new ArrayList<>();
+            backLore.add("");
+            backLore.add(ChatColor.of("#808080") + "Return to shop");
+            backMeta.setLore(backLore);
+            back.setItemMeta(backMeta);
+        }
+        inv.setItem(53, back);
 
         // Track
         player.openInventory(inv);
@@ -1584,9 +1727,9 @@ public class QuestMenu {
             isComplete ? Material.EMERALD : Material.COMPASS,
             statusPrefix + ChatColor.of("#FFD700") + "Quest Menu Tutorial",
             "",
-            ChatColor.of("#808080") + "Learn how the quest menu works!",
+            ChatColor.of("#808080") + "Mine 5 stone blocks to complete this quest",
             "",
-            ChatColor.of("#808080") + "Progress: " + ChatColor.of("#FFFF00") + String.format("%.0f", completion) + "%"
+            ChatColor.of("#808080") + "Progress: " + ChatColor.of("#FFFF00") + stoneMined + "/" + stoneTarget + " Stone"
         );
         if (isComplete) addGlow(questIcon);
         inv.setItem(9, questIcon);
@@ -1974,10 +2117,10 @@ public class QuestMenu {
             isComplete ? Material.EMERALD : Material.COMPASS,
             statusPrefix + ChatColor.of("#FFD700") + "Quest Menu Tutorial",
             "",
-            ChatColor.of("#808080") + "Learn how the quest menu works!",
-            "",
+            ChatColor.of("#808080") + "Mine 5 stone blocks to complete this quest",
+            " ",
             ChatColor.of("#808080") + "Required Progress: " + ChatColor.of("#FFFF00") + "0%",
-            isComplete ? ChatColor.of("#55FF55") + "Repeatable: No" : ""
+            !isComplete ? ChatColor.of("#55FF55") + "Repeatable: No" : ""
         );
         if (isComplete) addGlow(questIcon);
         inv.setItem(4, questIcon);
@@ -1994,8 +2137,8 @@ public class QuestMenu {
         ));
         
         // === ROW 1: Full-width progress bar ===
-        for (int seg = 0; seg < 8; seg++) {
-            int slot = 10 + seg;
+        for (int seg = 0; seg < 9; seg++) {
+            int slot = 9 + seg; // slots 9-17
             inv.setItem(slot, createWDPQuestProgressSegment(seg, completion, false));
         }
         
@@ -2008,17 +2151,13 @@ public class QuestMenu {
         
         // Objective - Mine 5 Stone (slot 19)
         Material objMat = isComplete ? Material.LIME_DYE : Material.GRAY_DYE;
-        String objPrefix = isComplete ? ChatColor.of("#55FF55") + "✓ " : ChatColor.of("#808080") + "○ ";
-        String objProgress = isComplete ? ChatColor.of("#55FF55") + "Complete!" : 
-                ChatColor.of("#808080") + "" + stoneMined + "/" + stoneTarget + " Stone mined";
+        String objStatus = isComplete ? "§a✓ " : "§7○ ";
+        String objProgress = isComplete ? "§aComplete!" : "§7" + stoneMined + "§8/§7" + stoneTarget;
         
         inv.setItem(19, createItem(
             objMat,
-            objPrefix + ChatColor.of("#FFFFFF") + "Mine 5 Stone",
-            "",
-            objProgress,
-            "",
-            ChatColor.of("#808080") + "Mine stone blocks to complete this objective"
+            objStatus + "§f" + "Mine 5 Stone",
+            objProgress
         ));
         
         // === ROW 3: Rewards ===
@@ -2028,6 +2167,7 @@ public class QuestMenu {
             ChatColor.of("#808080") + "What you'll receive"
         ));
         
+        // Reward - 20 SkillCoins (slot 28)
         inv.setItem(28, createItem(
             Material.GOLD_NUGGET,
             ChatColor.of("#FFFF00") + "20 SkillCoins",

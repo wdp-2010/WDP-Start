@@ -72,6 +72,9 @@ public class WDPStartPlugin extends JavaPlugin {
         // Initialize managers
         initializeManagers();
         
+        // Extract SkillCoinsShop resources
+        extractSkillCoinsShopResources();
+        
         // Initialize API (must be after managers)
         com.wdp.start.api.WDPStartAPI.init(this);
         getLogger().info("WDP-Start API initialized.");
@@ -147,6 +150,52 @@ public class WDPStartPlugin extends JavaPlugin {
         
         getLogger().info("Managers initialized successfully.");
         getLogger().info("Database: SQLite (playerdata.db)");
+    }
+    
+    private void extractSkillCoinsShopResources() {
+        try {
+            // Extract sections
+            String[] sectionFiles = {
+                "SkillCoinsShop/sections/Blocks.yml",
+                "SkillCoinsShop/sections/Combat.yml", 
+                "SkillCoinsShop/sections/Enchantments.yml",
+                "SkillCoinsShop/sections/Farming.yml",
+                "SkillCoinsShop/sections/Food.yml",
+                "SkillCoinsShop/sections/Miscellaneous.yml",
+                "SkillCoinsShop/sections/Potions.yml",
+                "SkillCoinsShop/sections/Redstone.yml",
+                "SkillCoinsShop/sections/Resources.yml",
+                "SkillCoinsShop/sections/Tools.yml",
+                "SkillCoinsShop/sections/TokenExchange.yml"
+            };
+            
+            for (String file : sectionFiles) {
+                saveResource(file, false);
+            }
+            
+            // Extract shops
+            String[] shopFiles = {
+                "SkillCoinsShop/shops/Blocks.yml",
+                "SkillCoinsShop/shops/Combat.yml",
+                "SkillCoinsShop/shops/Enchantments.yml", 
+                "SkillCoinsShop/shops/Farming.yml",
+                "SkillCoinsShop/shops/Food.yml",
+                "SkillCoinsShop/shops/Miscellaneous.yml",
+                "SkillCoinsShop/shops/Potions.yml",
+                "SkillCoinsShop/shops/Redstone.yml",
+                "SkillCoinsShop/shops/Resources.yml",
+                "SkillCoinsShop/shops/Tools.yml",
+                "SkillCoinsShop/shops/TokenExchange.yml"
+            };
+            
+            for (String file : shopFiles) {
+                saveResource(file, false);
+            }
+            
+            getLogger().info("SkillCoinsShop resources extracted successfully.");
+        } catch (Exception e) {
+            getLogger().warning("Failed to extract SkillCoinsShop resources: " + e.getMessage());
+        }
     }
     
     private void setupIntegrations() {

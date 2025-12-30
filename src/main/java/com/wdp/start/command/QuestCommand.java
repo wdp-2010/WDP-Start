@@ -49,7 +49,7 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         switch (subCommand) {
             case "help" -> handleHelp(sender);
             case "cancel" -> handleCancel(sender, args);
-            case "start" -> handleStart(sender);
+            case "start" -> handleStart(sender, args);
             case "reload" -> handleReload(sender);
             case "reset" -> handleReset(sender, args);
             case "complete" -> handleComplete(sender, args);
@@ -94,7 +94,7 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         plugin.getQuestManager().cancelQuests(player, confirmed);
     }
     
-    private void handleStart(CommandSender sender) {
+    private void handleStart(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cThis command can only be used by players!");
             return;
@@ -105,7 +105,17 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             return;
         }
         
-        plugin.getQuestManager().startQuests(player);
+        // Check for force parameter
+        boolean force = false;
+        if (args.length > 1 && "force".equalsIgnoreCase(args[1])) {
+            if (!player.isOp()) {
+                plugin.getMessageManager().send(player, "commands.no-permission");
+                return;
+            }
+            force = true;
+        }
+        
+        plugin.getQuestManager().startQuests(player, force);
     }
     
     private void handleReload(CommandSender sender) {
@@ -339,6 +349,12 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             
             if (sub.equals("cancel")) {
                 return Arrays.asList("confirm").stream()
+                    .filter(s -> s.startsWith(args[1].toLowerCase()))
+                    .collect(Collectors.toList());
+            }
+            
+            if (sub.equals("start") && sender.isOp()) {
+                return Arrays.asList("force").stream()
                     .filter(s -> s.startsWith(args[1].toLowerCase()))
                     .collect(Collectors.toList());
             }

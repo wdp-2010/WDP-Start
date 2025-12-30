@@ -157,11 +157,14 @@ public class QuestListener implements Listener {
         
         if (!data.isStarted()) return;
         
+        plugin.getLogger().info("[DEBUG] Player " + player.getName() + " current quest: " + data.getCurrentQuest() + ", completed: " + data.isQuestCompleted(data.getCurrentQuest()));
+        
         String command = event.getMessage().toLowerCase();
         
         // Quest 3: /shop command - INTERCEPT and show simplified shop
         if (data.getCurrentQuest() == 3 && !data.isQuestCompleted(3)) {
             if (command.startsWith("/shop")) {
+                plugin.getLogger().info("[DEBUG] Intercepting /shop command for player " + player.getName() + " on quest " + data.getCurrentQuest());
                 event.setCancelled(true); // Cancel so the shop plugin doesn't open
                 
                 PlayerData.QuestProgress progress = data.getQuestProgress(3);
@@ -183,6 +186,19 @@ public class QuestListener implements Listener {
                 
                 return;
             }
+        }
+        
+        // TEMP: Also intercept /shop for quest 1 and 2 for testing
+        if ((data.getCurrentQuest() == 1 || data.getCurrentQuest() == 2) && command.startsWith("/shop")) {
+            plugin.getLogger().info("[DEBUG] Intercepting /shop command for player " + player.getName() + " on quest " + data.getCurrentQuest() + " (TEMP for testing)");
+            event.setCancelled(true);
+            
+            // Open simplified shop menu for testing
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                plugin.getQuestMenu().openSimplifiedShopItems(player);
+            });
+            
+            return;
         }
         
         // Quest 4: /shop command - INTERCEPT for Token Exchange
@@ -244,10 +260,8 @@ public class QuestListener implements Listener {
         if (!progress.hasData("bought_item")) {
             plugin.getQuestManager().completeStep(player, 3, 2, "bought_item");
             
-            // Complete quest
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                plugin.getQuestManager().completeQuest(player, 3);
-            }, 10L);
+            // Complete quest immediately
+            plugin.getQuestManager().completeQuest(player, 3);
         }
     }
     
@@ -267,10 +281,8 @@ public class QuestListener implements Listener {
         if (!progress.hasData("viewed_stats")) {
             plugin.getQuestManager().completeStep(player, 3, 2, "viewed_stats");
             
-            // Complete quest
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                plugin.getQuestManager().completeQuest(player, 3);
-            }, 10L);
+            // Complete quest immediately
+            plugin.getQuestManager().completeQuest(player, 3);
         }
     }
     
@@ -298,10 +310,8 @@ public class QuestListener implements Listener {
         if (current >= required) {
             plugin.getQuestManager().completeStep(player, 4, 2, "bought_token");
             
-            // Complete quest
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                plugin.getQuestManager().completeQuest(player, 4);
-            }, 10L);
+            // Complete quest immediately
+            plugin.getQuestManager().completeQuest(player, 4);
         }
     }
     

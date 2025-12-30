@@ -27,6 +27,13 @@ public class QuestManager {
      * Start the quest chain for a player
      */
     public void startQuests(Player player) {
+        startQuests(player, false);
+    }
+    
+    /**
+     * Start the quest chain for a player (with force option for ops)
+     */
+    public void startQuests(Player player, boolean force) {
         PlayerData data = plugin.getPlayerDataManager().getData(player);
         
         if (data.isCompleted()) {
@@ -36,14 +43,16 @@ public class QuestManager {
         
         // If not started at all, start the first quest
         if (!data.isStarted()) {
-            // Check if player is already experienced (Foraging level 1 or higher)
-            String targetSkill = plugin.getConfigManager().getQuest2Skill();
-            int targetLevel = plugin.getConfigManager().getQuest2TargetLevel();
-            if (plugin.getAuraSkillsIntegration() != null) {
-                int currentLevel = plugin.getAuraSkillsIntegration().getSkillLevel(player, targetSkill);
-                if (currentLevel >= targetLevel) {
-                    plugin.getMessageManager().send(player, "quest.already-experienced");
-                    return;
+            // Check if player is already experienced (Foraging level 1 or higher) - skip if force
+            if (!force) {
+                String targetSkill = plugin.getConfigManager().getQuest2Skill();
+                int targetLevel = plugin.getConfigManager().getQuest2TargetLevel();
+                if (plugin.getAuraSkillsIntegration() != null) {
+                    int currentLevel = plugin.getAuraSkillsIntegration().getSkillLevel(player, targetSkill);
+                    if (currentLevel >= targetLevel) {
+                        plugin.getMessageManager().send(player, "quest.already-experienced");
+                        return;
+                    }
                 }
             }
             
@@ -435,8 +444,8 @@ public class QuestManager {
         return switch (quest) {
             case 1 -> 2; // Enter region + get teleported
             case 2 -> 1; // Reach level 2
-            case 3 -> 1; // Complete simplified task
-            case 4 -> 1; // Convert tokens
+            case 3 -> 2; // Open shop + buy item
+            case 4 -> 2; // Open shop + buy tokens
             case 5 -> 1; // Complete simple objective
             case 6 -> 1; // Click complete
             default -> 1;
