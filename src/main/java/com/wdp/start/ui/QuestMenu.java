@@ -97,7 +97,7 @@ public class QuestMenu {
     /**
      * Build welcome menu for players who haven't started
      */
-    private void buildWelcomeMenu(Inventory inv, Player player) {
+    private void buildWelcomeMenu(Inventory inv) {
         // Center content area
         
         // Welcome title item (slot 13)
