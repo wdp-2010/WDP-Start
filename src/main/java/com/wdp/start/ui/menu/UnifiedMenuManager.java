@@ -172,7 +172,7 @@ public class UnifiedMenuManager {
     /**
      * Create a navbar item based on configuration
      */
-    private ItemStack createNavbarItem(String itemName, Map<String, Object> config, Player player, String menuType, Map<String, Object> context) {
+    private ItemStack createNavbarItem(Map<String, Object> config, Player player, String menuType, Map<String, Object> context) {
         String materialStr = (String) config.get("material");
         String displayName = (String) config.get("display_name");
         List<String> lore = (List<String>) config.get("lore");
