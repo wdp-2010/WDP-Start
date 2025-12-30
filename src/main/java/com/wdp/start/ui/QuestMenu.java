@@ -1105,7 +1105,7 @@ public class QuestMenu {
         applyUniversalNavbar(inv, player, "shop_section", context);
         
         // Back button (slot 53)
-        ItemStack back = new ItemStack(Material.BARRIER);
+        ItemStack back = new ItemStack(icon == null ? Material.BARRIER : icon);
         ItemMeta backMeta = back.getItemMeta();
         if (backMeta != null) {
             backMeta.setDisplayName(ChatColor.of("#FF5555") + "← Back");
