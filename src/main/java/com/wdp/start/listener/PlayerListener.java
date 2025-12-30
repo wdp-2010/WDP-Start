@@ -29,7 +29,7 @@ public class PlayerListener implements Listener {
         PlayerData data = plugin.getPlayerDataManager().getData(player);
         
         // Check if should show welcome message
-        if (shouldShowWelcome(player, data)) {
+        if (shouldShowWelcome(data)) {
             // Delayed welcome message
             int delay = plugin.getMessageManager().getWelcomeDelayTicks();
             
@@ -56,7 +56,7 @@ public class PlayerListener implements Listener {
     /**
      * Check if we should show the welcome message
      */
-    private boolean shouldShowWelcome(Player player, PlayerData data) {
+    private boolean shouldShowWelcome(PlayerData data) {
         // Don't show if disabled
         if (!plugin.getConfigManager().isWelcomeMessage()) {
             return false;
