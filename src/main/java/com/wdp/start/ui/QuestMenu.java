@@ -1696,6 +1696,10 @@ public class QuestMenu {
      * Create a navbar item from configuration
      */
     private ItemStack createNavbarItem(String itemName, Map<String, Object> config, Player player, String menuType, Map<String, Object> context) {
+        // Currently unused, but kept in the signature for potential future per-player customization.
+        if (player == null) {
+            // no-op
+        }
         String materialStr = (String) config.get("material");
         String displayName = (String) config.get("display_name");
         @SuppressWarnings("unchecked")
