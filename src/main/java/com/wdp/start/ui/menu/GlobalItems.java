@@ -26,12 +26,8 @@ public class GlobalItems {
     public ItemStack createCloseItem() {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§c§l✗ Close");
-        List<String> lore = new ArrayList<>();
-        lore.add("");
-        lore.add("§7Click to close this menu");
-        lore.add("");
-        meta.setLore(lore);
+        meta.setDisplayName(plugin.getMessages().get("items.close.name"));
+        meta.setLore(plugin.getMessages().getList("items.close.lore"));
         item.setItemMeta(meta);
         return item;
     }
@@ -43,10 +39,10 @@ public class GlobalItems {
     public ItemStack createBackItem(String menuName) {
         ItemStack item = new ItemStack(Material.SPYGLASS);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§c§l← Back");
+        meta.setDisplayName(plugin.getMessages().get("items.back.name"));
         List<String> lore = new ArrayList<>();
         lore.add("");
-        lore.add("§7Return to " + formatMenuName(menuName));
+        lore.add(plugin.getMessages().get("items.back.lore", "menu", formatMenuName(menuName)));
         lore.add("");
         meta.setLore(lore);
         item.setItemMeta(meta);
@@ -59,12 +55,8 @@ public class GlobalItems {
     public ItemStack createBackToMainItem() {
         ItemStack item = new ItemStack(Material.SPYGLASS);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§c§l← Back§7 to Main");
-        List<String> lore = new ArrayList<>();
-        lore.add("");
-        lore.add("§7Return to main menu");
-        lore.add("");
-        meta.setLore(lore);
+        meta.setDisplayName(plugin.getMessages().get("items.back-to-main.name"));
+        meta.setLore(plugin.getMessages().getList("items.back-to-main.lore"));
         item.setItemMeta(meta);
         return item;
     }
@@ -75,12 +67,8 @@ public class GlobalItems {
     public ItemStack createPreviousPageItem(int currentPage) {
         ItemStack item = new ItemStack(Material.ARROW);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§e§l← Previous");
-        List<String> lore = new ArrayList<>();
-        lore.add("");
-        lore.add("§7Go to page " + (currentPage - 1));
-        lore.add("");
-        meta.setLore(lore);
+        meta.setDisplayName(plugin.getMessages().get("items.previous-page.name"));
+        meta.setLore(plugin.getMessages().getList("items.previous-page.lore", "page", String.valueOf(currentPage - 1)));
         item.setItemMeta(meta);
         return item;
     }
@@ -91,12 +79,10 @@ public class GlobalItems {
     public ItemStack createNextPageItem(int currentPage, int totalPages) {
         ItemStack item = new ItemStack(Material.ARROW);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§e§lNext →");
-        List<String> lore = new ArrayList<>();
-        lore.add("");
-        lore.add("§7Go to page " + (currentPage + 1) + "/" + totalPages);
-        lore.add("");
-        meta.setLore(lore);
+        meta.setDisplayName(plugin.getMessages().get("items.next-page.name"));
+        meta.setLore(plugin.getMessages().getList("items.next-page.lore", 
+                "page", String.valueOf(currentPage + 1), 
+                "total", String.valueOf(totalPages)));
         item.setItemMeta(meta);
         return item;
     }
@@ -107,13 +93,12 @@ public class GlobalItems {
     public ItemStack createPageInfoItem(int currentPage, int totalPages) {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§b§lPage " + currentPage + "/" + totalPages);
-        List<String> lore = new ArrayList<>();
-        lore.add("");
-        lore.add("§7Current page: " + currentPage);
-        lore.add("§7Total pages: " + totalPages);
-        lore.add("");
-        meta.setLore(lore);
+        meta.setDisplayName(plugin.getMessages().get("items.page-info.name", 
+                "current", String.valueOf(currentPage), 
+                "total", String.valueOf(totalPages)));
+        meta.setLore(plugin.getMessages().getList("items.page-info.lore", 
+                "current", String.valueOf(currentPage), 
+                "total", String.valueOf(totalPages)));
         item.setItemMeta(meta);
         return item;
     }
@@ -140,13 +125,8 @@ public class GlobalItems {
     public ItemStack createStatsItem(String playerName, double progress) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§e§l" + playerName);
-        List<String> lore = new ArrayList<>();
-        lore.add("");
-        lore.add("§7Progress: §a" + String.format("%.1f", progress) + "%");
-        lore.add("");
-        lore.add("§7Click to view details");
-        meta.setLore(lore);
+        meta.setDisplayName(plugin.getMessages().get("items.stats.name", "player", playerName));
+        meta.setLore(plugin.getMessages().getList("items.stats.lore", "progress", String.format("%.1f", progress)));
         item.setItemMeta(meta);
         return item;
     }
@@ -157,14 +137,11 @@ public class GlobalItems {
     public ItemStack createQuestInfoItem(String questName, int completed, int total) {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§6§lQuest Progress");
-        List<String> lore = new ArrayList<>();
-        lore.add("");
-        lore.add("§7Current: §e" + questName);
-        lore.add("§7Completed: §a" + completed + "§7/§a" + total);
-        lore.add("");
-        lore.add("§7Click to view details");
-        meta.setLore(lore);
+        meta.setDisplayName(plugin.getMessages().get("items.quest-info.name"));
+        meta.setLore(plugin.getMessages().getList("items.quest-info.lore", 
+                "quest", questName, 
+                "completed", String.valueOf(completed), 
+                "total", String.valueOf(total)));
         item.setItemMeta(meta);
         return item;
     }
@@ -175,13 +152,8 @@ public class GlobalItems {
     public ItemStack createBaseInfoItem(String baseName, int trustedCount) {
         ItemStack item = new ItemStack(Material.COMPASS);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§6§l" + baseName);
-        List<String> lore = new ArrayList<>();
-        lore.add("");
-        lore.add("§7Trusted players: §e" + trustedCount);
-        lore.add("");
-        lore.add("§7Click to manage");
-        meta.setLore(lore);
+        meta.setDisplayName(plugin.getMessages().get("items.base-info.name", "base", baseName));
+        meta.setLore(plugin.getMessages().getList("items.base-info.lore", "trusted", String.valueOf(trustedCount)));
         item.setItemMeta(meta);
         return item;
     }
@@ -214,12 +186,10 @@ public class GlobalItems {
     public ItemStack createBalanceItem(double coins, double tokens) {
         ItemStack item = new ItemStack(Material.GOLD_NUGGET);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§6Balance:");
-        List<String> lore = new ArrayList<>();
-        lore.add(" ");
-        lore.add("§eSkillCoins: §6" + String.format("%,.0f", coins) + " ⛃");
-        lore.add("§aTokens: §2" + String.format("%,.0f", tokens) + " 🎟");
-        meta.setLore(lore);
+        meta.setDisplayName(plugin.getMessages().get("items.balance-display.name"));
+        meta.setLore(plugin.getMessages().getList("items.balance-display.lore", 
+                "coins", String.format("%,.0f", coins), 
+                "tokens", String.format("%,.0f", tokens)));
         item.setItemMeta(meta);
         return item;
     }

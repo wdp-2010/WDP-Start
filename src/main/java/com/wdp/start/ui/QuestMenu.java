@@ -72,7 +72,7 @@ public class QuestMenu {
             " | CurrentQuest: " + data.getCurrentQuest() + 
             " | Completed: " + data.isCompleted());
         
-        String title = hex("&#FFD700✦ &#FFFFFFGet Started Quests &#FFD700✦");
+        String title = hex(plugin.getMessageManager().get("menu.title"));
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
         // Fill background
@@ -109,35 +109,20 @@ public class QuestMenu {
         // Center content area
         
         // Welcome title item (slot 13)
+        List<String> welcomeLore = plugin.getMessageManager().getList("menu.welcome.description");
+        String[] welcomeLoreArray = welcomeLore.stream().map(this::hex).toArray(String[]::new);
         ItemStack welcome = createItem(Material.NETHER_STAR,
-            hex("&#FFD700&l✦ &#FFFFFF&lWelcome to WDP! &#FFD700&l✦"),
-            " ",
-            hex("&#AAAAAATake your first steps on the server"),
-            hex("&#AAAAAAby completing starter quests!"),
-            " ",
-            hex("&#55FF55You'll learn about:"),
-            hex("&#FFFFFF• Exploration & Teleportation"),
-            hex("&#FFFFFF• Skills & Leveling"),
-            hex("&#FFFFFF• Progress Tracking"),
-            hex("&#FFFFFF• Economy & Shopping"),
-            " ",
-            hex("&#FFD700&lRewards:"),
-            hex("&#FFD700✦ 300 ⛃"),
-            hex("&#FF55FF✦ 10 🎟"),
-            hex("&#55FFFF✦ Starter Items"),
-            " "
+            hex(plugin.getMessageManager().get("menu.welcome.title")),
+            welcomeLoreArray
         );
         inv.setItem(13, welcome);
         
         // Start button (slot 31)
+        List<String> startLore = plugin.getMessageManager().getList("menu.welcome.start-button.lore");
+        String[] startLoreArray = startLore.stream().map(this::hex).toArray(String[]::new);
         ItemStack start = createItem(Material.LIME_CONCRETE,
-            hex("&#55FF55&l▶ START QUESTS"),
-            " ",
-            hex("&#AAAAAAClick to begin your adventure!"),
-            " ",
-            hex("&#FFFF55Tip: You can cancel anytime"),
-            hex("&#FFFFFFwith /quest cancel"),
-            " "
+            hex(plugin.getMessageManager().get("menu.welcome.start-button.name")),
+            startLoreArray
         );
         addGlow(start);
         inv.setItem(31, start);
@@ -166,42 +151,41 @@ public class QuestMenu {
         
         // Progress overview (slot 49 - center of row 5)
         int completed = data.getCompletedQuestCount();
+        String progressCompleted = plugin.getMessageManager().get("menu.progress.completed", 
+            "completed", String.valueOf(completed), "total", "6");
+        String currentStatus = data.isCompleted() 
+            ? hex(plugin.getMessageManager().get("menu.progress.all-complete")) 
+            : hex(plugin.getMessageManager().get("menu.progress.current", 
+                "quest", plugin.getQuestManager().getQuestName(data.getCurrentQuest())));
         ItemStack progress = createItem(Material.CLOCK,
-            hex("&#FFD700&l✦ Progress Overview"),
+            hex(plugin.getMessageManager().get("menu.progress.title")),
             " ",
-            hex("&#AAAAAACompleted: &#55FF55" + completed + "&#AAAAAA/&#55FF556"),
+            hex(progressCompleted),
             createProgressBar(completed, 6),
             " ",
-            data.isCompleted() 
-                ? hex("&#55FF55&l✓ All quests complete!") 
-                : hex("&#FFFFFFCurrent: &#55FFFF" + plugin.getQuestManager().getQuestName(data.getCurrentQuest())),
+            currentStatus,
             " "
         );
         inv.setItem(49, progress);
         
         // Cancel button (slot 45) - only if started and not completed
         if (data.isStarted() && !data.isCompleted()) {
+            List<String> cancelLore = plugin.getMessageManager().getList("menu.cancel.lore");
+            String[] cancelLoreArray = cancelLore.stream().map(this::hex).toArray(String[]::new);
             ItemStack cancel = createItem(Material.RED_CONCRETE,
-                hex("&#FF5555✗ Cancel Quests"),
-                " ",
-                hex("&#AAAAAAClick to cancel the quest chain."),
-                hex("&#FFFF55Unspent SkillCoins will be refunded."),
-                " "
+                hex(plugin.getMessageManager().get("menu.cancel.name")),
+                cancelLoreArray
             );
             inv.setItem(45, cancel);
         }
         
         // Help (slot 53)
+        List<String> helpLore = plugin.getMessageManager().getList("menu.help.lore", 
+            "discord", plugin.getConfigManager().getDiscordLink());
+        String[] helpLoreArray = helpLore.stream().map(this::hex).toArray(String[]::new);
         ItemStack help = createItem(Material.WRITABLE_BOOK,
-            hex("&#55FFFF? Help"),
-            " ",
-            hex("&#AAAAAACommands:"),
-            hex("&#FFFFFF/quest &#AAAAAA- Open this menu"),
-            hex("&#FFFFFF/quest cancel &#AAAAAA- Cancel quests"),
-            " ",
-            hex("&#AAAAAANeed more help?"),
-            hex("&#55FFFF" + plugin.getConfigManager().getDiscordLink()),
-            " "
+            hex(plugin.getMessageManager().get("menu.help.name")),
+            helpLoreArray
         );
         inv.setItem(53, help);
     }
@@ -228,25 +212,25 @@ public class QuestMenu {
         int currentStep = progress.getStep();
         
         List<String> lore = new ArrayList<>();
-        lore.add(hex("&#555555━━━━━━━━━━━━━━━━━"));
+        lore.add(hex(plugin.getMessageManager().get("menu.quest-item.divider")));
         
         // Status line
         if (progress.isCompleted()) {
-            lore.add(hex("&#AAAAAAStatus: &#55FF55✓ Completed"));
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-status.completed")));
         } else if (data.getCurrentQuest() == quest) {
-            lore.add(hex("&#AAAAAAStatus: &#FFFF55⚡ In Progress"));
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-status.in-progress")));
         } else if (data.getCurrentQuest() > quest) {
-            lore.add(hex("&#AAAAAAStatus: &#55FF55✓ Completed"));
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-status.completed")));
         } else {
-            lore.add(hex("&#AAAAAAStatus: &#777777🔒 Locked"));
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-status.locked")));
         }
         
-        lore.add(hex("&#555555━━━━━━━━━━━━━━━━━"));
+        lore.add(hex(plugin.getMessageManager().get("menu.quest-item.divider")));
         lore.add(" ");
         
         // Objective
-        lore.add(hex("&#FFFFFFObjective:"));
-        lore.add(hex("&#AAAAAA" + desc));
+        lore.add(hex(plugin.getMessageManager().get("menu.quest-item.objective")));
+        lore.add(hex(plugin.getMessageManager().get("menu.quest-item.objective-format", "description", desc)));
         lore.add(" ");
         
         // Progress (if in progress)
@@ -255,43 +239,44 @@ public class QuestMenu {
             if (quest == 2 && player != null) {
                 int targetLevel = plugin.getConfigManager().getQuest2TargetLevel();
                 int levelPercent = getLevelProgressPercent(player, data);
-                lore.add(hex("&#FFFFFFForaging Level: &#55FFFF0&#FFFFFF → &#55FFFF" + targetLevel));
+                lore.add(hex(plugin.getMessageManager().get("menu.quest-item.foraging-level", "target", String.valueOf(targetLevel))));
                 lore.add(createProgressBar(levelPercent, 100));
                 lore.add(" ");
             } else {
-                lore.add(hex("&#FFFFFFProgress: &#55FFFF" + currentStep + "&#FFFFFF/&#55FFFF" + totalSteps));
+                lore.add(hex(plugin.getMessageManager().get("menu.quest-item.progress", 
+                    "current", String.valueOf(currentStep), "total", String.valueOf(totalSteps))));
                 lore.add(createProgressBar(currentStep, totalSteps));
                 lore.add(" ");
             }
         }
         
         // Rewards
-        lore.add(hex("&#FFFFFFReward:"));
-        lore.add(hex("&#FFD700+ " + reward + " ⛃ SkillCoins"));
+        lore.add(hex(plugin.getMessageManager().get("menu.quest-item.reward")));
+        lore.add(hex(plugin.getMessageManager().get("menu.quest-item.reward-coins", "amount", String.valueOf(reward))));
         
         // Extra rewards for specific quests
         if (quest == 1) {
-            lore.add(hex("&#55FFFF+ 3x Apples"));
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-item.reward-apples")));
         } else if (quest == 6) {
-            lore.add(hex("&#FF55FF+ 10 🎟 SkillTokens"));
-            lore.add(hex("&#55FFFF+ 1x Diamond + more"));
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-item.reward-tokens")));
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-item.reward-items")));
         }
         
         lore.add(" ");
-        lore.add(hex("&#555555━━━━━━━━━━━━━━━━━"));
+        lore.add(hex(plugin.getMessageManager().get("menu.quest-item.divider")));
         
         // Action hint
         if (progress.isCompleted()) {
-            lore.add(hex("&#55FF55✓ Quest completed!"));
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-item.quest-completed")));
         } else if (data.getCurrentQuest() == quest) {
-            lore.add(hex("&#FFFF55▶ Click for details"));
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-item.click-details")));
         } else if (data.getCurrentQuest() > quest) {
-            lore.add(hex("&#55FF55✓ Quest completed!"));
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-item.quest-completed")));
         } else {
-            lore.add(hex("&#777777Complete previous quests first"));
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-item.complete-previous")));
         }
         
-        lore.add(hex("&#555555━━━━━━━━━━━━━━━━━"));
+        lore.add(hex(plugin.getMessageManager().get("menu.quest-item.divider")));
         
         // Build name with color based on state
         String displayName;
@@ -403,12 +388,13 @@ public class QuestMenu {
                     // Track spending for refund and analytics
                     com.wdp.start.api.WDPStartAPI.trackCoinSpending(player, (int) Math.round(cost));
 
-                    player.sendMessage(ChatColor.of("#55FF55") + "✓ Purchased " + quantity + "x " + item.name + 
-                            " for " + ChatColor.of("#FFD700") + String.format("%.0f", cost) + " SkillCoins" + 
-                            ChatColor.of("#55FF55") + "!");
+                    player.sendMessage(hex(plugin.getMessageManager().get("success.purchased-item",
+                            "quantity", String.valueOf(quantity),
+                            "item", item.name,
+                            "cost", String.format("%.0f", cost))));
                     
                     if (itemsDropped) {
-                        player.sendMessage(ChatColor.of("#FFAA00") + "⚠ Your inventory was full! Some items may have dropped on the ground.");
+                        player.sendMessage(hex(plugin.getMessageManager().get("errors.inventory-full")));
                     }
                     
                     // Notify quest listener for Quest 3
@@ -423,8 +409,8 @@ public class QuestMenu {
                         openMainMenu(player);
                     }, 10L);
                 } else {
-                    player.sendMessage(ChatColor.of("#FF5555") + "✗ Not enough SkillCoins! You need " + 
-                            ChatColor.of("#FFD700") + String.format("%.0f", cost));
+                    player.sendMessage(hex(plugin.getMessageManager().get("errors.not-enough-coins",
+                            "amount", String.format("%.0f", cost))));
                 }
                 return;
             }
@@ -463,9 +449,9 @@ public class QuestMenu {
                     com.wdp.start.api.WDPStartAPI.trackCoinSpending(player, tokenCost);
                     com.wdp.start.api.WDPStartAPI.notifyTokenPurchase(player, 1);
 
-                    player.sendMessage(ChatColor.of("#55FF55") + "✓ Purchased " + ChatColor.of("#00FFFF") + 
-                            "1 SkillToken" + ChatColor.of("#55FF55") + " for " + ChatColor.of("#FFD700") + 
-                            tokenCost + " SkillCoins" + ChatColor.of("#55FF55") + "!");
+                    player.sendMessage(hex(plugin.getMessageManager().get("success.purchased-token",
+                            "quantity", "1",
+                            "cost", String.valueOf(tokenCost))));
                     
                     // Notify quest listener for Quest 4
                     plugin.getQuestListener().onTokenPurchase(player, 1);
@@ -475,8 +461,8 @@ public class QuestMenu {
                         openMainMenu(player);
                     }, 10L);
                 } else {
-                    player.sendMessage(ChatColor.of("#FF5555") + "✗ Not enough SkillCoins! You need " + 
-                            ChatColor.of("#FFD700") + tokenCost);
+                    player.sendMessage(hex(plugin.getMessageManager().get("errors.not-enough-coins",
+                            "amount", String.valueOf(tokenCost))));
                 }
                 return;
             }
@@ -536,13 +522,13 @@ public class QuestMenu {
                                         openTokenExchange(player);
                                         return;
                                     } else {
-                                        player.sendMessage(ChatColor.of("#777777") + "✖ Token exchange is not available during this tutorial.");
+                                        player.sendMessage(hex(plugin.getMessageManager().get("errors.token-not-available")));
                                         return;
                                     }
                                 }
                                 // Skip skilllevels/tokens - not available in simplified view
                                 if (fname.contains("skilllevels") || fname.contains("tokens")) {
-                                    player.sendMessage(ChatColor.of("#777777") + "✖ This feature is not available during this tutorial.");
+                                    player.sendMessage(hex(plugin.getMessageManager().get("errors.feature-not-available")));
                                     return;
                                 }
 
@@ -608,7 +594,7 @@ public class QuestMenu {
             }
             
             // Other categories are NOT clickable (greyed out)
-            player.sendMessage(ChatColor.of("#777777") + "✖ This section is not available during the tutorial.");
+            player.sendMessage(hex(plugin.getMessageManager().get("errors.section-not-available")));
             return;
         }
         
@@ -621,7 +607,7 @@ public class QuestMenu {
                 if (stoneMined >= 5) {
                     // Quest is complete - complete it instantly
                     plugin.getQuestManager().completeQuest(player, 5);
-                    player.sendMessage(hex("&#55FF55&l✓ &#55FF55Quest completed! Type /start to continue your journey!"));
+                    player.sendMessage(hex(plugin.getMessageManager().get("success.quest-complete")));
                     player.closeInventory();
                 } else {
                     // Quest not complete - open detail view
@@ -691,10 +677,11 @@ public class QuestMenu {
                     // Check if items were dropped due to full inventory
                     boolean itemsDropped = !leftovers.isEmpty();
                     
-                    player.sendMessage(hex("&#55FF55✓ You purchased " + itemName + " for &#FFD700" + cost + " SkillCoins&#55FF55!"));
+                    player.sendMessage(hex(plugin.getMessageManager().get("success.purchased-item",
+                            "quantity", "1", "item", itemName, "cost", String.valueOf(cost))));
                     
                     if (itemsDropped) {
-                        player.sendMessage(ChatColor.of("#FFAA00") + "⚠ Your inventory was full! Some items may have dropped on the ground.");
+                        player.sendMessage(hex(plugin.getMessageManager().get("errors.inventory-full")));
                     }
                     
                     plugin.getQuestListener().onShopItemPurchase(player);
@@ -704,7 +691,8 @@ public class QuestMenu {
                         openMainMenu(player);
                     }, 10L);
                 } else {
-                    player.sendMessage(hex("&#FF5555✗ Not enough SkillCoins! You need &#FFD700" + cost + "&#FF5555."));
+                    player.sendMessage(hex(plugin.getMessageManager().get("errors.not-enough-coins",
+                            "amount", String.valueOf(cost))));
                 }
             }
             return;
@@ -713,7 +701,8 @@ public class QuestMenu {
         // Simplified token exchange menu (Quest 4) - legacy
         if (menuType.equals("simplified_shop") && slot == 31) {
             plugin.getQuestListener().onTokenPurchase(player, 1);
-            player.sendMessage(hex("&#55FF55✓ You purchased 1 SkillToken!"));
+            player.sendMessage(hex(plugin.getMessageManager().get("success.purchased-token",
+                    "quantity", "1", "cost", "100")));
             
             // Reopen main menu after short delay to show updated progress
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
@@ -748,7 +737,8 @@ public class QuestMenu {
                         openMainMenu(player);
                     }, 5L);
                 } else {
-                    player.sendMessage(ChatColor.of("#FF5555") + "✖ You must mine 5 stone first! (" + stoneMined + "/5)");
+                    player.sendMessage(hex(plugin.getMessageManager().get("errors.mine-stone-first",
+                            "current", String.valueOf(stoneMined))));
                     player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
                 }
                 return;
@@ -784,21 +774,21 @@ public class QuestMenu {
         // Quest 6: Simply complete it
         if (quest == 6) {
             plugin.getQuestManager().completeQuest(player, 6);
-            player.sendMessage(hex("&#55FF55&l✓ Quest completed! Welcome to the server!"));
+            player.sendMessage(hex(plugin.getMessageManager().get("success.quest-complete-welcome")));
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
             return;
         }
         
         String hint = switch (quest) {
-            case 1 -> "Walk towards the spawn exit to begin!";
-            case 2 -> "Chop trees to reach Foraging level 1!";
-            case 3 -> "Type /shop to open the shop and buy an item!";
-            case 4 -> "Type /shop to open the token exchange!";
-            case 5 -> "Type /quest to see the quest menu!";
-            default -> "Keep going!";
+            case 1 -> plugin.getMessageManager().get("quests.hints.quest1");
+            case 2 -> plugin.getMessageManager().get("quests.hints.quest2");
+            case 3 -> plugin.getMessageManager().get("quests.hints.quest3");
+            case 4 -> plugin.getMessageManager().get("quests.hints.quest4");
+            case 5 -> plugin.getMessageManager().get("quests.hints.quest5");
+            default -> plugin.getMessageManager().get("quests.hints.default");
         };
         
-        player.sendMessage(hex("&#FFD700&l➤ &#FFFFFF" + hint));
+        player.sendMessage(hex(plugin.getMessageManager().get("success.quest-hint", "hint", hint)));
     }
     
     /**
@@ -1058,7 +1048,7 @@ public class QuestMenu {
      * Shows item categories (NOT token exchange) - player must buy an item
      */
     public void openSimplifiedShopItems(Player player) {
-        String title = ChatColor.of("#00FFFF") + "❖ " + ChatColor.of("#FFFFFF") + "SkillCoins Shop";
+        String title = hex(plugin.getMessageManager().get("shop.main.title"));
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
 
@@ -1086,16 +1076,10 @@ public class QuestMenu {
         if (headMeta instanceof org.bukkit.inventory.meta.SkullMeta) {
             org.bukkit.inventory.meta.SkullMeta skullMeta = (org.bukkit.inventory.meta.SkullMeta) headMeta;
             skullMeta.setOwningPlayer(player);
-            skullMeta.setDisplayName(ChatColor.of("#00FFFF") + "⛃ Shop " + 
-                    ChatColor.of("#FFD700") + "♦ " + player.getName());
-            List<String> headLore = new ArrayList<>();
-            headLore.add("");
-            headLore.add(ChatColor.of("#808080") + "Welcome to the ⛃ Shop!");
-            headLore.add(ChatColor.of("#808080") + "Browse categories below to buy");
-            headLore.add(ChatColor.of("#808080") + "and sell items using your earnings.");
-            headLore.add("");
-            headLore.add(ChatColor.of("#00FFFF") + "▸ Your balance is on the right →");
-            skullMeta.setLore(headLore);
+            skullMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.main.player-head.name",
+                    "player", player.getName())));
+            List<String> headLore = plugin.getMessageManager().getList("shop.main.player-head.lore");
+            skullMeta.setLore(headLore.stream().map(this::hex).toList());
             playerHead.setItemMeta(skullMeta);
         }
         inv.setItem(0, playerHead);
@@ -1104,15 +1088,10 @@ public class QuestMenu {
         ItemStack balanceItem = new ItemStack(Material.GOLD_INGOT);
         ItemMeta balanceMeta = balanceItem.getItemMeta();
         if (balanceMeta != null) {
-            balanceMeta.setDisplayName(ChatColor.of("#FFD700") + "⬥ Your Balance");
-            List<String> balanceLore = new ArrayList<>();
-            balanceLore.add("");
-            balanceLore.add(ChatColor.of("#FFD700") + "⛃: " + 
-                    ChatColor.of("#FFFFFF") + String.format("%.0f", coins) + " ⛃");
-            balanceLore.add("");
-            balanceLore.add(ChatColor.of("#808080") + "Earn more by leveling skills");
-            balanceLore.add(ChatColor.of("#808080") + "and completing objectives!");
-            balanceMeta.setLore(balanceLore);
+            balanceMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.main.balance.name")));
+            List<String> balanceLore = plugin.getMessageManager().getList("shop.main.balance.lore",
+                    "coins", String.format("%.0f", coins));
+            balanceMeta.setLore(balanceLore.stream().map(this::hex).toList());
             balanceItem.setItemMeta(balanceMeta);
         }
         inv.setItem(8, balanceItem);
@@ -1160,14 +1139,9 @@ public class QuestMenu {
         ItemStack tokenItem = new ItemStack(Material.EMERALD);
         ItemMeta tokenMeta = tokenItem.getItemMeta();
         if (tokenMeta != null) {
-            tokenMeta.setDisplayName(ChatColor.of("#00FFFF") + "🎟 Token Exchange");
-            List<String> tokenLore = new ArrayList<>();
-            tokenLore.add("");
-            tokenLore.add(ChatColor.of("#808080") + "Exchange ⛃ for 🎟 tokens");
-            tokenLore.add(ChatColor.of("#808080") + "Tokens can be used for special purchases");
-            tokenLore.add("");
-            tokenLore.add(ChatColor.of("#FFFF00") + "▸ Click to open!");
-            tokenMeta.setLore(tokenLore);
+            tokenMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.main.token-exchange.name")));
+            List<String> tokenLore = plugin.getMessageManager().getList("shop.main.token-exchange.lore");
+            tokenMeta.setLore(tokenLore.stream().map(this::hex).toList());
             tokenItem.setItemMeta(tokenMeta);
         }
         inv.setItem(38, tokenItem);
@@ -1176,11 +1150,9 @@ public class QuestMenu {
         ItemStack close = new ItemStack(Material.BARRIER);
         ItemMeta closeMeta = close.getItemMeta();
         if (closeMeta != null) {
-            closeMeta.setDisplayName(ChatColor.of("#FF5555") + "✖ Close");
-            List<String> closeLore = new ArrayList<>();
-            closeLore.add("");
-            closeLore.add(ChatColor.of("#808080") + "Close this menu");
-            closeMeta.setLore(closeLore);
+            closeMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.main.close.name")));
+            List<String> closeLore = plugin.getMessageManager().getList("shop.main.close.lore");
+            closeMeta.setLore(closeLore.stream().map(this::hex).toList());
             close.setItemMeta(closeMeta);
         }
         inv.setItem(53, close);
@@ -1229,11 +1201,9 @@ public class QuestMenu {
         ItemStack back = new ItemStack(Material.SPYGLASS);
         ItemMeta backMeta = back.getItemMeta();
         if (backMeta != null) {
-            backMeta.setDisplayName(ChatColor.of("#FF5555") + "← Back");
-            List<String> backLore = new ArrayList<>();
-            backLore.add("");
-            backLore.add(ChatColor.of("#808080") + "Return to main shop menu");
-            backMeta.setLore(backLore);
+            backMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.section.back.name")));
+            List<String> backLore = plugin.getMessageManager().getList("shop.section.back.lore");
+            backMeta.setLore(backLore.stream().map(this::hex).toList());
             back.setItemMeta(backMeta);
         }
         inv.setItem(53, back);
@@ -1251,8 +1221,8 @@ public class QuestMenu {
      * Open item transaction menu - ONLY +1 button (and -1 for selling), max 5 items
      */
     public void openItemTransaction(Player player, ShopItemData item, boolean isBuying) {
-        String title = (isBuying ? ChatColor.of("#55FF55") + "Buy: " : ChatColor.of("#FFD700") + "Sell: ") + 
-                ChatColor.of("#FFFFFF") + item.name;
+        String title = hex(plugin.getMessageManager().get(isBuying ? "shop.transaction.title-buy" : "shop.transaction.title-sell",
+                "item", item.name));
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
         // Fill border
@@ -1283,15 +1253,15 @@ public class QuestMenu {
             displayMeta.setDisplayName(ChatColor.of("#FFFFFF") + item.name);
             List<String> displayLore = new ArrayList<>();
             displayLore.add("");
-            displayLore.add(ChatColor.of("#808080") + "Quantity: " + ChatColor.of("#FFFFFF") + quantity);
-            displayLore.add(ChatColor.of("#808080") + "Price per item: " + ChatColor.of("#FFD700") + String.format("%.0f", item.buyPrice));
+            displayLore.add(hex(plugin.getMessageManager().get("shop.transaction.quantity", "quantity", String.valueOf(quantity))));
+            displayLore.add(hex(plugin.getMessageManager().get("shop.transaction.price-per", "price", String.format("%.0f", item.buyPrice))));
             displayLore.add("");
-            displayLore.add(ChatColor.of("#FFD700") + "Total Cost: " + ChatColor.of("#FFFFFF") + String.format("%.0f", totalPrice) + " Coins");
+            displayLore.add(hex(plugin.getMessageManager().get("shop.transaction.total-cost", "total", String.format("%.0f", totalPrice))));
             displayLore.add("");
             if (coins >= totalPrice) {
-                displayLore.add(ChatColor.of("#55FF55") + "✔ Sufficient Funds");
+                displayLore.add(hex(plugin.getMessageManager().get("shop.transaction.sufficient-funds")));
             } else {
-                displayLore.add(ChatColor.of("#FF5555") + "✖ Insufficient Funds");
+                displayLore.add(hex(plugin.getMessageManager().get("shop.transaction.insufficient-funds")));
             }
             displayMeta.setLore(displayLore);
             display.setItemMeta(displayMeta);
@@ -1303,12 +1273,9 @@ public class QuestMenu {
             ItemStack plus1 = new ItemStack(Material.LIME_TERRACOTTA);
             ItemMeta plus1Meta = plus1.getItemMeta();
             if (plus1Meta != null) {
-                plus1Meta.setDisplayName(ChatColor.of("#55FF55") + "▲ +1");
-                List<String> plus1Lore = new ArrayList<>();
-                plus1Lore.add("");
-                plus1Lore.add(ChatColor.of("#808080") + "Add 1 item");
-                plus1Lore.add(ChatColor.of("#808080") + "(Max: 3)");
-                plus1Meta.setLore(plus1Lore);
+                plus1Meta.setDisplayName(hex(plugin.getMessageManager().get("shop.transaction.plus-one.name")));
+                List<String> plus1Lore = plugin.getMessageManager().getList("shop.transaction.plus-one.lore");
+                plus1Meta.setLore(plus1Lore.stream().map(this::hex).toList());
                 plus1.setItemMeta(plus1Meta);
             }
             inv.setItem(24, plus1);
@@ -1319,11 +1286,9 @@ public class QuestMenu {
             ItemStack minus1 = new ItemStack(Material.RED_TERRACOTTA);
             ItemMeta minus1Meta = minus1.getItemMeta();
             if (minus1Meta != null) {
-                minus1Meta.setDisplayName(ChatColor.of("#FF5555") + "▼ -1");
-                List<String> minus1Lore = new ArrayList<>();
-                minus1Lore.add("");
-                minus1Lore.add(ChatColor.of("#808080") + "Remove 1 item");
-                minus1Meta.setLore(minus1Lore);
+                minus1Meta.setDisplayName(hex(plugin.getMessageManager().get("shop.transaction.minus-one.name")));
+                List<String> minus1Lore = plugin.getMessageManager().getList("shop.transaction.minus-one.lore");
+                minus1Meta.setLore(minus1Lore.stream().map(this::hex).toList());
                 minus1.setItemMeta(minus1Meta);
             }
             inv.setItem(20, minus1);
@@ -1333,7 +1298,8 @@ public class QuestMenu {
         ItemStack qtyDisplay = new ItemStack(Material.PAPER, quantity);
         ItemMeta qtyMeta = qtyDisplay.getItemMeta();
         if (qtyMeta != null) {
-            qtyMeta.setDisplayName(ChatColor.of("#FFFF00") + "Quantity: " + ChatColor.of("#FFFFFF") + quantity);
+            qtyMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.transaction.quantity-display.name", 
+                    "quantity", String.valueOf(quantity))));
             qtyDisplay.setItemMeta(qtyMeta);
         }
         inv.setItem(22, qtyDisplay);
@@ -1344,20 +1310,16 @@ public class QuestMenu {
         ItemMeta confirmMeta = confirm.getItemMeta();
         if (confirmMeta != null) {
             if (canAfford) {
-                confirmMeta.setDisplayName(ChatColor.of("#55FF55") + "✔ CONFIRM PURCHASE");
-                List<String> confirmLore = new ArrayList<>();
-                confirmLore.add("");
-                confirmLore.add(ChatColor.of("#808080") + "Purchase " + ChatColor.of("#FFFFFF") + quantity + "x " + item.name);
-                confirmLore.add(ChatColor.of("#808080") + "Cost: " + ChatColor.of("#FFD700") + String.format("%.0f", totalPrice) + " Coins");
-                confirmLore.add("");
-                confirmLore.add(ChatColor.of("#55FF55") + "▸ Click to confirm!");
-                confirmMeta.setLore(confirmLore);
+                confirmMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.transaction.confirm.can-buy.name")));
+                List<String> confirmLore = plugin.getMessageManager().getList("shop.transaction.confirm.can-buy.lore",
+                        "quantity", String.valueOf(quantity),
+                        "item", item.name,
+                        "total", String.format("%.0f", totalPrice));
+                confirmMeta.setLore(confirmLore.stream().map(this::hex).toList());
             } else {
-                confirmMeta.setDisplayName(ChatColor.of("#FF5555") + "✖ Cannot Purchase");
-                List<String> confirmLore = new ArrayList<>();
-                confirmLore.add("");
-                confirmLore.add(ChatColor.of("#FF5555") + "Insufficient coins!");
-                confirmMeta.setLore(confirmLore);
+                confirmMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.transaction.confirm.cannot-buy.name")));
+                List<String> confirmLore = plugin.getMessageManager().getList("shop.transaction.confirm.cannot-buy.lore");
+                confirmMeta.setLore(confirmLore.stream().map(this::hex).toList());
             }
             confirm.setItemMeta(confirmMeta);
         }
@@ -1367,7 +1329,7 @@ public class QuestMenu {
         ItemStack back = new ItemStack(Material.SPYGLASS);
         ItemMeta backMeta = back.getItemMeta();
         if (backMeta != null) {
-            backMeta.setDisplayName("§c§l← Back");
+            backMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.transaction.back.name")));
             back.setItemMeta(backMeta);
         }
         inv.setItem(53, back);
@@ -1390,7 +1352,7 @@ public class QuestMenu {
      * Shows ALL categories but they are UNCLICKABLE, only token exchange works
      */
     public void openSimplifiedShop(Player player) {
-        String title = ChatColor.of("#00FFFF") + "❖ " + ChatColor.of("#FFFFFF") + "SkillCoins Shop";
+        String title = hex(plugin.getMessageManager().get("shop.main.title"));
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
         // Fill with black glass pane border
@@ -1416,15 +1378,10 @@ public class QuestMenu {
         if (headMeta instanceof org.bukkit.inventory.meta.SkullMeta) {
             org.bukkit.inventory.meta.SkullMeta skullMeta = (org.bukkit.inventory.meta.SkullMeta) headMeta;
             skullMeta.setOwningPlayer(player);
-            skullMeta.setDisplayName(ChatColor.of("#00FFFF") + "SkillCoins Shop " + 
-                    ChatColor.of("#FFD700") + "♦ " + player.getName());
-            List<String> headLore = new ArrayList<>();
-            headLore.add("");
-            headLore.add(ChatColor.of("#808080") + "Welcome to the SkillCoins shop!");
-            headLore.add(ChatColor.of("#808080") + "Exchange your coins for tokens!");
-            headLore.add("");
-            headLore.add(ChatColor.of("#00FFFF") + "▸ Your balance is on the right →");
-            skullMeta.setLore(headLore);
+            skullMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.main.player-head.name",
+                    "player", player.getName())));
+            List<String> headLore = plugin.getMessageManager().getList("shop.main.player-head.lore");
+            skullMeta.setLore(headLore.stream().map(this::hex).toList());
             playerHead.setItemMeta(skullMeta);
         }
         inv.setItem(0, playerHead);
@@ -1433,13 +1390,10 @@ public class QuestMenu {
         ItemStack balanceItem = new ItemStack(Material.GOLD_INGOT);
         ItemMeta balanceMeta = balanceItem.getItemMeta();
         if (balanceMeta != null) {
-            balanceMeta.setDisplayName(ChatColor.of("#FFD700") + "⬥ Your Balance");
-            List<String> balanceLore = new ArrayList<>();
-            balanceLore.add("");
-            balanceLore.add(ChatColor.of("#FFFF00") + "SkillCoins: " + ChatColor.of("#FFFFFF") + String.format("%.0f", coins));
-            balanceLore.add("");
-            balanceLore.add(ChatColor.of("#808080") + "Earn more by leveling skills!");
-            balanceMeta.setLore(balanceLore);
+            balanceMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.main.balance.name")));
+            List<String> balanceLore = plugin.getMessageManager().getList("shop.main.balance.lore",
+                    "coins", String.format("%.0f", coins));
+            balanceMeta.setLore(balanceLore.stream().map(this::hex).toList());
             balanceItem.setItemMeta(balanceMeta);
         }
         inv.setItem(8, balanceItem);
@@ -1464,17 +1418,9 @@ public class QuestMenu {
                     ItemStack tokenExchange = new ItemStack(Material.EMERALD);
                     ItemMeta tokenMeta = tokenExchange.getItemMeta();
                     if (tokenMeta != null) {
-                        tokenMeta.setDisplayName(ChatColor.of("#55FF55") + "✦ Token Exchange");
-                        List<String> tokenLore = new ArrayList<>();
-                        tokenLore.add("");
-                        tokenLore.add(ChatColor.of("#808080") + "Exchange SkillCoins for");
-                        tokenLore.add(ChatColor.of("#808080") + "powerful SkillTokens!");
-                        tokenLore.add("");
-                        tokenLore.add(ChatColor.of("#808080") + "Rate: " + ChatColor.of("#FFD700") + "100 Coins" + 
-                                ChatColor.of("#808080") + " = " + ChatColor.of("#00FFFF") + "1 Token");
-                        tokenLore.add("");
-                        tokenLore.add(ChatColor.of("#FFFF00") + "▸ Click to open!");
-                        tokenMeta.setLore(tokenLore);
+                        tokenMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.main.token-exchange.name")));
+                        List<String> tokenLore = plugin.getMessageManager().getList("shop.main.token-exchange.lore");
+                        tokenMeta.setLore(tokenLore.stream().map(this::hex).toList());
                         tokenExchange.setItemMeta(tokenMeta);
                     }
                     addGlow(tokenExchange);
@@ -1488,7 +1434,8 @@ public class QuestMenu {
                 Material icon = Material.matchMaterial(sec.getString("material", "STONE"));
                 if (icon == null) icon = Material.STONE;
                 int itemCount = loadShopPageItems(display).size();
-                inv.setItem(slot, createShopCategory(icon, ChatColor.of("#777777") + display, "Not available during tutorial", Math.max(1, itemCount), false));
+                inv.setItem(slot, createShopCategory(icon, ChatColor.of("#777777") + display, 
+                        plugin.getMessageManager().get("shop.category.not-available"), Math.max(1, itemCount), false));
             } catch (Exception e) {
                 // ignore
             }
@@ -1498,11 +1445,9 @@ public class QuestMenu {
         ItemStack close = new ItemStack(Material.SPYGLASS);
         ItemMeta closeMeta = close.getItemMeta();
         if (closeMeta != null) {
-            closeMeta.setDisplayName("§c§l← Back");
-            List<String> closeLore = new ArrayList<>();
-            closeLore.add("");
-            closeLore.add(ChatColor.of("#808080") + "Return to main shop");
-            closeMeta.setLore(closeLore);
+            closeMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.back.name")));
+            List<String> closeLore = plugin.getMessageManager().getList("shop.token-exchange.back.lore");
+            closeMeta.setLore(closeLore.stream().map(this::hex).toList());
             close.setItemMeta(closeMeta);
         }
         inv.setItem(53, close);
@@ -1521,7 +1466,7 @@ public class QuestMenu {
      * ONLY +1 button, max 1 token purchase
      */
     public void openTokenExchange(Player player) {
-        String title = ChatColor.of("#55FF55") + "✦ " + ChatColor.of("#FFFFFF") + "Token Exchange";
+        String title = hex(plugin.getMessageManager().get("shop.token-exchange.title"));
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
         // Fill border
@@ -1548,21 +1493,18 @@ public class QuestMenu {
         ItemStack tokenDisplay = new ItemStack(Material.PAPER, 1);
         ItemMeta tokenMeta = tokenDisplay.getItemMeta();
         if (tokenMeta != null) {
-            tokenMeta.setDisplayName(ChatColor.of("#00FFFF") + "✦ Skill Tokens");
-            List<String> lore = new ArrayList<>();
-            lore.add("");
-            lore.add(ChatColor.of("#808080") + "Tokens to Purchase: " + ChatColor.of("#FFFFFF") + quantity);
-            lore.add(ChatColor.of("#808080") + "Exchange Rate: " + ChatColor.of("#FFD700") + tokenCost + " coins" + 
-                    ChatColor.of("#808080") + " = " + ChatColor.of("#00FFFF") + "1 token");
-            lore.add("");
-            lore.add(ChatColor.of("#FFD700") + "Total Cost: " + ChatColor.of("#FFFFFF") + totalCost + " Coins");
-            lore.add("");
+            tokenMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.token-display.name")));
+            List<String> lore = plugin.getMessageManager().getList("shop.token-exchange.token-display.lore",
+                    "quantity", String.valueOf(quantity),
+                    "cost", String.valueOf(tokenCost),
+                    "total", String.valueOf(totalCost));
+            List<String> processedLore = new ArrayList<>(lore.stream().map(this::hex).toList());
             if (coinBalance >= totalCost) {
-                lore.add(ChatColor.of("#55FF55") + "✔ Sufficient Funds");
+                processedLore.add(hex(plugin.getMessageManager().get("shop.transaction.sufficient-funds")));
             } else {
-                lore.add(ChatColor.of("#FF5555") + "✖ Insufficient Funds");
+                processedLore.add(hex(plugin.getMessageManager().get("shop.transaction.insufficient-funds")));
             }
-            tokenMeta.setLore(lore);
+            tokenMeta.setLore(processedLore);
             tokenDisplay.setItemMeta(tokenMeta);
         }
         inv.setItem(13, tokenDisplay);
@@ -1571,12 +1513,9 @@ public class QuestMenu {
         ItemStack plus1 = new ItemStack(Material.LIME_TERRACOTTA);
         ItemMeta plus1Meta = plus1.getItemMeta();
         if (plus1Meta != null) {
-            plus1Meta.setDisplayName(ChatColor.of("#55FF55") + "▲ +1");
-            List<String> plus1Lore = new ArrayList<>();
-            plus1Lore.add("");
-            plus1Lore.add(ChatColor.of("#808080") + "Add 1 token");
-            plus1Lore.add(ChatColor.of("#808080") + "(Tutorial: Max 1)");
-            plus1Meta.setLore(plus1Lore);
+            plus1Meta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.plus-one.name")));
+            List<String> plus1Lore = plugin.getMessageManager().getList("shop.token-exchange.plus-one.lore");
+            plus1Meta.setLore(plus1Lore.stream().map(this::hex).toList());
             plus1.setItemMeta(plus1Meta);
         }
         inv.setItem(24, plus1);
@@ -1585,11 +1524,10 @@ public class QuestMenu {
         ItemStack qtyDisplay = new ItemStack(Material.PAPER, 1);
         ItemMeta qtyMeta = qtyDisplay.getItemMeta();
         if (qtyMeta != null) {
-            qtyMeta.setDisplayName(ChatColor.of("#FFFF00") + "Quantity: " + ChatColor.of("#FFFFFF") + quantity);
-            List<String> qtyLore = new ArrayList<>();
-            qtyLore.add("");
-            qtyLore.add(ChatColor.of("#808080") + "Tokens to purchase");
-            qtyMeta.setLore(qtyLore);
+            qtyMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.quantity-display.name",
+                    "quantity", String.valueOf(quantity))));
+            List<String> qtyLore = plugin.getMessageManager().getList("shop.token-exchange.quantity-display.lore");
+            qtyMeta.setLore(qtyLore.stream().map(this::hex).toList());
             qtyDisplay.setItemMeta(qtyMeta);
         }
         inv.setItem(22, qtyDisplay);
@@ -1600,21 +1538,15 @@ public class QuestMenu {
         ItemMeta confirmMeta = confirm.getItemMeta();
         if (confirmMeta != null) {
             if (canAfford) {
-                confirmMeta.setDisplayName(ChatColor.of("#55FF55") + "✔ CONFIRM PURCHASE");
-                List<String> confirmLore = new ArrayList<>();
-                confirmLore.add("");
-                confirmLore.add(ChatColor.of("#808080") + "Purchase " + ChatColor.of("#00FFFF") + quantity + 
-                        ChatColor.of("#808080") + " token");
-                confirmLore.add(ChatColor.of("#808080") + "Cost: " + ChatColor.of("#FFD700") + totalCost + " Coins");
-                confirmLore.add("");
-                confirmLore.add(ChatColor.of("#55FF55") + "▸ Click to confirm!");
-                confirmMeta.setLore(confirmLore);
+                confirmMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.confirm.can-buy.name")));
+                List<String> confirmLore = plugin.getMessageManager().getList("shop.token-exchange.confirm.can-buy.lore",
+                        "quantity", String.valueOf(quantity),
+                        "total", String.valueOf(totalCost));
+                confirmMeta.setLore(confirmLore.stream().map(this::hex).toList());
             } else {
-                confirmMeta.setDisplayName(ChatColor.of("#FF5555") + "✖ Cannot Purchase");
-                List<String> confirmLore = new ArrayList<>();
-                confirmLore.add("");
-                confirmLore.add(ChatColor.of("#FF5555") + "Insufficient coins!");
-                confirmMeta.setLore(confirmLore);
+                confirmMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.confirm.cannot-buy.name")));
+                List<String> confirmLore = plugin.getMessageManager().getList("shop.token-exchange.confirm.cannot-buy.lore");
+                confirmMeta.setLore(confirmLore.stream().map(this::hex).toList());
             }
             confirm.setItemMeta(confirmMeta);
         }
@@ -1624,13 +1556,11 @@ public class QuestMenu {
         ItemStack balanceItem = new ItemStack(Material.GOLD_INGOT);
         ItemMeta balanceMeta = balanceItem.getItemMeta();
         if (balanceMeta != null) {
-            balanceMeta.setDisplayName(ChatColor.of("#FFD700") + "⬥ Your Balance");
-            List<String> balanceLore = new ArrayList<>();
-            balanceLore.add("");
-            balanceLore.add(ChatColor.of("#FFD700") + "Coins: " + ChatColor.of("#FFFFFF") + String.format("%.0f", coinBalance));
-            balanceLore.add("");
-            balanceLore.add(ChatColor.of("#808080") + "Required: " + ChatColor.of("#FFFFFF") + totalCost + " coins");
-            balanceMeta.setLore(balanceLore);
+            balanceMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.balance.name")));
+            List<String> balanceLore = plugin.getMessageManager().getList("shop.token-exchange.balance.lore",
+                    "coins", String.format("%.0f", coinBalance),
+                    "required", String.valueOf(totalCost));
+            balanceMeta.setLore(balanceLore.stream().map(this::hex).toList());
             balanceItem.setItemMeta(balanceMeta);
         }
         inv.setItem(45, balanceItem);
@@ -1639,11 +1569,9 @@ public class QuestMenu {
         ItemStack back = new ItemStack(Material.SPYGLASS);
         ItemMeta backMeta = back.getItemMeta();
         if (backMeta != null) {
-            backMeta.setDisplayName(ChatColor.of("#FF5555") + "← Back");
-            List<String> backLore = new ArrayList<>();
-            backLore.add("");
-            backLore.add(ChatColor.of("#808080") + "Return to shop");
-            backMeta.setLore(backLore);
+            backMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.back.name")));
+            List<String> backLore = plugin.getMessageManager().getList("shop.token-exchange.back.lore");
+            backMeta.setLore(backLore.stream().map(this::hex).toList());
             back.setItemMeta(backMeta);
         }
         inv.setItem(53, back);
@@ -1662,7 +1590,7 @@ public class QuestMenu {
      * Universal navbar from navbar.yml
      */
     public void openSimplifiedQuestView(Player player) {
-        String title = ChatColor.of("#FFD700") + "Quest Menu";
+        String title = hex(plugin.getMessageManager().get("quest-view.title"));
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
         PlayerData data = plugin.getPlayerDataManager().getData(player);
@@ -1690,46 +1618,45 @@ public class QuestMenu {
         ItemMeta headMeta = playerHead.getItemMeta();
         if (headMeta instanceof org.bukkit.inventory.meta.SkullMeta skullMeta) {
             skullMeta.setOwningPlayer(player);
-            skullMeta.setDisplayName(ChatColor.of("#FFD700") + player.getName());
-            List<String> headLore = new ArrayList<>();
-            headLore.add(ChatColor.of("#808080") + "Welcome to the quest menu!");
-            headLore.add("");
-            headLore.add(ChatColor.of("#FFD700") + "Coins: " + ChatColor.of("#FFFF00") + String.format("%.0f", coins));
-            headLore.add(ChatColor.of("#55FF55") + "Tokens: " + ChatColor.of("#00FF00") + tokens);
-            skullMeta.setLore(headLore);
+            skullMeta.setDisplayName(hex(plugin.getMessageManager().get("quest-view.player-head.name",
+                    "player", player.getName())));
+            List<String> headLore = plugin.getMessageManager().getList("quest-view.player-head.lore",
+                    "coins", String.format("%.0f", coins),
+                    "tokens", String.valueOf(tokens));
+            skullMeta.setLore(headLore.stream().map(this::hex).toList());
             playerHead.setItemMeta(skullMeta);
         }
         inv.setItem(0, playerHead);
         
         // Title (slot 4)
+        List<String> titleLore = plugin.getMessageManager().getList("quest-view.title-item.lore");
         inv.setItem(4, createItem(
             Material.BOOK,
-            ChatColor.of("#FFD700") + "§lQuest Menu",
-            "",
-            ChatColor.of("#808080") + "Complete quests to earn rewards!",
-            ""
+            hex(plugin.getMessageManager().get("quest-view.title-item.name")),
+            titleLore.stream().map(this::hex).toArray(String[]::new)
         ));
         
         // Progress display (slot 8)
+        List<String> progressLore = plugin.getMessageManager().getList("quest-view.progress-item.lore",
+                "progress", String.format("%.0f", completion));
         inv.setItem(8, createItem(
             Material.EXPERIENCE_BOTTLE,
-            ChatColor.of("#00FFFF") + "§lProgress",
-            "",
-            ChatColor.of("#FFFF00") + "Overall Progress: " + ChatColor.of("#FFFFFF") + String.format("%.0f", completion) + "%",
-            "",
-            ChatColor.of("#808080") + "Complete quests to level up!"
+            hex(plugin.getMessageManager().get("quest-view.progress-item.name")),
+            progressLore.stream().map(this::hex).toArray(String[]::new)
         ));
         
         // === QUEST ROW (Row 1: slots 9-17) ===
         // Quest icon (slot 9)
-        String statusPrefix = isComplete ? ChatColor.of("#55FF55") + "✓ " : ChatColor.of("#FFFF00") + "● ";
+        String questName = isComplete 
+            ? hex(plugin.getMessageManager().get("quest-view.quest-icon.complete.name"))
+            : hex(plugin.getMessageManager().get("quest-view.quest-icon.incomplete.name"));
+        List<String> questLore = plugin.getMessageManager().getList("quest-view.quest-icon.lore",
+                "current", String.valueOf(stoneMined),
+                "total", String.valueOf(stoneTarget));
         ItemStack questIcon = createItem(
             isComplete ? Material.EMERALD : Material.COMPASS,
-            statusPrefix + ChatColor.of("#FFD700") + "Quest Menu Tutorial",
-            "",
-            ChatColor.of("#808080") + "Mine 5 stone blocks to complete this quest",
-            "",
-            ChatColor.of("#808080") + "Progress: " + ChatColor.of("#FFFF00") + stoneMined + "/" + stoneTarget + " Stone"
+            questName,
+            questLore.stream().map(this::hex).toArray(String[]::new)
         );
         if (isComplete) addGlow(questIcon);
         inv.setItem(9, questIcon);
@@ -1895,15 +1822,18 @@ public class QuestMenu {
         int totalPages = context != null && context.containsKey("total_pages") ? (Integer) context.get("total_pages") : 1;
         inv.setItem(49, createItem(
             Material.PAPER,
-            ChatColor.of("#FFFF00") + "§lPage " + page + "/" + totalPages,
-            ChatColor.of("#808080") + "Current page"
+            hex(plugin.getMessageManager().get("items.page-info.name", 
+                "current", String.valueOf(page), "total", String.valueOf(totalPages))),
+            hex(plugin.getMessageManager().get("menu.navbar.page.lore", 
+                "page", String.valueOf(page), "total", String.valueOf(totalPages)))
         ));
         
         // Close button (slot 53)
+        List<String> closeLore = plugin.getMessageManager().getList("items.close.lore");
         inv.setItem(53, createItem(
             Material.BARRIER,
-            ChatColor.of("#FF5555") + "§l✗ Close",
-            ChatColor.of("#808080") + "Close this menu"
+            hex(plugin.getMessageManager().get("items.close.name")),
+            closeLore.stream().map(this::hex).toArray(String[]::new)
         ));
     }
     
@@ -1945,14 +1875,14 @@ public class QuestMenu {
             meta.setDisplayName(name);
             List<String> lore = new ArrayList<>();
             lore.add("");
-            lore.add(ChatColor.of("#808080") + description);
+            lore.add(hex(plugin.getMessageManager().get("shop.category.description", "description", description)));
             lore.add("");
-            lore.add(ChatColor.of("#808080") + "Items: " + ChatColor.of("#FFFFFF") + itemCount);
+            lore.add(hex(plugin.getMessageManager().get("shop.category.items-count", "count", String.valueOf(itemCount))));
             lore.add("");
             if (clickable) {
-                lore.add(ChatColor.of("#FFFF00") + "▸ Click to open!");
+                lore.add(hex(plugin.getMessageManager().get("shop.category.click-to-open")));
             } else {
-                lore.add(ChatColor.of("#777777") + "✖ Not available during tutorial");
+                lore.add(hex(plugin.getMessageManager().get("shop.category.not-available")));
             }
             meta.setLore(lore);
             item.setItemMeta(meta);
@@ -1967,16 +1897,12 @@ public class QuestMenu {
             meta.setDisplayName(ChatColor.of("#FFFFFF") + item.name);
             List<String> lore = new ArrayList<>();
             lore.add("");
-            lore.add(ChatColor.of("#55FF55") + "● Buy: " + ChatColor.of("#FFFFFF") + String.format("%.0f", item.buyPrice) + 
-                    ChatColor.of("#FFFF00") + " Coins");
-            lore.add(ChatColor.of("#808080") + "  └ " + ChatColor.of("#FFFF00") + "Left Click" + 
-                    ChatColor.of("#808080") + " to purchase");
+            lore.add(hex(plugin.getMessageManager().get("shop.item.buy", "price", String.format("%.0f", item.buyPrice))));
+            lore.add(hex(plugin.getMessageManager().get("shop.item.buy-action")));
             lore.add("");
             if (item.canSell) {
-                lore.add(ChatColor.of("#FFD700") + "● Sell: " + ChatColor.of("#FFFFFF") + String.format("%.0f", item.sellPrice) + 
-                        ChatColor.of("#FFFF00") + " Coins");
-                lore.add(ChatColor.of("#808080") + "  └ " + ChatColor.of("#FFFF00") + "Right Click" + 
-                        ChatColor.of("#808080") + " to sell");
+                lore.add(hex(plugin.getMessageManager().get("shop.item.sell", "price", String.format("%.0f", item.sellPrice))));
+                lore.add(hex(plugin.getMessageManager().get("shop.item.sell-action")));
             }
             meta.setLore(lore);
             display.setItemMeta(meta);
@@ -2095,7 +2021,7 @@ public class QuestMenu {
      * Open quest detail view for the simplified quest (Quest 5)
      */
     private void openQuestDetailView(Player player) {
-        String title = ChatColor.of("#FFD700") + "Quest Details";
+        String title = hex(plugin.getMessageManager().get("quest-detail.title"));
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
         PlayerData data = plugin.getPlayerDataManager().getData(player);
@@ -2112,28 +2038,29 @@ public class QuestMenu {
         
         // === ROW 0: Header ===
         // Quest icon (slot 4)
-        String statusPrefix = isComplete ? ChatColor.of("#55FF55") + "✓ " : ChatColor.of("#FFFF00") + "● ";
+        String questName = isComplete 
+            ? hex(plugin.getMessageManager().get("quest-view.quest-icon.complete.name"))
+            : hex(plugin.getMessageManager().get("quest-view.quest-icon.incomplete.name"));
+        List<String> questLore = plugin.getMessageManager().getList("quest-detail.quest-icon.lore",
+                "required", "0");
         ItemStack questIcon = createItem(
             isComplete ? Material.EMERALD : Material.COMPASS,
-            statusPrefix + ChatColor.of("#FFD700") + "Quest Menu Tutorial",
-            "",
-            ChatColor.of("#808080") + "Mine 5 stone blocks to complete this quest",
-            " ",
-            ChatColor.of("#808080") + "Required Progress: " + ChatColor.of("#FFFF00") + "0%",
-            !isComplete ? ChatColor.of("#55FF55") + "Repeatable: No" : ""
+            questName,
+            questLore.stream().map(this::hex).toArray(String[]::new)
         );
         if (isComplete) addGlow(questIcon);
         inv.setItem(4, questIcon);
         
         // Status indicator (slot 8)
         Material statusMat = isComplete ? Material.LIME_DYE : Material.YELLOW_DYE;
-        String statusText = isComplete ? "§a§lCOMPLETED" : "§e§lACTIVE";
+        String statusText = isComplete 
+            ? hex(plugin.getMessageManager().get("quest-detail.status.completed.name"))
+            : hex(plugin.getMessageManager().get("quest-detail.status.active.name"));
+        List<String> statusLore = plugin.getMessageManager().getList("quest-detail.status.lore");
         inv.setItem(8, createItem(
             statusMat,
             statusText,
-            "",
-            ChatColor.of("#808080") + "Quest Status",
-            isComplete ? ChatColor.of("#55FF55") + "Ready to turn in!" : ChatColor.of("#FFFF00") + "In progress..."
+            statusLore.stream().map(this::hex).toArray(String[]::new)
         ));
         
         // === ROW 1: Full-width progress bar ===
@@ -2145,34 +2072,39 @@ public class QuestMenu {
         // === ROW 2: Objectives ===
         inv.setItem(18, createItem(
             Material.PAPER,
-            ChatColor.of("#FFD700") + "§lObjectives",
-            ChatColor.of("#808080") + "Complete all to finish"
+            hex(plugin.getMessageManager().get("quest-detail.objectives.title")),
+            hex(plugin.getMessageManager().get("quest-detail.objectives.subtitle"))
         ));
         
         // Objective - Mine 5 Stone (slot 19)
         Material objMat = isComplete ? Material.LIME_DYE : Material.GRAY_DYE;
-        String objStatus = isComplete ? "§a✓ " : "§7○ ";
-        String objProgress = isComplete ? "§aComplete!" : "§7" + stoneMined + "§8/§7" + stoneTarget;
+        String objStatus = isComplete 
+            ? hex(plugin.getMessageManager().get("quest-detail.objectives.complete", "objective", "Mine 5 Stone"))
+            : hex(plugin.getMessageManager().get("quest-detail.objectives.incomplete", "objective", "Mine 5 Stone"));
+        String objProgress = isComplete 
+            ? hex(plugin.getMessageManager().get("quest-detail.objectives.progress-complete"))
+            : hex(plugin.getMessageManager().get("quest-detail.objectives.progress-incomplete", 
+                "current", String.valueOf(stoneMined), "total", String.valueOf(stoneTarget)));
         
         inv.setItem(19, createItem(
             objMat,
-            objStatus + "§f" + "Mine 5 Stone",
+            objStatus,
             objProgress
         ));
         
         // === ROW 3: Rewards ===
         inv.setItem(27, createItem(
             Material.CHEST,
-            ChatColor.of("#FFD700") + "§lRewards",
-            ChatColor.of("#808080") + "What you'll receive"
+            hex(plugin.getMessageManager().get("quest-detail.rewards.title")),
+            hex(plugin.getMessageManager().get("quest-detail.rewards.subtitle"))
         ));
         
         // Reward - 20 SkillCoins (slot 28)
+        List<String> rewardLore = plugin.getMessageManager().getList("quest-detail.rewards.skillcoins.lore");
         inv.setItem(28, createItem(
             Material.GOLD_NUGGET,
-            ChatColor.of("#FFFF00") + "20 SkillCoins",
-            "",
-            ChatColor.of("#808080") + "Currency for the shop"
+            hex(plugin.getMessageManager().get("quest-detail.rewards.skillcoins.name", "amount", "20")),
+            rewardLore.stream().map(this::hex).toArray(String[]::new)
         ));
         
         // === ROW 4: Empty ===

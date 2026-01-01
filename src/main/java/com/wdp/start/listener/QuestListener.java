@@ -2,7 +2,6 @@ package com.wdp.start.listener;
 
 import com.wdp.start.WDPStartPlugin;
 import com.wdp.start.player.PlayerData;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -376,8 +375,7 @@ public class QuestListener implements Listener {
         int newCount = currentCount + 1;
         
         // Send progress message
-        player.sendMessage(ChatColor.of("#55FF55") + "⛏ Stone Mined: " + 
-                         ChatColor.of("#FFFFFF") + newCount + "/5");
+        player.sendMessage(plugin.getMessages().get("listener.stone-mined", "current", String.valueOf(newCount)));
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.2f);
         
         // Complete when reached 5
@@ -386,9 +384,8 @@ public class QuestListener implements Listener {
             plugin.getQuestManager().completeStep(player, 5, 1, "mined_stone");
             
             player.sendMessage("");
-            player.sendMessage(ChatColor.of("#FFD700") + "§l✓ Objective Complete!");
-            player.sendMessage(ChatColor.of("#FFFFFF") + "Type " + ChatColor.of("#55FF55") + "/quest" + 
-                             ChatColor.of("#FFFFFF") + " to complete Quest 5!");
+            player.sendMessage(plugin.getMessages().get("listener.objective-complete.title"));
+            player.sendMessage(plugin.getMessages().get("listener.objective-complete.instruction"));
             player.sendMessage("");
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
         }

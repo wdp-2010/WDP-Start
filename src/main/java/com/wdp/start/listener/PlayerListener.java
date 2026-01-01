@@ -80,6 +80,6 @@ public class PlayerListener implements Listener {
      * Send the welcome message to a player
      */
     private void sendWelcomeMessage(Player player) {
-        plugin.getMessageManager().sendList(player, "welcome.messages");
+        plugin.getMessages().sendList(player, "welcome.messages");
     }
 }
