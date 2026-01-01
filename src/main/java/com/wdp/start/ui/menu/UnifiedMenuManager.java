@@ -172,7 +172,7 @@ public class UnifiedMenuManager {
     /**
      * Create a navbar item based on configuration
      */
-    private ItemStack createNavbarItem(String itemName, Map<String, Object> config, Player player, String menuType, Map<String, Object> context) {
+    private ItemStack createNavbarItem(String itemName, Map<String, Object> config, Player player, Map<String, Object> context) {
         String materialStr = (String) config.get("material");
         String displayName = (String) config.get("display_name");
         List<String> lore = (List<String>) config.get("lore");
@@ -240,7 +240,7 @@ public class UnifiedMenuManager {
     /**
      * Create a fallback navbar when YAML is not available
      */
-    private void createFallbackNavbar(Inventory inv, Player player, String menuType, Map<String, Object> context) {
+    private void createFallbackNavbar(Inventory inv, String menuType, Map<String, Object> context) {
         // Fill row 5 with glass
         for (int i = 45; i <= 53; i++) {
             inv.setItem(i, globalItems.createGlassPane());

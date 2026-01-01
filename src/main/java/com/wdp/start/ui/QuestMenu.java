@@ -105,7 +105,7 @@ public class QuestMenu {
     /**
      * Build welcome menu for players who haven't started
      */
-    private void buildWelcomeMenu(Inventory inv, Player player) {
+    private void buildWelcomeMenu(Inventory inv) {
         // Center content area
         
         // Welcome title item (slot 13)
@@ -1828,7 +1828,7 @@ public class QuestMenu {
                 }
             }
             
-            ItemStack item = createNavbarItem(itemName, itemConfig, player, menuType, context);
+            ItemStack item = createNavbarItem(itemName, itemConfig, player, context);
             if (item != null) {
                 inv.setItem(slot, item);
             }
@@ -1838,7 +1838,7 @@ public class QuestMenu {
     /**
      * Create a navbar item from configuration
      */
-    private ItemStack createNavbarItem(String itemName, Map<String, Object> config, Player player, String menuType, Map<String, Object> context) {
+    private ItemStack createNavbarItem(String itemName, Map<String, Object> config, Player player, Map<String, Object> context) {
         String materialStr = (String) config.get("material");
         String displayName = (String) config.get("display_name");
         @SuppressWarnings("unchecked")

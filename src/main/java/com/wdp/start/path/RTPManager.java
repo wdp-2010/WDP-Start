@@ -184,7 +184,7 @@ public class RTPManager {
 
                     if (cfObj instanceof CompletableFuture) {
                         CompletableFuture<?> chunkFuture = (CompletableFuture<?>) cfObj;
-                        chunkFuture.whenComplete((chunk, ex) -> {
+                        chunkFuture.whenComplete((ignoredChunk, ex) -> {
                             Bukkit.getScheduler().runTask(plugin, () -> {
                                 // Teleport player now that the chunk is available
                                 if (!player.isOnline()) {
