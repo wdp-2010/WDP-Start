@@ -82,7 +82,7 @@ public class QuestMenu {
         if (!data.isStarted()) {
             // Not started - show welcome/start menu
             plugin.debug("[QuestMenu] Showing welcome menu (not started)");
-            buildWelcomeMenu(inv, player);
+            buildWelcomeMenu(inv);
         } else {
             // Normal menu - show all quests with current progress
             plugin.debug("[QuestMenu] Showing normal menu with progress");
