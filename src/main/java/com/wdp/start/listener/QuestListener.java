@@ -375,7 +375,7 @@ public class QuestListener implements Listener {
         int newCount = currentCount + 1;
         
         // Send progress message
-        player.sendMessage(plugin.getMessages().get("listener.stone-mined", "current", String.valueOf(newCount)));
+        player.sendMessage(plugin.getMessageManager().get("listener.stone-mined", "current", String.valueOf(newCount)));
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.2f);
         
         // Complete when reached 5
@@ -384,8 +384,8 @@ public class QuestListener implements Listener {
             plugin.getQuestManager().completeStep(player, 5, 1, "mined_stone");
             
             player.sendMessage("");
-            player.sendMessage(plugin.getMessages().get("listener.objective-complete.title"));
-            player.sendMessage(plugin.getMessages().get("listener.objective-complete.instruction"));
+            player.sendMessage(plugin.getMessageManager().get("listener.objective-complete.title"));
+            player.sendMessage(plugin.getMessageManager().get("listener.objective-complete.instruction"));
             player.sendMessage("");
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
         }

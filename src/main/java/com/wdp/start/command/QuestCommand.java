@@ -30,12 +30,12 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         // No args - open menu
         if (args.length == 0) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(plugin.getMessages().get("commands.player-only"));
+                sender.sendMessage(plugin.getMessageManager().get("commands.player-only"));
                 return true;
             }
             
             if (!player.hasPermission("wdpstart.menu")) {
-                plugin.getMessages().send(player, "commands.no-permission");
+                plugin.getMessageManager().send(player, "commands.no-permission");
                 return true;
             }
             
@@ -56,9 +56,9 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             case "debug" -> handleDebug(sender, args);
             default -> {
                 if (sender instanceof Player player) {
-                    plugin.getMessages().send(player, "commands.unknown");
+                    plugin.getMessageManager().send(player, "commands.unknown");
                 } else {
-                    sender.sendMessage(plugin.getMessages().get("commands.unknown"));
+                    sender.sendMessage(plugin.getMessageManager().get("commands.unknown"));
                 }
             }
         }
@@ -68,10 +68,10 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
     
     private void handleHelp(CommandSender sender) {
         if (sender instanceof Player player) {
-            plugin.getMessages().sendList(player, "commands.help");
+            plugin.getMessageManager().sendList(player, "commands.help");
         } else {
             // Console gets raw help messages
-            for (String line : plugin.getMessages().getList("commands.help")) {
+            for (String line : plugin.getMessageManager().getList("commands.help")) {
                 sender.sendMessage(line);
             }
         }
@@ -79,12 +79,12 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
     
     private void handleCancel(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(plugin.getMessages().get("commands.player-only"));
+            sender.sendMessage(plugin.getMessageManager().get("commands.player-only"));
             return;
         }
         
         if (!player.hasPermission("wdpstart.cancel")) {
-            plugin.getMessages().send(player, "commands.no-permission");
+            plugin.getMessageManager().send(player, "commands.no-permission");
             return;
         }
         
@@ -94,12 +94,12 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
     
     private void handleStart(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(plugin.getMessages().get("commands.player-only"));
+            sender.sendMessage(plugin.getMessageManager().get("commands.player-only"));
             return;
         }
         
         if (!player.hasPermission("wdpstart.use")) {
-            plugin.getMessages().send(player, "commands.no-permission");
+            plugin.getMessageManager().send(player, "commands.no-permission");
             return;
         }
         
@@ -107,7 +107,7 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         boolean force = false;
         if (args.length > 1 && "force".equalsIgnoreCase(args[1])) {
             if (!player.isOp()) {
-                plugin.getMessages().send(player, "commands.no-permission");
+                plugin.getMessageManager().send(player, "commands.no-permission");
                 return;
             }
             force = true;
@@ -119,9 +119,9 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
     private void handleReload(CommandSender sender) {
         if (!sender.hasPermission("wdpstart.admin.reload")) {
             if (sender instanceof Player player) {
-                plugin.getMessages().send(player, "commands.no-permission");
+                plugin.getMessageManager().send(player, "commands.no-permission");
             } else {
-                sender.sendMessage(plugin.getMessages().get("commands.no-permission"));
+                sender.sendMessage(plugin.getMessageManager().get("commands.no-permission"));
             }
             return;
         }
@@ -129,33 +129,33 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         plugin.reload();
         
         if (sender instanceof Player player) {
-            plugin.getMessages().send(player, "admin.reload");
+            plugin.getMessageManager().send(player, "admin.reload");
         } else {
-            sender.sendMessage(plugin.getMessages().get("admin.reload"));
+            sender.sendMessage(plugin.getMessageManager().get("admin.reload"));
         }
     }
     
     private void handleReset(CommandSender sender, String[] args) {
         if (!sender.hasPermission("wdpstart.admin.reset")) {
             if (sender instanceof Player player) {
-                plugin.getMessages().send(player, "commands.no-permission");
+                plugin.getMessageManager().send(player, "commands.no-permission");
             } else {
-                sender.sendMessage(plugin.getMessages().get("commands.no-permission"));
+                sender.sendMessage(plugin.getMessageManager().get("commands.no-permission"));
             }
             return;
         }
         
         if (args.length < 2) {
-            sender.sendMessage(plugin.getMessages().get("admin.usage.reset"));
+            sender.sendMessage(plugin.getMessageManager().get("admin.usage.reset"));
             return;
         }
         
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
             if (sender instanceof Player player) {
-                plugin.getMessages().send(player, "admin.player-not-found", "player", args[1]);
+                plugin.getMessageManager().send(player, "admin.player-not-found", "player", args[1]);
             } else {
-                sender.sendMessage(plugin.getMessages().get("admin.player-not-found", "player", args[1]));
+                sender.sendMessage(plugin.getMessageManager().get("admin.player-not-found", "player", args[1]));
             }
             return;
         }
@@ -164,33 +164,33 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         data.reset();
         
         if (sender instanceof Player player) {
-            plugin.getMessages().send(player, "admin.reset", "player", target.getName());
+            plugin.getMessageManager().send(player, "admin.reset", "player", target.getName());
         } else {
-            sender.sendMessage(plugin.getMessages().get("admin.reset", "player", target.getName()));
+            sender.sendMessage(plugin.getMessageManager().get("admin.reset", "player", target.getName()));
         }
     }
     
     private void handleComplete(CommandSender sender, String[] args) {
         if (!sender.hasPermission("wdpstart.admin.complete")) {
             if (sender instanceof Player player) {
-                plugin.getMessages().send(player, "commands.no-permission");
+                plugin.getMessageManager().send(player, "commands.no-permission");
             } else {
-                sender.sendMessage(plugin.getMessages().get("commands.no-permission"));
+                sender.sendMessage(plugin.getMessageManager().get("commands.no-permission"));
             }
             return;
         }
         
         if (args.length < 3) {
-            sender.sendMessage(plugin.getMessages().get("admin.usage.complete"));
+            sender.sendMessage(plugin.getMessageManager().get("admin.usage.complete"));
             return;
         }
         
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
             if (sender instanceof Player player) {
-                plugin.getMessages().send(player, "admin.player-not-found", "player", args[1]);
+                plugin.getMessageManager().send(player, "admin.player-not-found", "player", args[1]);
             } else {
-                sender.sendMessage(plugin.getMessages().get("admin.player-not-found", "player", args[1]));
+                sender.sendMessage(plugin.getMessageManager().get("admin.player-not-found", "player", args[1]));
             }
             return;
         }
@@ -201,9 +201,9 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             if (quest < 1 || quest > 6) throw new NumberFormatException();
         } catch (NumberFormatException e) {
             if (sender instanceof Player player) {
-                plugin.getMessages().send(player, "admin.invalid-quest", "quest", args[2]);
+                plugin.getMessageManager().send(player, "admin.invalid-quest", "quest", args[2]);
             } else {
-                sender.sendMessage(plugin.getMessages().get("admin.invalid-quest", "quest", args[2]));
+                sender.sendMessage(plugin.getMessageManager().get("admin.invalid-quest", "quest", args[2]));
             }
             return;
         }
@@ -231,11 +231,11 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         }
         
         if (sender instanceof Player player) {
-            plugin.getMessages().send(player, "admin.complete", 
+            plugin.getMessageManager().send(player, "admin.complete", 
                 "quest", String.valueOf(quest), 
                 "player", target.getName());
         } else {
-            sender.sendMessage(plugin.getMessages().get("admin.complete", 
+            sender.sendMessage(plugin.getMessageManager().get("admin.complete", 
                 "quest", String.valueOf(quest), 
                 "player", target.getName()));
         }
@@ -244,9 +244,9 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
     private void handleDebug(CommandSender sender, String[] args) {
         if (!sender.hasPermission("wdpstart.admin.debug")) {
             if (sender instanceof Player player) {
-                plugin.getMessages().send(player, "commands.no-permission");
+                plugin.getMessageManager().send(player, "commands.no-permission");
             } else {
-                sender.sendMessage(plugin.getMessages().get("commands.no-permission"));
+                sender.sendMessage(plugin.getMessageManager().get("commands.no-permission"));
             }
             return;
         }
@@ -262,13 +262,13 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
         if (args.length > 1) {
             target = Bukkit.getPlayer(args[1]);
             if (target == null) {
-                sender.sendMessage(plugin.getMessages().get("admin.player-not-found", "player", args[1]));
+                sender.sendMessage(plugin.getMessageManager().get("admin.player-not-found", "player", args[1]));
                 return;
             }
         } else if (sender instanceof Player) {
             target = (Player) sender;
         } else {
-            sender.sendMessage(plugin.getMessages().get("admin.usage.debug"));
+            sender.sendMessage(plugin.getMessageManager().get("admin.usage.debug"));
             return;
         }
         
@@ -379,21 +379,21 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
     private void handleSetQuest(CommandSender sender, String[] args) {
         if (!sender.hasPermission("wdpstart.admin.complete")) {
             if (sender instanceof Player player) {
-                plugin.getMessages().send(player, "commands.no-permission");
+                plugin.getMessageManager().send(player, "commands.no-permission");
             } else {
-                sender.sendMessage(plugin.getMessages().get("commands.no-permission"));
+                sender.sendMessage(plugin.getMessageManager().get("commands.no-permission"));
             }
             return;
         }
         
         if (args.length < 3) {
-            sender.sendMessage(plugin.getMessages().get("admin.usage.setquest"));
+            sender.sendMessage(plugin.getMessageManager().get("admin.usage.setquest"));
             return;
         }
         
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            sender.sendMessage(plugin.getMessages().get("admin.player-not-found", "player", args[1]));
+            sender.sendMessage(plugin.getMessageManager().get("admin.player-not-found", "player", args[1]));
             return;
         }
         
@@ -402,17 +402,17 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
             quest = Integer.parseInt(args[2]);
             if (quest < 1 || quest > 6) throw new NumberFormatException();
         } catch (NumberFormatException e) {
-            sender.sendMessage(plugin.getMessages().get("admin.invalid-quest", "quest", args[2]));
+            sender.sendMessage(plugin.getMessageManager().get("admin.invalid-quest", "quest", args[2]));
             return;
         }
         
         plugin.getQuestManager().setQuest(target, quest);
         
-        sender.sendMessage(plugin.getMessages().get("admin.setquest", 
+        sender.sendMessage(plugin.getMessageManager().get("admin.setquest", 
             "player", target.getName(), 
             "quest", String.valueOf(quest),
             "quest_name", plugin.getQuestManager().getQuestName(quest)));
-        target.sendMessage(plugin.getMessages().get("admin.setquest-target", 
+        target.sendMessage(plugin.getMessageManager().get("admin.setquest-target", 
             "quest_name", plugin.getQuestManager().getQuestName(quest)));
     }
 }
