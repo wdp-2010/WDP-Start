@@ -63,9 +63,9 @@ particle-path:
 # │       After portal, player is RTP'd near a tree (away from bases)           │
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest1:
-  # Rewards
+  # Rewards - Tutorial start, small amount to introduce currency
   rewards:
-    skillcoins: 30
+    skillcoins: 15
     items:
       - "APPLE:3"
 
@@ -149,12 +149,12 @@ quest2:
   # Override default AuraSkills level up message - use our own
   override-reward: true
   
-  # Rewards (given when reaching level 1)
+  # Rewards (given when reaching level 1) - teaches skill leveling
   rewards:
-    skillcoins: 40
+    skillcoins: 20
   
   # These are used in the AuraSkills-style override message
-  completion-message: "Use your 40 SkillCoins in the shop!"
+  completion-message: "Use your SkillCoins in the shop!"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                       Quest 3: Shop Tutorial                                │
@@ -162,34 +162,35 @@ quest2:
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest3:
   # Minimum item cost (player must have enough money)
-  min-item-cost: 20
+  min-item-cost: 10
   
   # Ensure player has enough money to buy something
   ensure-balance: true
   
-  # Minimum balance to ensure
-  ensure-balance-amount: 40
+  # Minimum balance to ensure (player already has ~35 from Q1+Q2)
+  ensure-balance-amount: 35
   
-  # Rewards after completing shop purchase
+  # Rewards after completing shop purchase - reward for learning shop
   rewards:
-    skillcoins: 50
+    skillcoins: 25
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                       Quest 4: Token Exchange                               │
+# │         Player learns about the token system (1 token = 500 coins)          │
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest4:
   # Minimum tokens to purchase (can buy more)
   tokens-required: 1
   
-  # Cost per token
-  token-cost: 100
+  # Cost per token - 1 Token = 500 Coins (premium currency ratio)
+  token-cost: 500
   
   # Auto top-up if player doesn't have enough coins
   auto-topup: true
   
-  # Rewards after purchasing
+  # Rewards after purchasing - teaches token value
   rewards:
-    skillcoins: 60
+    skillcoins: 30
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                      Quest 5: Quest Menu Tutorial                           │
@@ -199,9 +200,9 @@ quest5:
   # Simplified quest objective to display
   objective: "Complete this simple task!"
   
-  # Rewards
+  # Rewards - introduces daily quest system
   rewards:
-    skillcoins: 20
+    skillcoins: 15
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                       Quest 6: Community Support                            │
@@ -210,14 +211,14 @@ quest6:
   # Discord invite link
   discord-link: "https://discord.gg/yourserver"
   
-  # Final rewards for completing all quests
+  # Final rewards for completing all tutorial quests
+  # Generous to give players a head start in the economy
   final-rewards:
-    skillcoins: 100
-    skilltokens: 10
+    skillcoins: 50
+    skilltokens: 1
     items:
-      - "DIAMOND:1"
-      - "IRON_INGOT:8"
-      - "BREAD:16"
+      - "IRON_INGOT:4"
+      - "BREAD:8"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                          Cancellation & Refunds                             │
