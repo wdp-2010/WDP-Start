@@ -148,3 +148,97 @@ errors:
   generic: "&cAn error occurred. Please contact an administrator."
   not-started: "&cYou haven't started the quest chain yet! Use &e/start &cto begin."
   quest-locked: "&cThis quest is locked. Complete the previous quest first!"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                              Menu Messages                                  │
+# └─────────────────────────────────────────────────────────────────────────────┘
+menu:
+  # Main menu title
+  title: "&#FFD700✦ &#FFFFFFGet Started Quests &#FFD700✦"
+  
+  # Welcome menu (for players who haven't started)
+  welcome:
+    title: "&#FFD700&l✦ &#FFFFFF&lWelcome to WDP! &#FFD700&l✦"
+    description:
+      - " "
+      - "&#AAAAAATake your first steps on the server"
+      - "&#AAAAAAby completing starter quests!"
+      - " "
+      - "&#55FF55You'll learn about:"
+      - "&#FFFFFF• Exploration & Teleportation"
+      - "&#FFFFFF• Skills & Leveling"
+      - "&#FFFFFF• Progress Tracking"
+      - "&#FFFFFF• Economy & Shopping"
+      - " "
+      - "&#FFD700&lRewards:"
+      - "&#FFD700✦ 300 ⛃"
+      - "&#FF55FF✦ 10 🎟"
+      - "&#55FFFF✦ Starter Items"
+      - " "
+    start-button:
+      name: "&#55FF55&l▶ START QUESTS"
+      lore:
+        - " "
+        - "&#AAAAAAClick to begin your adventure!"
+        - " "
+        - "&#FFFF55Tip: You can cancel anytime"
+        - "&#FFFFFFwith /quest cancel"
+        - " "
+  
+  # Progress overview
+  progress:
+    title: "&#FFD700&l✦ Progress Overview"
+    completed: "&#AAAAAACompleted: &#55FF55{completed}&#AAAAAA/&#55FF55{total}"
+    all-complete: "&#55FF55&l✓ All quests complete!"
+    current: "&#FFFFFFCurrent: &#55FFFF{quest}"
+  
+  # Quest status labels
+  quest-status:
+    completed: "&#AAAAAAStatus: &#55FF55✓ Completed"
+    in-progress: "&#AAAAAAStatus: &#FFFF55⚡ In Progress"
+    locked: "&#AAAAAAStatus: &#777777🔒 Locked"
+  
+  # Quest item labels
+  quest-item:
+    objective: "&#FFFFFFObjective:"
+    progress: "&#FFFFFFProgress: &#55FFFF{current}&#FFFFFF/&#55FFFF{total}"
+    reward: "&#FFFFFFReward:"
+    click-details: "&#FFFF55▶ Click for details"
+    complete-previous: "&#777777Complete previous quests first"
+  
+  # Cancel button
+  cancel:
+    name: "&#FF5555✗ Cancel Quests"
+    lore:
+      - " "
+      - "&#AAAAAAClick to cancel the quest chain."
+      - "&#FFFF55Unspent SkillCoins will be refunded."
+      - " "
+  
+  # Help button
+  help:
+    name: "&#55FFFF? Help"
+    lore:
+      - " "
+      - "&#AAAAAACommands:"
+      - "&#FFFFFF/quest &#AAAAAA- Open this menu"
+      - "&#FFFFFF/quest cancel &#AAAAAA- Cancel quests"
+      - " "
+      - "&#AAAAAANeed more help?"
+      - "&#55FFFF{discord}"
+      - " "
+  
+  # Navbar messages (for consistency)
+  navbar:
+    balance: "&#FFD700Balance:"
+    balance-coins: "&#FFD700SkillCoins: &#FFD700{coins} ⛃"
+    balance-tokens: "&#55FF55Tokens: &#00FFFF{tokens} 🎟"
+    back: "&#FF5555&l← Back"
+    back-lore: "&#AAAAAReturn to previous menu"
+    close: "&#FF5555&l✗ Close"
+    close-lore: "&#AAAAAAClose this menu"
+    previous: "&#FFFF00&l← Previous"
+    previous-lore: "&#AAAAAAGo to previous page"
+    next: "&#FFFF00&lNext →"
+    next-lore: "&#AAAAAAGo to next page"
+    page: "&#FFFF00&lPage &#FFFFFF&l{page} &#555555/ {total}"
