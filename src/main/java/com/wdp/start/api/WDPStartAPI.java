@@ -206,7 +206,7 @@ public class WDPStartAPI {
      */
     public static boolean shouldSuppressLevelUpMessages(Player player) {
         if (!isAvailable()) {
-            plugin.getLogger().info("[DEBUG] WDP-Start API: Not available");
+            plugin.debug("WDP-Start API: Not available");
             return false;
         }
         
@@ -214,26 +214,22 @@ public class WDPStartAPI {
             PlayerData data = plugin.getPlayerDataManager().getData(player);
             boolean transientSuppress = data.isSuppressLevelUpActive();
             if (transientSuppress) {
-                plugin.getLogger().info("[DEBUG] WDP-Start API: Transient suppression active for " + player.getName());
+                plugin.debug("WDP-Start API: Transient suppression active for " + player.getName());
             }
             boolean shouldSuppress = transientSuppress || (data.isStarted() && 
                                     data.getCurrentQuest() == 2 && 
                                     !data.isQuestCompleted(2));
             
-            plugin.getLogger().info("[DEBUG] WDP-Start API: Level up check for " + player.getName() + " at " + System.currentTimeMillis());
-            plugin.getLogger().info("  - Started: " + data.isStarted());
-            plugin.getLogger().info("  - Current Quest: " + data.getCurrentQuest());
-            plugin.getLogger().info("  - Quest 2 Completed: " + data.isQuestCompleted(2));
-            plugin.getLogger().info("  - Transient: " + transientSuppress);
-            plugin.getLogger().info("  - Should Suppress: " + shouldSuppress);
+            plugin.debug("WDP-Start API: Level up check for " + player.getName() + 
+                " - Quest: " + data.getCurrentQuest() + ", Suppress: " + shouldSuppress);
             
             if (shouldSuppress) {
-                plugin.getLogger().info("[DEBUG] WDP-Start API: Suppressing level up messages for " + player.getName());
+                plugin.debug("WDP-Start API: Suppressing level up messages for " + player.getName());
             }
             
             return shouldSuppress;
         } catch (Exception e) {
-            plugin.getLogger().warning("[DEBUG] WDP-Start API: Error checking player data for " + player.getName() + ": " + e.getMessage());
+            plugin.getLogger().warning("WDP-Start API: Error checking player data for " + player.getName() + ": " + e.getMessage());
             return false;
         }
     }

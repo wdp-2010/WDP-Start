@@ -66,8 +66,8 @@ public class QuestManager {
             
             plugin.getMessageManager().send(player, "quest.started");
             
-            // Console debug
-            plugin.getLogger().info("[DEBUG] [QuestManager] " + player.getName() + " STARTED quest chain. Saved to database.");
+            // Debug
+            plugin.debug("[QuestManager] " + player.getName() + " STARTED quest chain. Saved to database.");
             
             // Start particle path guide for Quest 1
             if (plugin.getPathGuideManager() != null) {
@@ -100,8 +100,8 @@ public class QuestManager {
                 
                 plugin.getMessageManager().send(player, "quest.next-started", "quest", String.valueOf(currentQuest + 1));
                 
-                // Console debug
-                plugin.getLogger().info("[DEBUG] [QuestManager] " + player.getName() + " STARTED next quest: " + (currentQuest + 1));
+                // Debug
+                plugin.debug("[QuestManager] " + player.getName() + " STARTED next quest: " + (currentQuest + 1));
                 
                 // Play sound
                 if (plugin.getConfigManager().isSoundsEnabled()) {
@@ -187,8 +187,8 @@ public class QuestManager {
         plugin.getPlayerDataManager().saveData(data);
         plugin.getPlayerDataManager().forceSave(player.getUniqueId());
         
-        // Console debug
-        plugin.getLogger().info("[DEBUG] [QuestManager] " + player.getName() + 
+        // Debug
+        plugin.debug("[QuestManager] " + player.getName() + 
             " completed STEP " + step + " of Quest " + quest + " (" + stepKey + "). Saved to database.");
         
         // Send step completion message
@@ -256,8 +256,8 @@ public class QuestManager {
         plugin.getPlayerDataManager().saveData(data);
         plugin.getPlayerDataManager().forceSave(player.getUniqueId());
         
-        // Console debug
-        plugin.getLogger().info("[DEBUG] [QuestManager] " + player.getName() + 
+        // Debug
+        plugin.debug("[QuestManager] " + player.getName() + 
             " COMPLETED Quest " + quest + ". Progress saved to database.");
         
         plugin.debug("Player " + player.getName() + " completed quest " + quest);

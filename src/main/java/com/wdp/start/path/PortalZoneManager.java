@@ -130,7 +130,7 @@ public class PortalZoneManager {
         player.sendMessage(WDPStartPlugin.hex("&#FFFF55Use /quests debug again to disable"));
         player.sendMessage("");
         
-        plugin.getLogger().info("[DEBUG] Enabled portal zone highlight for " + player.getName());
+        plugin.debug("Enabled portal zone highlight for " + player.getName());
     }
     
     /**
@@ -146,7 +146,7 @@ public class PortalZoneManager {
         }
         
         player.sendMessage(WDPStartPlugin.hex("&#FF5555&l✗ Debug Mode Disabled"));
-        plugin.getLogger().info("[DEBUG] Disabled portal zone highlight for " + player.getName());
+        plugin.debug("Disabled portal zone highlight for " + player.getName());
     }
     
     /**
@@ -269,10 +269,10 @@ public class PortalZoneManager {
      * Called when a player enters the portal zone
      */
     private void onPlayerEnterZone(Player player) {
-        // Console debug message
-        plugin.getLogger().info("[DEBUG] [PortalZone] " + player.getName() + 
+        // Debug message
+        plugin.debug("[PortalZone] " + player.getName() + 
             " ENTERED the portal zone at " + formatLocation(player.getLocation()));
-        plugin.getLogger().info("[DEBUG] [PortalZone] Waiting for teleport event...");
+        plugin.debug("[PortalZone] Waiting for teleport event...");
         
         // Send message to player
         player.sendMessage("");
@@ -303,10 +303,10 @@ public class PortalZoneManager {
         
         // Check if they were in the zone
         if (playersInZone.contains(uuid)) {
-            // Console debug message
-            plugin.getLogger().info("[DEBUG] [PortalZone] " + player.getName() + 
+            // Debug message
+            plugin.debug("[PortalZone] " + player.getName() + 
                 " was TELEPORTED from portal zone!");
-            plugin.getLogger().info("[DEBUG] [PortalZone] From: " + formatLocation(from) + 
+            plugin.debug("[PortalZone] From: " + formatLocation(from) + 
                 " To: " + formatLocation(to));
             
             playersInZone.remove(uuid);

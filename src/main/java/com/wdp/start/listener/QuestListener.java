@@ -99,16 +99,16 @@ public class QuestListener implements Listener {
             return;
         }
         
-        // Console debug message
-        plugin.getLogger().info("[DEBUG] [QuestListener] " + player.getName() + 
+        // Debug message
+        plugin.debug("[QuestListener] " + player.getName() + 
             " TELEPORTED from " + formatLocation(event.getFrom()) + " to " + formatLocation(event.getTo()));
-        plugin.getLogger().info("[DEBUG] [QuestListener] Teleport cause: " + event.getCause().name());
+        plugin.debug("[QuestListener] Teleport cause: " + event.getCause().name());
         
         // Notify portal zone manager
         plugin.getPortalZoneManager().onPlayerTeleport(player, event.getFrom(), event.getTo());
         
         // Teleport detected after region entry - perform RTP first
-        plugin.getLogger().info("[DEBUG] [QuestListener] " + player.getName() + 
+        plugin.debug("[QuestListener] " + player.getName() + 
             " teleported - triggering RTP...");
         
         // Mark as teleported to prevent repeated attempts
@@ -126,10 +126,9 @@ public class QuestListener implements Listener {
                         plugin.getQuestManager().completeQuest(player, 1);
                     }, 20L);
                     
-                    plugin.getLogger().info("[DEBUG] [QuestListener] " + player.getName() + " completed Quest 1 - RTP successful!");
-                    plugin.debug("Player " + player.getName() + " was teleported via portal - Quest 1 complete!");
+                    plugin.debug("[QuestListener] " + player.getName() + " completed Quest 1 - RTP successful!");
                 } else {
-                    plugin.getLogger().warning("[DEBUG] [QuestListener] RTP failed for " + player.getName() + " - quest step completed but RTP failed");
+                    plugin.debug("[QuestListener] RTP failed for " + player.getName() + " - quest step completed but RTP failed");
                 }
             });
         }, 10L);
@@ -156,14 +155,11 @@ public class QuestListener implements Listener {
         
         if (!data.isStarted()) return;
         
-        plugin.getLogger().info("[DEBUG] Player " + player.getName() + " current quest: " + data.getCurrentQuest() + ", completed: " + data.isQuestCompleted(data.getCurrentQuest()));
-        
         String command = event.getMessage().toLowerCase();
         
         // Quest 3: /shop command - INTERCEPT and show simplified shop
         if (data.getCurrentQuest() == 3 && !data.isQuestCompleted(3)) {
             if (command.startsWith("/shop")) {
-                plugin.getLogger().info("[DEBUG] Intercepting /shop command for player " + player.getName() + " on quest " + data.getCurrentQuest());
                 event.setCancelled(true); // Cancel so the shop plugin doesn't open
                 
                 PlayerData.QuestProgress progress = data.getQuestProgress(3);
@@ -189,7 +185,6 @@ public class QuestListener implements Listener {
         
         // TEMP: Also intercept /shop for quest 1 and 2 for testing
         if ((data.getCurrentQuest() == 1 || data.getCurrentQuest() == 2) && command.startsWith("/shop")) {
-            plugin.getLogger().info("[DEBUG] Intercepting /shop command for player " + player.getName() + " on quest " + data.getCurrentQuest() + " (TEMP for testing)");
             event.setCancelled(true);
             
             // Open simplified shop menu for testing

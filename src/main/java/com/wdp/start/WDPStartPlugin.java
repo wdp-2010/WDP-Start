@@ -165,8 +165,10 @@ public class WDPStartPlugin extends JavaPlugin {
                 "SkillCoinsShop/sections/Potions.yml",
                 "SkillCoinsShop/sections/Redstone.yml",
                 "SkillCoinsShop/sections/Resources.yml",
-                "SkillCoinsShop/sections/Tools.yml",
-                "SkillCoinsShop/sections/TokenExchange.yml"
+                "SkillCoinsShop/sections/SkillLevels.yml",
+                "SkillCoinsShop/sections/TokenExchange.yml",
+                "SkillCoinsShop/sections/Tokens.yml",
+                "SkillCoinsShop/sections/Tools.yml"
             };
             
             for (String file : sectionFiles) {
@@ -184,8 +186,10 @@ public class WDPStartPlugin extends JavaPlugin {
                 "SkillCoinsShop/shops/Potions.yml",
                 "SkillCoinsShop/shops/Redstone.yml",
                 "SkillCoinsShop/shops/Resources.yml",
-                "SkillCoinsShop/shops/Tools.yml",
-                "SkillCoinsShop/shops/TokenExchange.yml"
+                "SkillCoinsShop/shops/SkillLevels.yml",
+                "SkillCoinsShop/shops/TokenExchange.yml",
+                "SkillCoinsShop/shops/Tokens.yml",
+                "SkillCoinsShop/shops/Tools.yml"
             };
             
             for (String file : shopFiles) {

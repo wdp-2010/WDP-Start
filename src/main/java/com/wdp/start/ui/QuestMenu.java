@@ -600,7 +600,7 @@ public class QuestMenu {
         
         // ========== SIMPLIFIED QUEST MENU (Quest 5) ==========
         if (menuType.equals("simplified_quest")) {
-            // Quest icon click (slot 9) - complete if ready, otherwise open detail
+            // Quest icon click (slot 9) - recalculate progress, complete if ready, otherwise refresh
             if (slot == 9) {
                 PlayerData.QuestProgress progress = data.getQuestProgress(5);
                 int stoneMined = progress != null ? progress.getCounter("stone_mined", 0) : 0;
@@ -610,9 +610,26 @@ public class QuestMenu {
                     player.sendMessage(hex(plugin.getMessageManager().get("success.quest-complete")));
                     player.closeInventory();
                 } else {
-                    // Quest not complete - open detail view
-                    openQuestDetailView(player);
+                    // Quest not complete - show progress feedback and refresh the view
+                    player.sendMessage(hex(plugin.getMessageManager().get("quest-progress.stone-progress", 
+                            "current", String.valueOf(stoneMined), 
+                            "required", "5")));
+                    
+                    // Refresh the menu to show latest progress bar
+                    plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                        openSimplifiedQuestView(player);
+                    }, 2L);
                 }
+                return;
+            }
+            
+            // Progress bar click (slots 10-17) - also refresh/show progress
+            if (slot >= 10 && slot <= 17) {
+                PlayerData.QuestProgress progress = data.getQuestProgress(5);
+                int stoneMined = progress != null ? progress.getCounter("stone_mined", 0) : 0;
+                player.sendMessage(hex(plugin.getMessageManager().get("quest-progress.stone-progress", 
+                        "current", String.valueOf(stoneMined), 
+                        "required", "5")));
                 return;
             }
             
@@ -1696,8 +1713,17 @@ public class QuestMenu {
      * Apply universal navbar from navbar.yml configuration
      */
     private void applyUniversalNavbar(Inventory inv, Player player, String menuType, Map<String, Object> context) {
-        // Load navbar configuration
-        FileConfiguration config = plugin.getConfig();
+        // Load navbar configuration from navbar.yml (not config.yml!)
+        File navbarFile = new File(plugin.getDataFolder(), "navbar.yml");
+        FileConfiguration config;
+        if (navbarFile.exists()) {
+            config = YamlConfiguration.loadConfiguration(navbarFile);
+        } else {
+            // Fallback navbar
+            createFallbackNavbar(inv, context);
+            return;
+        }
+        
         if (!config.contains("navbar")) {
             // Fallback navbar
             createFallbackNavbar(inv, context);

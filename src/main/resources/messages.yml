@@ -143,10 +143,10 @@ admin:
   player-not-found: "&cPlayer not found: &e{player}"
   invalid-quest: "&cInvalid quest number: &e{quest} &c(must be 1-6)"
   usage:
-    reset: "&cUsage: /quests reset <player>"
-    complete: "&cUsage: /quests complete <player> <quest>"
-    setquest: "&cUsage: /quests setquest <player> <quest>\n&7Sets the player to start at a specific quest (1-6)"
-    debug: "&cUsage: /quests debug <player>"
+    reset: "&cUsage: /start reset <player>"
+    complete: "&cUsage: /start complete <player> <quest>"
+    setquest: "&cUsage: /start setquest <player> <quest>\n&7Sets the player to start at a specific quest (1-6)"
+    debug: "&cUsage: /start debug <player>"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                             Error Messages                                  │
@@ -588,7 +588,7 @@ quests:
     quest2: "Reach Foraging level 1"
     quest3: "Open /shop and buy an item"
     quest4: "Convert SkillCoins to Tokens"
-    quest5: "Open /quests and complete the task"
+    quest5: "Open /quest and complete the task"
     quest6: "Join Discord for help!"
     unknown: "Unknown"
   hints:
@@ -602,7 +602,7 @@ quests:
     quest2: "Chop trees to reach Foraging level 1"
     quest3: "Open /shop and buy an item"
     quest4: "Open /shop and exchange tokens"
-    quest5: "Open /quests to see your progress"
+    quest5: "Open /quest to see your progress"
     quest6: "Click to complete and join Discord!"
     default: "Continue your adventure!"
   
@@ -634,6 +634,12 @@ listener:
   objective-complete:
     title: "&#FFD700§l✓ Objective Complete!"
     instruction: "&#FFFFFFType &#55FF55/quest&#FFFFFF to complete Quest 5!"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                        Quest Progress Messages                              │
+# └─────────────────────────────────────────────────────────────────────────────┘
+quest-progress:
+  stone-progress: "&#55FFFF⛏ Stone Progress: &#FFFFFF{current}/{required}"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                        Success Messages                                     │
