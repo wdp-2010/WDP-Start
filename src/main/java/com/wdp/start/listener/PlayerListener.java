@@ -40,6 +40,19 @@ public class PlayerListener implements Listener {
             }, delay);
         }
         
+        // If player is on Quest 1 and it's not completed, restart particle path
+        if (data.isStarted() && data.getCurrentQuest() == 1 && !data.isQuestCompleted(1)) {
+            if (plugin.getPathGuideManager() != null) {
+                plugin.debug("Restarting particle path guide for " + player.getName() + " on rejoin");
+                // Delay slightly to ensure player is fully loaded
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    if (player.isOnline()) {
+                        plugin.getPathGuideManager().startPath(player);
+                    }
+                }, 20L); // 1 second delay
+            }
+        }
+        
         plugin.debug("Player " + player.getName() + " joined. Quest started: " + data.isStarted());
     }
     

@@ -90,7 +90,7 @@ public class UnifiedMenuManager {
     public void applyNavbar(Inventory inv, Player player, String menuType, Map<String, Object> context) {
         FileConfiguration config = navbarConfigs.get("default");
         if (config == null) {
-            createFallbackNavbar(inv, player, menuType, context);
+            // No config loaded - skip navbar
             return;
         }
 
@@ -102,14 +102,11 @@ public class UnifiedMenuManager {
 
         ConfigurationSection navbarSection = config.getConfigurationSection("navbar");
         if (navbarSection == null) {
-            createFallbackNavbar(inv, player, menuType, context);
+            // No navbar config - skip
             return;
         }
 
-        // First, fill all navbar slots with glass panes as default
-        for (int i = 45; i <= 53; i++) {
-            inv.setItem(i, globalItems.createGlassPane());
-        }
+        // Don't fill with glass - let navbar config handle everything
 
         // Process each navbar item
         for (String itemName : navbarSection.getKeys(false)) {
@@ -219,10 +216,7 @@ public class UnifiedMenuManager {
      * Apply navbar for exception menus (e.g., skill selection - only back button)
      */
     private void applyExceptionNavbar(Inventory inv, FileConfiguration config, String menuType, Map<String, Object> context) {
-        // Fill with glass first
-        for (int i = 45; i <= 53; i++) {
-            inv.setItem(i, globalItems.createGlassPane());
-        }
+        // Don't fill with glass - let navbar config handle it
 
         ConfigurationSection exceptions = config.getConfigurationSection("exceptions");
         if (exceptions == null) return;
@@ -360,46 +354,7 @@ public class UnifiedMenuManager {
         return result;
     }
 
-    /**
-     * Create a fallback navbar when YAML is not available
-     */
-    private void createFallbackNavbar(Inventory inv, Player player, String menuType, Map<String, Object> context) {
-        // Fill row 5 with glass
-        for (int i = 45; i <= 53; i++) {
-            inv.setItem(i, globalItems.createGlassPane());
-        }
-        
-        // Balance at slot 45
-        double coins = context != null ? getContextDouble(context, "coins", 0) : 0;
-        double tokens = context != null ? getContextDouble(context, "tokens", 0) : 0;
-        inv.setItem(45, globalItems.createBalanceItem(coins, tokens));
-        
-        // Previous page at 48 if needed
-        if (context != null && context.containsKey("page") && context.containsKey("total_pages")) {
-            int page = getContextInt(context, "page", 1);
-            int totalPages = getContextInt(context, "total_pages", 1);
-            
-            if (page > 1) {
-                inv.setItem(48, globalItems.createPreviousPageItem(page));
-            }
-            
-            // Page info at 49
-            inv.setItem(49, globalItems.createPageInfoItem(page, totalPages));
-            
-            // Next page at 50 if needed
-            if (page < totalPages) {
-                inv.setItem(50, globalItems.createNextPageItem(page, totalPages));
-            }
-        }
-        
-        // Back/Close at 53
-        String previousMenu = context != null ? (String) context.get("previous_menu") : null;
-        if (previousMenu != null) {
-            inv.setItem(53, globalItems.createBackItem(previousMenu));
-        } else {
-            inv.setItem(53, globalItems.createCloseItem());
-        }
-    }
+
 
     /**
      * Get double from context with default value

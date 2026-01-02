@@ -30,15 +30,17 @@ navbar:
     lore:
       - '§7Go to previous page'
 
-  # Slot 49: Page info (center)
-  page_info:
+  # Slot 49: Quest progress (center)
+  quest_progress:
     slot: 49
-    material: paper
-    display_name: '§e§lPage §f§l{page} §8/ §f§l{total_pages}'
+    material: clock
+    display_name: '§e§lQuest Progress'
     lore:
       - ''
-      - '§7Current page: §f{page}'
-      - '§7Total pages: §f{total_pages}'
+      - '§7Completed: §f{completed_quests}§8/§f{total_quests}'
+      - '§a{progress_bar}'
+      - ''
+      - '§7Current Quest: §f{current_quest}'
       - ''
 
   # Slot 50: Next page (only shown when page < total_pages)

@@ -75,9 +75,6 @@ public class QuestMenu {
         String title = hex(plugin.getMessageManager().get("menu.title"));
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
-        // Fill background
-        fillBackground(inv, Material.GRAY_STAINED_GLASS_PANE);
-        
         // Determine menu type based on quest progress
         if (!data.isStarted()) {
             // Not started - show welcome/start menu
@@ -147,47 +144,7 @@ public class QuestMenu {
         inv.setItem(31, createQuestItem(5, data));
         inv.setItem(33, createQuestItem(6, data));
         
-        // Stats row on row 5 (after one row gap)
-        
-        // Progress overview (slot 49 - center of row 5)
-        int completed = data.getCompletedQuestCount();
-        String progressCompleted = plugin.getMessageManager().get("menu.progress.completed", 
-            "completed", String.valueOf(completed), "total", "6");
-        String currentStatus = data.isCompleted() 
-            ? hex(plugin.getMessageManager().get("menu.progress.all-complete")) 
-            : hex(plugin.getMessageManager().get("menu.progress.current", 
-                "quest", plugin.getQuestManager().getQuestName(data.getCurrentQuest())));
-        ItemStack progress = createItem(Material.CLOCK,
-            hex(plugin.getMessageManager().get("menu.progress.title")),
-            " ",
-            hex(progressCompleted),
-            createProgressBar(completed, 6),
-            " ",
-            currentStatus,
-            " "
-        );
-        inv.setItem(49, progress);
-        
-        // Cancel button (slot 45) - only if started and not completed
-        if (data.isStarted() && !data.isCompleted()) {
-            List<String> cancelLore = plugin.getMessageManager().getList("menu.cancel.lore");
-            String[] cancelLoreArray = cancelLore.stream().map(this::hex).toArray(String[]::new);
-            ItemStack cancel = createItem(Material.RED_CONCRETE,
-                hex(plugin.getMessageManager().get("menu.cancel.name")),
-                cancelLoreArray
-            );
-            inv.setItem(45, cancel);
-        }
-        
-        // Help (slot 53)
-        List<String> helpLore = plugin.getMessageManager().getList("menu.help.lore", 
-            "discord", plugin.getConfigManager().getDiscordLink());
-        String[] helpLoreArray = helpLore.stream().map(this::hex).toArray(String[]::new);
-        ItemStack help = createItem(Material.WRITABLE_BOOK,
-            hex(plugin.getMessageManager().get("menu.help.name")),
-            helpLoreArray
-        );
-        inv.setItem(53, help);
+        // Bottom row (45-53) is handled by universal navbar
     }
     
     /**
@@ -321,6 +278,15 @@ public class QuestMenu {
         context.put("completed_quests", completed);
         context.put("total_quests", 6);
         
+        // Add progress bar
+        context.put("progress_bar", createProgressBar(completed, 6));
+        
+        // Add current quest info
+        String currentQuestName = data.isCompleted() 
+            ? plugin.getMessageManager().get("menu.progress.all-complete")
+            : plugin.getQuestManager().getQuestName(data.getCurrentQuest());
+        context.put("current_quest", currentQuestName);
+        
         // Add currency info if available
         double coins = 0;
         int tokens = 0;
@@ -328,6 +294,7 @@ public class QuestMenu {
             coins = plugin.getVaultIntegration().getBalance(player);
         }
         context.put("balance", coins);
+        context.put("coins", String.format("%.0f", coins)); // For navbar display
         context.put("tokens", tokens);
         
         applyUniversalNavbar(inv, player, "main", context);
@@ -485,9 +452,6 @@ public class QuestMenu {
                     openSimplifiedQuestView(player);
                 } else if (menuType.startsWith("skillcoins_shop_section")) {
                     openSimplifiedShopItems(player);
-                } else {
-                    // For main menu or other menus, back button closes the menu
-                    player.closeInventory();
                 }
                 return;
             }
@@ -840,17 +804,6 @@ public class QuestMenu {
     }
     
     // ==================== UTILITY METHODS ====================
-    
-    private void fillBackground(Inventory inv, Material material) {
-        ItemStack bg = new ItemStack(material);
-        ItemMeta meta = bg.getItemMeta();
-        meta.setDisplayName(" ");
-        bg.setItemMeta(meta);
-        
-        for (int i = 0; i < 54; i++) {
-            inv.setItem(i, bg);
-        }
-    }
     
     private ItemStack createItem(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);
@@ -1214,17 +1167,6 @@ public class QuestMenu {
         context.put("balance", (int) Math.round(coins));
         applyUniversalNavbar(inv, player, "shop_section", context);
         
-        // Back button (slot 53)
-        ItemStack back = new ItemStack(Material.SPYGLASS);
-        ItemMeta backMeta = back.getItemMeta();
-        if (backMeta != null) {
-            backMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.section.back.name")));
-            List<String> backLore = plugin.getMessageManager().getList("shop.section.back.lore");
-            backMeta.setLore(backLore.stream().map(this::hex).toList());
-            back.setItemMeta(backMeta);
-        }
-        inv.setItem(53, back);
-        
         // Track menu
         player.openInventory(inv);
         openMenus.put(player.getUniqueId(), new MenuSession(player, "skillcoins_shop_section_" + category.toLowerCase(), 3));
@@ -1458,17 +1400,6 @@ public class QuestMenu {
             }
         }
         
-        // Back button (slot 53)
-        ItemStack close = new ItemStack(Material.SPYGLASS);
-        ItemMeta closeMeta = close.getItemMeta();
-        if (closeMeta != null) {
-            closeMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.back.name")));
-            List<String> closeLore = plugin.getMessageManager().getList("shop.token-exchange.back.lore");
-            closeMeta.setLore(closeLore.stream().map(this::hex).toList());
-            close.setItemMeta(closeMeta);
-        }
-        inv.setItem(53, close);
-        
         // Open and track
         player.openInventory(inv);
         openMenus.put(player.getUniqueId(), new MenuSession(player, "skillcoins_shop_tokens", 4));
@@ -1619,9 +1550,6 @@ public class QuestMenu {
         double completion = Math.min(100.0, (stoneMined * 100.0) / stoneTarget);
         boolean isComplete = stoneMined >= stoneTarget;
         
-        // Fill background with black glass panes (like WDP-Quest)
-        fillBackground(inv, Material.BLACK_STAINED_GLASS_PANE);
-        
         // Get player balance
         double coins = 0;
         int tokens = 0;
@@ -1719,14 +1647,12 @@ public class QuestMenu {
         if (navbarFile.exists()) {
             config = YamlConfiguration.loadConfiguration(navbarFile);
         } else {
-            // Fallback navbar
-            createFallbackNavbar(inv, context);
+            // No navbar config - skip
             return;
         }
         
         if (!config.contains("navbar")) {
-            // Fallback navbar
-            createFallbackNavbar(inv, context);
+            // No navbar section - skip
             return;
         }
 
@@ -1734,24 +1660,41 @@ public class QuestMenu {
         for (String itemName : config.getConfigurationSection("navbar").getKeys(false)) {
             Map<String, Object> itemConfig = config.getConfigurationSection("navbar." + itemName).getValues(false);
             
+            // Handle glass_fill with multiple slots
+            if ("glass_fill".equals(itemName)) {
+                @SuppressWarnings("unchecked")
+                List<Integer> slots = (List<Integer>) itemConfig.get("slots");
+                if (slots != null) {
+                    ItemStack glassItem = createNavbarItem(itemName, itemConfig, player, context);
+                    if (glassItem != null) {
+                        for (Integer slot : slots) {
+                            if (slot >= 45 && slot <= 53) {
+                                inv.setItem(slot, glassItem);
+                            }
+                        }
+                    }
+                }
+                continue;
+            }
+            
             Integer slot = (Integer) itemConfig.get("slot");
             if (slot == null || slot < 45 || slot > 53) continue;
             
             // Handle special cases
             if ("back".equals(itemName)) {
-                // Always show back button - it can close the menu if no previous menu
-                // if (context == null || !context.containsKey("previous_menu")) {
-                //     inv.setItem(slot, createGlassPane());
-                //     continue;
-                // }
+                // Only show back button if there's a previous menu
+                if (context == null || !context.containsKey("previous_menu")) {
+                    // Skip back button for main menu
+                    continue;
+                }
             }
             
             if ("close".equals(itemName)) {
-                // Always show close button
-                // if (context != null && context.containsKey("previous_menu")) {
-                //     inv.setItem(slot, createGlassPane());
-                //     continue;
-                // }
+                // Only show close button if there's NO previous menu
+                if (context != null && context.containsKey("previous_menu")) {
+                    // Skip close button if there's a back button
+                    continue;
+                }
             }
             
             if ("previous_page".equals(itemName) || "next_page".equals(itemName)) {
@@ -1776,6 +1719,13 @@ public class QuestMenu {
             
             if ("page_info".equals(itemName)) {
                 if (context == null || !context.containsKey("page") || !context.containsKey("total_pages")) {
+                    inv.setItem(slot, createGlassPane());
+                    continue;
+                }
+            }
+            
+            if ("quest_progress".equals(itemName)) {
+                if (context == null || !context.containsKey("completed_quests") || !context.containsKey("total_quests")) {
                     inv.setItem(slot, createGlassPane());
                     continue;
                 }
@@ -1806,13 +1756,13 @@ public class QuestMenu {
         ItemMeta meta = item.getItemMeta();
         
         if (displayName != null) {
-            meta.setDisplayName(replacePlaceholders(displayName, context));
+            meta.setDisplayName(hex(replacePlaceholders(displayName, context)));
         }
         
         if (lore != null) {
             List<String> processedLore = new ArrayList<>();
             for (String line : lore) {
-                processedLore.add(replacePlaceholders(line, context));
+                processedLore.add(hex(replacePlaceholders(line, context)));
             }
             meta.setLore(processedLore);
         }
@@ -1832,35 +1782,6 @@ public class QuestMenu {
             result = result.replace("{" + entry.getKey() + "}", String.valueOf(entry.getValue()));
         }
         return result;
-    }
-    
-    /**
-     * Create fallback navbar
-     */
-    private void createFallbackNavbar(Inventory inv, Map<String, Object> context) {
-        // Fill navbar row with black glass panes
-        for (int i = 45; i < 54; i++) {
-            inv.setItem(i, createGlassPane());
-        }
-        
-        // Page info (slot 49)
-        int page = context != null && context.containsKey("page") ? (Integer) context.get("page") : 1;
-        int totalPages = context != null && context.containsKey("total_pages") ? (Integer) context.get("total_pages") : 1;
-        inv.setItem(49, createItem(
-            Material.PAPER,
-            hex(plugin.getMessageManager().get("items.page-info.name", 
-                "current", String.valueOf(page), "total", String.valueOf(totalPages))),
-            hex(plugin.getMessageManager().get("menu.navbar.page.lore", 
-                "page", String.valueOf(page), "total", String.valueOf(totalPages)))
-        ));
-        
-        // Close button (slot 53)
-        List<String> closeLore = plugin.getMessageManager().getList("items.close.lore");
-        inv.setItem(53, createItem(
-            Material.BARRIER,
-            hex(plugin.getMessageManager().get("items.close.name")),
-            closeLore.stream().map(this::hex).toArray(String[]::new)
-        ));
     }
     
     /**
@@ -1891,7 +1812,6 @@ public class QuestMenu {
             inv.setItem(startSlot + i, item);
         }
     }
-    
     // ==================== HELPER METHODS ====================
     
     private ItemStack createShopCategory(Material icon, String name, String description, int itemCount, boolean clickable) {
@@ -2058,9 +1978,6 @@ public class QuestMenu {
         int stoneTarget = 5;
         double completion = Math.min(100.0, (stoneMined * 100.0) / stoneTarget);
         boolean isComplete = stoneMined >= stoneTarget;
-        
-        // Fill background with gray glass panes (like WDP-Quest detail view)
-        fillBackground(inv, Material.GRAY_STAINED_GLASS_PANE);
         
         // === ROW 0: Header ===
         // Quest icon (slot 4)
