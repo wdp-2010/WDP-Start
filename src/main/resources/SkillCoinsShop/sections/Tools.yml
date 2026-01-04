@@ -1,4 +1,14 @@
 enable: true
 slot: 11
-material: DIAMOND_PICKAXE
-displayname: 'Tools'
+title: ''
+hidden: false
+sub-section: false
+display-item: false
+fill-item:
+  material: AIR
+nav-bar:
+  mode: INHERIT
+item:
+  material: NETHERITE_PICKAXE
+  displayname: '&b⛏ Tools'
+  name: '&b⛏ Tools'

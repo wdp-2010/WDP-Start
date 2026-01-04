@@ -124,6 +124,13 @@ public class WDPStartPlugin extends JavaPlugin {
         saveDefaultConfig();
         configManager = new ConfigManager(this);
         
+        // Extract navbar.yml if it doesn't exist
+        java.io.File navbarFile = new java.io.File(getDataFolder(), "navbar.yml");
+        if (!navbarFile.exists()) {
+            saveResource("navbar.yml", false);
+            getLogger().info("Extracted navbar.yml configuration.");
+        }
+        
         // Messages
         messageManager = new MessageManager(this);
         

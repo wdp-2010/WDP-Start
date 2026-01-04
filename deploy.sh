@@ -5,7 +5,8 @@
 # ║                   Professional Quest System Deployment                     ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
-set -e
+# Don't exit on error - we need to handle errors gracefully
+set +e
 
 # Colors
 RED='\033[0;31m'
@@ -61,6 +62,12 @@ fi
 print_step "Building ${PLUGIN_NAME}..."
 mvn clean package -DskipTests -q
 
+BUILD_EXIT=$?
+if [ $BUILD_EXIT -ne 0 ]; then
+    print_error "Build failed with exit code $BUILD_EXIT"
+    exit 1
+fi
+
 if [ ! -f "target/${JAR_NAME}" ]; then
     print_error "Build failed! JAR not found: target/${JAR_NAME}"
     exit 1
@@ -68,43 +75,42 @@ fi
 
 print_success "Build completed: target/${JAR_NAME}"
 
-# Step 2: Stop the server (robust Pterodactyl Docker handling)
+# Step 2: Stop the server container
 print_step "Stopping server container..."
 
-# Get docker container name from pterodactyl container ID
-DOCKER_CONTAINER=$(docker ps -a --format '{{.Names}}' | grep -i "${CONTAINER_ID:0:12}" | head -1)
+# Find the actual running container by the pterodactyl container ID
+CONTAINER_FULL_ID=$(docker ps -a --filter "name=b8f24891-b5be-4847-a96e-c705c500aece" --format "{{.ID}}" | head -1)
 
-if [ -z "$DOCKER_CONTAINER" ]; then
-    DOCKER_CONTAINER="${CONTAINER_ID:0:12}"
+if [ -z "$CONTAINER_FULL_ID" ]; then
+    print_error "Could not find container!"
+    exit 1
 fi
 
-# Check if container is running
-if docker ps -q --filter "name=${DOCKER_CONTAINER}" | grep -q . 2>/dev/null || docker ps -q --filter "id=${CONTAINER_ID:0:12}" | grep -q . 2>/dev/null; then
-    docker stop "$DOCKER_CONTAINER" > /dev/null 2>&1 || docker stop "${CONTAINER_ID:0:12}" > /dev/null 2>&1
-    
+print_step "Found container: $CONTAINER_FULL_ID"
+
+# Stop the container
+docker stop "$CONTAINER_FULL_ID" 2>/dev/null
+STOP_EXIT=$?
+
+if [ $STOP_EXIT -eq 0 ]; then
     print_step "Waiting for container to stop..."
-    STOP_TIMEOUT=30
-    STOP_COUNTER=0
-    
-    while docker ps -q --filter "name=${DOCKER_CONTAINER}" | grep -q . 2>/dev/null || docker ps -q --filter "id=${CONTAINER_ID:0:12}" | grep -q . 2>/dev/null; do
+    WAIT_COUNT=0
+    while docker ps -q --filter "id=$CONTAINER_FULL_ID" 2>/dev/null | grep -q . 2>/dev/null; do
         sleep 1
-        STOP_COUNTER=$((STOP_COUNTER + 1))
-        
-        if [ $STOP_COUNTER -ge $STOP_TIMEOUT ]; then
-            print_warning "Container did not stop within ${STOP_TIMEOUT} seconds!"
-            print_step "Forcing container stop..."
-            docker kill "$DOCKER_CONTAINER" > /dev/null 2>&1 || docker kill "${CONTAINER_ID:0:12}" > /dev/null 2>&1
+        WAIT_COUNT=$((WAIT_COUNT + 1))
+        if [ $WAIT_COUNT -ge 15 ]; then
+            print_warning "Container slow to stop, killing..."
+            docker kill "$CONTAINER_FULL_ID" 2>/dev/null
             sleep 2
             break
         fi
     done
-    
-    print_success "Container stopped (took ${STOP_COUNTER}s)"
+    print_success "Container stopped (took ${WAIT_COUNT}s)"
 else
-    print_warning "Container is already stopped or not found"
+    print_warning "Container stop command failed, but continuing..."
 fi
 
-# Safety wait for file handles to release
+# Safety wait for file handles
 sleep 2
 
 # Step 3: Backup existing plugin
@@ -146,24 +152,42 @@ chown -R pterodactyl:pterodactyl "${CONFIG_DIR}" 2>/dev/null || true
 # Step 7: Start the server
 print_step "Starting server container..."
 
-docker start "$DOCKER_CONTAINER" > /dev/null 2>&1 || docker start "${CONTAINER_ID:0:12}" > /dev/null 2>&1
+# Start container using the full container ID we found earlier
+docker start "$CONTAINER_FULL_ID" 2>&1
+START_EXIT=$?
 
-if [ $? -eq 0 ]; then
-    print_success "Container started"
+if [ $START_EXIT -ne 0 ]; then
+    print_warning "Start command returned error code $START_EXIT, but checking if running anyway..."
+fi
+
+# Wait for container to actually start
+print_step "Verifying container is running..."
+sleep 3
+VERIFY_COUNT=$(docker ps -q --filter "id=$CONTAINER_FULL_ID" 2>/dev/null | wc -l)
+
+if [ $VERIFY_COUNT -gt 0 ]; then
+    print_success "Container is running!"
+    print_step "Waiting for server to initialize (20s)..."
+    INIT_FAIL=0
+    for i in $(seq 1 20); do
+        STILL_RUNNING=$(docker ps -q --filter "id=$CONTAINER_FULL_ID" 2>/dev/null | wc -l)
+        if [ $STILL_RUNNING -eq 0 ]; then
+            print_error "Container stopped unexpectedly during initialization!"
+            INIT_FAIL=1
+            break
+        fi
+        sleep 1
+    done
     
-    # Wait for startup and show status
-    print_step "Waiting for server to initialize (15s)..."
-    sleep 15
-    
-    # Check container health
-    if docker ps -q --filter "name=${DOCKER_CONTAINER}" | grep -q . 2>/dev/null || docker ps -q --filter "id=${CONTAINER_ID:0:12}" | grep -q . 2>/dev/null; then
-        print_success "Server is running"
+    if [ $INIT_FAIL -eq 0 ]; then
+        print_success "Server initialization complete"
     else
-        print_warning "Server may have stopped - check Pterodactyl console"
+        exit 1
     fi
 else
-    print_warning "Could not start container automatically"
-    print_step "Please start the server manually from Pterodactyl panel"
+    print_error "Container failed to start! Status:"
+    docker ps -a --filter "id=$CONTAINER_FULL_ID" --format "ID: {{.ID}}\nName: {{.Names}}\nStatus: {{.Status}}"
+    exit 1
 fi
 
 # Summary

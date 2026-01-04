@@ -1,4 +1,14 @@
 enable: true
 slot: 24
-material: REDSTONE
-displayname: 'Redstone'
+title: ''
+hidden: false
+sub-section: false
+display-item: false
+fill-item:
+  material: AIR
+nav-bar:
+  mode: INHERIT
+item:
+  material: REDSTONE_BLOCK
+  displayname: '&c⚡ Redstone'
+  name: '&c⚡ Redstone'

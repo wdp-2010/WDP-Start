@@ -1,85 +1,57 @@
-pages:
-  page1:
-    items:
-      token_1:
-        material: EMERALD
-        buy: 100
-        currency: coins
-        tokens: 1
-        displayname: "&b1 🎟"
-        lore:
-          - "&7Exchange coins for tokens"
-          - "&7Cost: &6100 ⛃"
-          - "&7Receive: &b1 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      token_5:
-        material: EMERALD
-        buy: 450
-        currency: coins
-        tokens: 5
-        displayname: "&b5 🎟"
-        lore:
-          - "&7Exchange coins for tokens"
-          - "&7Cost: &6450 ⛃"
-          - "&7Receive: &b5 🎟"
-          - ""
-          - "&a10% Discount!"
-          - "&eClick to purchase!"
-      
-      token_10:
-        material: EMERALD
-        buy: 850
-        currency: coins
-        tokens: 10
-        displayname: "&b10 🎟"
-        lore:
-          - "&7Exchange coins for tokens"
-          - "&7Cost: &6850 ⛃"
-          - "&7Receive: &b10 🎟"
-          - ""
-          - "&a15% Discount!"
-          - "&eClick to purchase!"
-      
-      token_25:
-        material: EMERALD
-        buy: 2000
-        currency: coins
-        tokens: 25
-        displayname: "&b25 🎟"
-        lore:
-          - "&7Exchange coins for tokens"
-          - "&7Cost: &62,000 ⛃"
-          - "&7Receive: &b25 🎟"
-          - ""
-          - "&a20% Discount!"
-          - "&eClick to purchase!"
-      
-      token_50:
-        material: EMERALD_BLOCK
-        buy: 3750
-        currency: coins
-        tokens: 50
-        displayname: "&b50 🎟"
-        lore:
-          - "&7Exchange coins for tokens"
-          - "&7Cost: &63,750 ⛃"
-          - "&7Receive: &b50 🎟"
-          - ""
-          - "&a25% Discount!"
-          - "&eClick to purchase!"
-      
-      token_100:
-        material: EMERALD_BLOCK
-        buy: 7000
-        currency: coins
-        tokens: 100
-        displayname: "&b100 🎟"
-        lore:
-          - "&7Exchange coins for tokens"
-          - "&7Cost: &67,000 ⛃"
-          - "&7Receive: &b100 🎟"
-          - ""
-          - "&a30% Discount!"
-          - "&eClick to purchase!"
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                    TOKEN EXCHANGE - BALANCED ECONOMY V2                       ║
+# ╠══════════════════════════════════════════════════════════════════════════════╣
+# ║ CORE EXCHANGE RATE: 1 Token = 500 SkillCoins                                  ║
+# ║                                                                               ║
+# ║ Tokens are the premium currency earned through:                               ║
+# ║ - Skill level milestones (every 10 levels)                                    ║
+# ║ - Hard quest completions                                                      ║
+# ║ - Special achievements                                                        ║
+# ║                                                                               ║
+# ║ Tokens unlock:                                                                ║
+# ║ - Enchanted books (skip the grind)                                            ║
+# ║ - Skill level purchases (direct progression)                                  ║
+# ║ - Premium convenience items                                                   ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# Token Exchange Configuration
+exchange:
+  # Base rate: 1 token = 500 coins
+  rate: 500
+  
+  # Minimum tokens to purchase
+  min-purchase: 1
+  
+  # Maximum tokens per transaction
+  max-purchase: 100
+  
+  # Preset amounts for quick purchase
+  presets:
+    - 1      # 500 coins
+    - 5      # 2,500 coins
+    - 10     # 5,000 coins
+    - 25     # 12,500 coins
+    - 50     # 25,000 coins
+    - 100    # 50,000 coins
+
+# Display settings
+display:
+  title: "&8&l✦ &6&lToken Exchange &8&l✦"
+  token-icon: EMERALD
+  coin-icon: GOLD_NUGGET
+  
+  # Lore for token display
+  token-lore:
+    - ""
+    - "&7Premium currency for special purchases"
+    - "&7Rate: &e1 Token &7= &6500 SkillCoins"
+    - ""
+    - "&a▸ Used for enchantments"
+    - "&a▸ Used for skill level purchases"
+    - ""
+
+# Messages
+messages:
+  purchase-success: "&a✓ Purchased &e%tokens% token(s) &afor &6%cost% coins!"
+  insufficient-funds: "&c✗ You need &6%cost% coins &cto buy &e%tokens% token(s)!"
+  max-exceeded: "&cYou can only buy up to &e100 tokens &cper transaction!"

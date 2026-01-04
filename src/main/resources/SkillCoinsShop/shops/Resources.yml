@@ -1,308 +1,162 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                      RESOURCES SHOP - BALANCED ECONOMY V2                     ║
+# ╠══════════════════════════════════════════════════════════════════════════════╣
+# ║ Pricing Philosophy:                                                           ║
+# ║ - Raw materials: Based on mining difficulty + spawn rarity                    ║
+# ║ - Coal/Iron: Very farmable, low prices to not compete with mining             ║
+# ║ - Diamonds: High value but selling should feel worthwhile                     ║
+# ║ - Netherite: Premium pricing, actual mining is encouraged                     ║
+# ║ - Sell prices encourage farming/mining over shop flipping                     ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
 pages:
   page1:
     items:
-      # Ores & Minerals
+      # ═══════ COMMON MATERIALS - Very farmable ═══════
       '1':
         material: COAL
-        buy: 5
-        sell: 1.5
+        buy: 1.5
+        sell: 0.4
       '2':
-        material: COPPER_INGOT
-        buy: 8
-        sell: 2.5
+        material: RAW_IRON
+        buy: 7.5
+        sell: 2.25
       '3':
         material: IRON_INGOT
-        buy: 15
-        sell: 5
+        buy: 11.5
+        sell: 3.45
       '4':
-        material: GOLD_INGOT
-        buy: 25
-        sell: 8
+        material: RAW_COPPER
+        buy: 2.5
+        sell: 0.75
       '5':
-        material: REDSTONE
-        buy: 10
-        sell: 3
+        material: COPPER_INGOT
+        buy: 4.5
+        sell: 1.35
+      
+      # ═══════ UNCOMMON MATERIALS ═══════
       '6':
-        material: LAPIS_LAZULI
-        buy: 12
-        sell: 4
+        material: RAW_GOLD
+        buy: 14.5
+        sell: 4.35
       '7':
-        material: DIAMOND
-        buy: 100
-        sell: 30
+        material: GOLD_INGOT
+        buy: 21.5
+        sell: 6.45
       '8':
-        material: EMERALD
-        buy: 80
-        sell: 25
+        material: LAPIS_LAZULI
+        buy: 5.5
+        sell: 1.65
       '9':
-        material: NETHERITE_INGOT
-        buy: 500
-        sell: 150
+        material: REDSTONE
+        buy: 2.5
+        sell: 0.75
       '10':
-        material: NETHERITE_SCRAP
-        buy: 200
-        sell: 60
-      '11':
-        material: ANCIENT_DEBRIS
-        buy: 250
-        sell: 75
-      
-      # Rare Materials
-      '12':
-        material: AMETHYST_SHARD
-        buy: 20
-        sell: 6
-      '13':
-        material: ECHO_SHARD
-        buy: 150
-        sell: 45
-      '14':
-        material: DISC_FRAGMENT_5
-        buy: 100
-        sell: 30
-      '15':
-        material: NETHERITE_UPGRADE_SMITHING_TEMPLATE
-        buy: 400
-        sell: 120
-      
-      # Nether Materials
-      '16':
-        material: BLAZE_ROD
-        buy: 40
-        sell: 12
-      '17':
-        material: BLAZE_POWDER
-        buy: 20
-        sell: 6
-      '18':
-        material: NETHER_STAR
-        buy: 1000
-        sell: 300
-      '19':
-        material: GHAST_TEAR
-        buy: 35
-        sell: 10
-      '20':
-        material: MAGMA_CREAM
-        buy: 25
-        sell: 8
-      '21':
-        material: GLOWSTONE_DUST
-        buy: 8
-        sell: 2.5
-      '22':
         material: QUARTZ
-        buy: 5
-        sell: 1.5
+        buy: 3.5
+        sell: 1.05
       
-      # End Materials
-      '23':
-        material: ENDER_PEARL
-        buy: 25
-        sell: 8
-      '24':
-        material: ENDER_EYE
-        buy: 50
-        sell: 15
-      '25':
-        material: SHULKER_SHELL
-        buy: 200
-        sell: 60
-      '26':
-        material: DRAGON_BREATH
-        buy: 150
-        sell: 45
-      '27':
-        material: DRAGON_EGG
-        buy: 2000
-        sell: 600
-      '28':
-        material: CHORUS_FRUIT
-        buy: 10
-        sell: 3
-      '29':
-        material: POPPED_CHORUS_FRUIT
-        buy: 15
-        sell: 5
+      # ═══════ RARE MATERIALS ═══════
+      '11':
+        material: DIAMOND
+        buy: 62.5
+        sell: 18.75
+      '12':
+        material: EMERALD
+        buy: 52.5
+        sell: 15.75
+      '13':
+        material: AMETHYST_SHARD
+        buy: 7.5
+        sell: 2.25
       
-      # Building Blocks - Stone
-      '30':
-        material: STONE
-        buy: 2
-        sell: 0.5
-      '31':
+      # ═══════ END-GAME MATERIALS ═══════
+      '14':
+        material: NETHERITE_SCRAP
+        buy: 145
+        sell: 43.5
+      '15':
+        material: NETHERITE_INGOT
+        buy: 625
+        sell: 187.5
+      '16':
+        material: ANCIENT_DEBRIS
+        buy: 115
+        sell: 34.5
+      
+      # ═══════ BUILDING STONE ═══════
+      '17':
         material: COBBLESTONE
-        buy: 1
-        sell: 0.3
-      '32':
+        buy: 0.75
+        sell: 0.2
+      '18':
+        material: STONE
+        buy: 1.5
+        sell: 0.45
+      '19':
         material: DEEPSLATE
-        buy: 3
-        sell: 1
-      '33':
-        material: COBBLED_DEEPSLATE
-        buy: 2
-        sell: 0.6
-      '34':
-        material: GRANITE
-        buy: 2
-        sell: 0.5
-      '35':
-        material: DIORITE
-        buy: 2
-        sell: 0.5
-      '36':
-        material: ANDESITE
-        buy: 2
-        sell: 0.5
-      '37':
-        material: CALCITE
-        buy: 3
-        sell: 1
-      '38':
+        buy: 1.5
+        sell: 0.45
+      '20':
         material: TUFF
-        buy: 3
-        sell: 1
-      '39':
-        material: DRIPSTONE_BLOCK
-        buy: 5
-        sell: 1.5
-      
-      # Building Blocks - Wood
-      '40':
-        material: OAK_LOG
-        buy: 3
-        sell: 1
-      '41':
-        material: SPRUCE_LOG
-        buy: 3
-        sell: 1
-      '42':
-        material: BIRCH_LOG
-        buy: 3
-        sell: 1
-      '43':
-        material: JUNGLE_LOG
-        buy: 3
-        sell: 1
-      '44':
-        material: ACACIA_LOG
-        buy: 3
-        sell: 1
-      '45':
-        material: DARK_OAK_LOG
-        buy: 3
-        sell: 1
-      '46':
-        material: MANGROVE_LOG
-        buy: 4
-        sell: 1.2
-      '47':
-        material: CHERRY_LOG
-        buy: 4
-        sell: 1.2
-      '48':
-        material: CRIMSON_STEM
-        buy: 5
-        sell: 1.5
-      '49':
-        material: WARPED_STEM
-        buy: 5
-        sell: 1.5
-      
-      # Glass & Decorative
-      '50':
-        material: GLASS
-        buy: 3
-        sell: 1
-      '51':
-        material: GLOWSTONE
-        buy: 20
-        sell: 6
-      '52':
-        material: SEA_LANTERN
-        buy: 25
-        sell: 8
-      '53':
+        buy: 1.5
+        sell: 0.45
+      '21':
         material: OBSIDIAN
-        buy: 30
-        sell: 9
-      '54':
-        material: CRYING_OBSIDIAN
-        buy: 40
-        sell: 12
-      '55':
+        buy: 24
+        sell: 7.2
+      
+      # ═══════ NETHER MATERIALS ═══════
+      '22':
         material: NETHERRACK
-        buy: 1
-        sell: 0.3
-      '56':
-        material: END_STONE
-        buy: 5
-        sell: 1.5
+        buy: 0.75
+        sell: 0.2
+      '23':
+        material: NETHER_BRICK
+        buy: 2.5
+        sell: 0.75
+      '24':
+        material: SOUL_SAND
+        buy: 3.5
+        sell: 1.05
+      '25':
+        material: SOUL_SOIL
+        buy: 3.5
+        sell: 1.05
+      '26':
+        material: GLOWSTONE_DUST
+        buy: 4.5
+        sell: 1.35
+      '27':
+        material: GLOWSTONE
+        buy: 17
+        sell: 5.1
       
-      # Special Materials
-      '57':
+      # ═══════ SPECIAL MATERIALS ═══════
+      '28':
         material: PRISMARINE_SHARD
-        buy: 15
-        sell: 5
-      '58':
+        buy: 9.5
+        sell: 2.85
+      '29':
         material: PRISMARINE_CRYSTALS
-        buy: 20
-        sell: 6
-      '59':
-        material: HEART_OF_THE_SEA
-        buy: 300
-        sell: 90
-      '60':
-        material: NAUTILUS_SHELL
-        buy: 100
-        sell: 30
-      '61':
-        material: SCUTE
-        buy: 50
-        sell: 15
-      '62':
-        material: HONEYCOMB
-        buy: 15
-        sell: 5
-      '63':
-        material: SLIME_BALL
-        buy: 20
-        sell: 6
-      '64':
-        material: PHANTOM_MEMBRANE
-        buy: 35
-        sell: 10
-      
-      # Crafting Materials
-      '65':
-        material: STRING
-        buy: 3
-        sell: 1
-      '66':
-        material: FEATHER
-        buy: 5
-        sell: 1.5
-      '67':
-        material: GUNPOWDER
-        buy: 10
-        sell: 3
-      '68':
-        material: BONE
-        buy: 5
-        sell: 1.5
-      '69':
-        material: SPIDER_EYE
-        buy: 8
-        sell: 2.5
-      '70':
-        material: ROTTEN_FLESH
-        buy: 2
-        sell: 0.5
-      '71':
-        material: INK_SAC
-        buy: 5
-        sell: 1.5
-      '72':
-        material: GLOW_INK_SAC
-        buy: 15
-        sell: 5
+        buy: 11.5
+        sell: 3.45
+      '30':
+        material: BLAZE_ROD
+        buy: 33.5
+        sell: 10.05
+      '31':
+        material: ENDER_PEARL
+        buy: 14.5
+        sell: 4.35
+      '32':
+        material: GHAST_TEAR
+        buy: 43.5
+        sell: 13.05
+      '33':
+        material: NETHER_STAR
+        buy: 1150
+        sell: 345
+      '34':
+        material: SHULKER_SHELL
+        buy: 82.5
+        sell: 24.75

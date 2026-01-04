@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -14,14 +15,24 @@ import java.util.List;
 public class ConfigManager {
     
     private final WDPStartPlugin plugin;
+    private final ConfigMigration migration;
     private FileConfiguration config;
+    private static final int CONFIG_VERSION = 2;
     
     public ConfigManager(WDPStartPlugin plugin) {
         this.plugin = plugin;
+        this.migration = new ConfigMigration(plugin);
         reload();
     }
     
     public void reload() {
+        // Migrate configs if needed
+        File configFile = new File(plugin.getDataFolder(), "config.yml");
+        migration.migrateConfig(configFile, "config.yml", CONFIG_VERSION);
+        
+        File navbarFile = new File(plugin.getDataFolder(), "navbar.yml");
+        migration.migrateConfig(navbarFile, "navbar.yml", 1);
+        
         plugin.reloadConfig();
         config = plugin.getConfig();
     }

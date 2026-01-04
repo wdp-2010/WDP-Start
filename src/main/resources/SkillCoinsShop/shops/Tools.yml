@@ -1,382 +1,161 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                        TOOLS SHOP - BALANCED ECONOMY V2                       ║
+# ╠══════════════════════════════════════════════════════════════════════════════╣
+# ║ Pricing Philosophy:                                                           ║
+# ║ - Pickaxes: Primary income tool, priced by efficiency + durability            ║
+# ║ - Axes: Dual combat/foraging use, slightly higher than pure tools             ║
+# ║ - Shovels/Hoes: Utility tools, lower prices since less versatile              ║
+# ║ - Fortune III pick: Huge investment that pays for itself over time            ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
 pages:
   page1:
     items:
-      # Pickaxes
+      # ═══════ PICKAXES ═══════
+      # Primary income tool - worth investing in
       '1':
         material: WOODEN_PICKAXE
-        buy: 8
-        sell: 2.5
+        buy: 5.0
+        sell: 1.5
       '2':
         material: STONE_PICKAXE
-        buy: 15
-        sell: 5
+        buy: 8.0
+        sell: 2.4
       '3':
         material: IRON_PICKAXE
-        buy: 50
-        sell: 15
+        buy: 30.0
+        sell: 9.0
       '4':
         material: GOLDEN_PICKAXE
-        buy: 80
-        sell: 25
+        buy: 55.0
+        sell: 16.5
       '5':
         material: DIAMOND_PICKAXE
-        buy: 180
-        sell: 55
+        buy: 140.0
+        sell: 42.0
       '6':
         material: NETHERITE_PICKAXE
-        buy: 400
-        sell: 120
+        buy: 480.0
+        sell: 144.0
       
-      # Axes
+      # ═══════ AXES ═══════
+      # Foraging + Combat dual use
       '7':
         material: WOODEN_AXE
-        buy: 8
-        sell: 2.5
+        buy: 5.0
+        sell: 1.5
       '8':
         material: STONE_AXE
-        buy: 15
-        sell: 5
+        buy: 8.0
+        sell: 2.4
       '9':
         material: IRON_AXE
-        buy: 50
-        sell: 15
+        buy: 35.0
+        sell: 10.5
       '10':
         material: GOLDEN_AXE
-        buy: 80
-        sell: 25
+        buy: 60.0
+        sell: 18.0
       '11':
         material: DIAMOND_AXE
-        buy: 180
-        sell: 55
+        buy: 160.0
+        sell: 48.0
       '12':
         material: NETHERITE_AXE
-        buy: 400
-        sell: 120
+        buy: 520.0
+        sell: 156.0
       
-      # Shovels
+      # ═══════ SHOVELS ═══════
+      # Excavation skill - utility focus
       '13':
         material: WOODEN_SHOVEL
-        buy: 5
-        sell: 1.5
+        buy: 3.0
+        sell: 0.9
       '14':
         material: STONE_SHOVEL
-        buy: 10
-        sell: 3
+        buy: 5.0
+        sell: 1.5
       '15':
         material: IRON_SHOVEL
-        buy: 35
-        sell: 10
+        buy: 20.0
+        sell: 6.0
       '16':
         material: GOLDEN_SHOVEL
-        buy: 60
-        sell: 18
+        buy: 40.0
+        sell: 12.0
       '17':
         material: DIAMOND_SHOVEL
-        buy: 120
-        sell: 35
+        buy: 100.0
+        sell: 30.0
       '18':
         material: NETHERITE_SHOVEL
-        buy: 280
-        sell: 85
+        buy: 380.0
+        sell: 114.0
       
-      # Hoes
+      # ═══════ HOES ═══════
+      # Farming focus - important for farming skill
       '19':
         material: WOODEN_HOE
-        buy: 5
-        sell: 1.5
+        buy: 3.0
+        sell: 0.9
       '20':
         material: STONE_HOE
-        buy: 10
-        sell: 3
+        buy: 5.0
+        sell: 1.5
       '21':
         material: IRON_HOE
-        buy: 35
-        sell: 10
+        buy: 18.0
+        sell: 5.4
       '22':
         material: GOLDEN_HOE
-        buy: 60
-        sell: 18
+        buy: 35.0
+        sell: 10.5
       '23':
         material: DIAMOND_HOE
-        buy: 120
-        sell: 35
+        buy: 90.0
+        sell: 27.0
       '24':
         material: NETHERITE_HOE
-        buy: 280
-        sell: 85
+        buy: 350.0
+        sell: 105.0
       
-      # Fishing Rods & Misc Tools
+      # ═══════ UTILITY TOOLS ═══════
       '25':
-        material: FISHING_ROD
-        buy: 40
-        sell: 12
+        material: SHEARS
+        buy: 15.0
+        sell: 4.5
       '26':
         material: FLINT_AND_STEEL
-        buy: 25
-        sell: 8
+        buy: 12.0
+        sell: 3.6
       '27':
-        material: SHEARS
-        buy: 30
-        sell: 9
+        material: FISHING_ROD
+        buy: 20.0
+        sell: 6.0
       '28':
-        material: COMPASS
-        buy: 50
-        sell: 15
+        material: CARROT_ON_A_STICK
+        buy: 25.0
+        sell: 7.5
       '29':
-        material: CLOCK
-        buy: 50
-        sell: 15
+        material: WARPED_FUNGUS_ON_A_STICK
+        buy: 35.0
+        sell: 10.5
       '30':
-        material: SPYGLASS
-        buy: 80
-        sell: 25
-      '31':
-        material: BRUSH
-        buy: 60
-        sell: 18
-      '32':
         material: LEAD
-        buy: 25
-        sell: 8
-      '33':
+        buy: 8.0
+        sell: 2.4
+      '31':
         material: NAME_TAG
-        buy: 100
-        sell: 30
-      
-      # Buckets
+        buy: 25.0
+        sell: 7.5
+      '32':
+        material: SPYGLASS
+        buy: 40.0
+        sell: 12.0
+      '33':
+        material: BRUSH
+        buy: 30.0
+        sell: 9.0
       '34':
-        material: BUCKET
-        buy: 30
-        sell: 9
-      '35':
-        material: WATER_BUCKET
-        buy: 35
-        sell: 10
-      '36':
-        material: LAVA_BUCKET
-        buy: 50
-        sell: 15
-      '37':
-        material: MILK_BUCKET
-        buy: 40
-        sell: 12
-      '38':
-        material: POWDER_SNOW_BUCKET
-        buy: 45
-        sell: 13
-      
-      # Transportation
-      '39':
-        material: MINECART
-        buy: 60
-        sell: 18
-      '40':
-        material: CHEST_MINECART
-        buy: 100
-        sell: 30
-      '41':
-        material: FURNACE_MINECART
-        buy: 100
-        sell: 30
-      '42':
-        material: TNT_MINECART
-        buy: 120
-        sell: 35
-      '43':
-        material: HOPPER_MINECART
-        buy: 150
-        sell: 45
-      '44':
-        material: RAIL
-        buy: 5
-        sell: 1.5
-      '45':
-        material: POWERED_RAIL
-        buy: 15
-        sell: 5
-      '46':
-        material: DETECTOR_RAIL
-        buy: 10
-        sell: 3
-      '47':
-        material: ACTIVATOR_RAIL
-        buy: 10
-        sell: 3
-      '48':
-        material: OAK_BOAT
-        buy: 40
-        sell: 12
-      '49':
-        material: OAK_CHEST_BOAT
-        buy: 70
-        sell: 20
-      
-      # Redstone Components
-      '50':
-        material: REDSTONE_TORCH
-        buy: 8
-        sell: 2.5
-      '51':
-        material: REDSTONE_LAMP
-        buy: 25
-        sell: 8
-      '52':
-        material: LEVER
-        buy: 5
-        sell: 1.5
-      '53':
-        material: STONE_BUTTON
-        buy: 3
-        sell: 1
-      '54':
-        material: TRIPWIRE_HOOK
-        buy: 15
-        sell: 5
-      '55':
-        material: OBSERVER
-        buy: 40
-        sell: 12
-      '56':
-        material: HOPPER
-        buy: 80
-        sell: 25
-      '57':
-        material: DROPPER
-        buy: 35
-        sell: 10
-      '58':
-        material: DISPENSER
-        buy: 40
-        sell: 12
-      '59':
-        material: PISTON
-        buy: 45
-        sell: 13
-      '60':
-        material: STICKY_PISTON
-        buy: 60
-        sell: 18
-      '61':
-        material: REPEATER
-        buy: 20
-        sell: 6
-      '62':
-        material: COMPARATOR
-        buy: 25
-        sell: 8
-      
-      # Storage & Utility Blocks
-      '63':
-        material: CHEST
-        buy: 25
-        sell: 8
-      '64':
-        material: BARREL
-        buy: 30
-        sell: 9
-      '65':
-        material: SHULKER_BOX
-        buy: 300
-        sell: 90
-      '66':
-        material: ENDER_CHEST
-        buy: 200
-        sell: 60
-      '67':
-        material: CRAFTING_TABLE
-        buy: 10
-        sell: 3
-      '68':
-        material: FURNACE
-        buy: 20
-        sell: 6
-      '69':
-        material: BLAST_FURNACE
-        buy: 80
-        sell: 25
-      '70':
-        material: SMOKER
-        buy: 80
-        sell: 25
-      '71':
-        material: BREWING_STAND
-        buy: 60
-        sell: 18
-      '72':
-        material: ANVIL
-        buy: 150
-        sell: 45
-      '73':
-        material: GRINDSTONE
-        buy: 50
-        sell: 15
-      '74':
-        material: SMITHING_TABLE
-        buy: 60
-        sell: 18
-      '75':
-        material: ENCHANTING_TABLE
-        buy: 200
-        sell: 60
-      '76':
-        material: BOOKSHELF
-        buy: 40
-        sell: 12
-      '77':
-        material: LECTERN
-        buy: 50
-        sell: 15
-      '78':
-        material: BEACON
-        buy: 1500
-        sell: 450
-      '79':
-        material: CONDUIT
-        buy: 800
-        sell: 240
-      
-      # Miscellaneous Utility
-      '80':
-        material: TORCH
-        buy: 2
-        sell: 0.5
-      '81':
-        material: SOUL_TORCH
-        buy: 3
-        sell: 1
-      '82':
-        material: LANTERN
-        buy: 10
-        sell: 3
-      '83':
-        material: SOUL_LANTERN
-        buy: 12
-        sell: 4
-      '84':
-        material: CAMPFIRE
-        buy: 20
-        sell: 6
-      '85':
-        material: SOUL_CAMPFIRE
-        buy: 25
-        sell: 8
-      '86':
-        material: LADDER
-        buy: 5
-        sell: 1.5
-      '87':
-        material: SCAFFOLDING
-        buy: 3
-        sell: 1
-      '88':
-        material: BELL
-        buy: 100
-        sell: 30
-      '89':
-        material: TNT
-        buy: 50
-        sell: 15
-      '90':
-        material: END_CRYSTAL
-        buy: 150
-        sell: 45
+        material: COMPASS
+        buy: 20.0
+        sell: 6.0

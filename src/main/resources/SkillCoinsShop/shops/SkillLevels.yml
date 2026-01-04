@@ -1,184 +1,118 @@
-pages:
-  page1:
-    items:
-      # Combat Skills
-      farming:
-        material: WHEAT
-        buy: 10
-        currency: tokens
-        skill: farming
-        displayname: "&aFarming Level"
-        lore:
-          - "&7Purchase 1 level in Farming"
-          - "&7Cost: &b10 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      foraging:
-        material: OAK_LOG
-        buy: 10
-        currency: tokens
-        skill: foraging
-        displayname: "&aForaging Level"
-        lore:
-          - "&7Purchase 1 level in Foraging"
-          - "&7Cost: &b10 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      mining:
-        material: IRON_PICKAXE
-        buy: 10
-        currency: tokens
-        skill: mining
-        displayname: "&aMining Level"
-        lore:
-          - "&7Purchase 1 level in Mining"
-          - "&7Cost: &b10 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      fishing:
-        material: FISHING_ROD
-        buy: 10
-        currency: tokens
-        skill: fishing
-        displayname: "&aFishing Level"
-        lore:
-          - "&7Purchase 1 level in Fishing"
-          - "&7Cost: &b10 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      excavation:
-        material: IRON_SHOVEL
-        buy: 10
-        currency: tokens
-        skill: excavation
-        displayname: "&aExcavation Level"
-        lore:
-          - "&7Purchase 1 level in Excavation"
-          - "&7Cost: &b10 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      archery:
-        material: BOW
-        buy: 12
-        currency: tokens
-        skill: archery
-        displayname: "&aArchery Level"
-        lore:
-          - "&7Purchase 1 level in Archery"
-          - "&7Cost: &b12 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      fighting:
-        material: DIAMOND_SWORD
-        buy: 12
-        currency: tokens
-        skill: fighting
-        displayname: "&aFighting Level"
-        lore:
-          - "&7Purchase 1 level in Fighting"
-          - "&7Cost: &b12 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      defense:
-        material: SHIELD
-        buy: 12
-        currency: tokens
-        skill: defense
-        displayname: "&aDefense Level"
-        lore:
-          - "&7Purchase 1 level in Defense"
-          - "&7Cost: &b12 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      agility:
-        material: FEATHER
-        buy: 8
-        currency: tokens
-        skill: agility
-        displayname: "&aAgility Level"
-        lore:
-          - "&7Purchase 1 level in Agility"
-          - "&7Cost: &b8 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      endurance:
-        material: LEATHER_BOOTS
-        buy: 8
-        currency: tokens
-        skill: endurance
-        displayname: "&aEndurance Level"
-        lore:
-          - "&7Purchase 1 level in Endurance"
-          - "&7Cost: &b8 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      # Magical Skills
-      alchemy:
-        material: BREWING_STAND
-        buy: 15
-        currency: tokens
-        skill: alchemy
-        displayname: "&aAlchemy Level"
-        lore:
-          - "&7Purchase 1 level in Alchemy"
-          - "&7Cost: &b15 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      enchanting:
-        material: ENCHANTING_TABLE
-        buy: 15
-        currency: tokens
-        skill: enchanting
-        displayname: "&aEnchanting Level"
-        lore:
-          - "&7Purchase 1 level in Enchanting"
-          - "&7Cost: &b15 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      sorcery:
-        material: BLAZE_POWDER
-        buy: 15
-        currency: tokens
-        skill: sorcery
-        displayname: "&aSorcery Level"
-        lore:
-          - "&7Purchase 1 level in Sorcery"
-          - "&7Cost: &b15 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      healing:
-        material: GOLDEN_APPLE
-        buy: 15
-        currency: tokens
-        skill: healing
-        displayname: "&aHealing Level"
-        lore:
-          - "&7Purchase 1 level in Healing"
-          - "&7Cost: &b15 🎟"
-          - ""
-          - "&eClick to purchase!"
-      
-      forging:
-        material: ANVIL
-        buy: 15
-        currency: tokens
-        skill: forging
-        displayname: "&aForging Level"
-        lore:
-          - "&7Purchase 1 level in Forging"
-          - "&7Cost: &b15 🎟"
-          - ""
-          - "&eClick to purchase!"
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                    SKILL LEVELS SHOP - BALANCED ECONOMY V2                    ║
+# ╠══════════════════════════════════════════════════════════════════════════════╣
+# ║ Purchase skill levels directly with TOKENS                                    ║
+# ║                                                                               ║
+# ║ Pricing Philosophy:                                                           ║
+# ║ - Early levels (1-25): Cheap, helps new players catch up                      ║
+# ║ - Mid levels (26-50): Moderate, still accessible                              ║
+# ║ - Late levels (51-75): Expensive, rewards dedicated players                   ║
+# ║ - End levels (76-100): Very expensive, prestige purchases                     ║
+# ║                                                                               ║
+# ║ This allows catching up but makes grinding still valuable                     ║
+# ║ A player who grinds earns tokens from level-ups AND gets skills               ║
+# ║ A player who buys levels spends tokens without earning them back              ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# Skill level purchase pricing (in TOKENS)
+pricing:
+  # Cost formula: base_cost + (level_tier_multiplier * tokens)
+  # Higher levels = exponentially more expensive
+  
+  tiers:
+    # Levels 1-10: Very cheap (new player friendly)
+    early:
+      min-level: 1
+      max-level: 10
+      cost-per-level: 1
+    
+    # Levels 11-25: Cheap
+    beginner:
+      min-level: 11
+      max-level: 25
+      cost-per-level: 2
+    
+    # Levels 26-40: Moderate
+    intermediate:
+      min-level: 26
+      max-level: 40
+      cost-per-level: 4
+    
+    # Levels 41-55: Getting expensive
+    advanced:
+      min-level: 41
+      max-level: 55
+      cost-per-level: 6
+    
+    # Levels 56-70: Expensive
+    expert:
+      min-level: 56
+      max-level: 70
+      cost-per-level: 10
+    
+    # Levels 71-85: Very expensive
+    master:
+      min-level: 71
+      max-level: 85
+      cost-per-level: 15
+    
+    # Levels 86-100: Premium pricing
+    grandmaster:
+      min-level: 86
+      max-level: 100
+      cost-per-level: 25
+
+# Total cost to buy all 100 levels of a skill: ~850 tokens
+# This equals ~425,000 coins if converted directly
+# Compare to ~3,000 coins earned FROM leveling that skill naturally
+# Makes buying all levels a huge commitment
+
+# Skills available for purchase
+available-skills:
+  - farming
+  - foraging
+  - mining
+  - fishing
+  - excavation
+  - archery
+  - defense
+  - fighting
+  - agility
+  - alchemy
+  - enchanting
+
+# Restrictions
+restrictions:
+  # Maximum levels purchasable per day per skill
+  daily-limit-per-skill: 10
+  
+  # Maximum total levels purchasable per day
+  daily-limit-total: 25
+  
+  # Cooldown between purchases (seconds)
+  purchase-cooldown: 5
+
+# Display settings
+display:
+  title: "&8&l✦ &e&lSkill Levels &8&l✦"
+  skill-icon-slot: 13
+  
+  # Cost display format
+  cost-format: "&e%cost% &7token(s)"
+  
+  # Lore additions
+  lore:
+    - ""
+    - "&7Purchase skill levels directly!"
+    - "&7Higher levels cost more tokens."
+    - ""
+    - "&c⚠ Daily limit: &e10 levels/skill"
+    - ""
+
+# Messages
+messages:
+  purchase-success: "&a✓ Purchased &b%skill% &alevel &e%level% &afor &e%cost% tokens!"
+  insufficient-tokens: "&c✗ You need &e%cost% tokens &cfor this level!"
+  max-level: "&cThis skill is already at maximum level!"
+  daily-limit: "&cYou've reached your daily purchase limit for this skill!"
+  cooldown: "&cPlease wait before making another purchase!"

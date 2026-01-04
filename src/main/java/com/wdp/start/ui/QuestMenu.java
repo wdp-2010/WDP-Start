@@ -40,6 +40,9 @@ public class QuestMenu {
     // Track open menus
     private final ConcurrentHashMap<UUID, MenuSession> openMenus = new ConcurrentHashMap<>();
     
+    // Track Quest 6 reminder tasks
+    private final ConcurrentHashMap<UUID, Integer> quest6ReminderTasks = new ConcurrentHashMap<>();
+    
     // Menu identifier
     private static final String MENU_ID = "§8§l";
     
@@ -289,13 +292,43 @@ public class QuestMenu {
         
         // Add currency info if available
         double coins = 0;
-        int tokens = 0;
+        double tokens = 0;
         if (plugin.getVaultIntegration() != null) {
             coins = plugin.getVaultIntegration().getBalance(player);
         }
+        // Get tokens from AuraSkills via command output parsing
+        if (plugin.getAuraSkillsIntegration() != null && plugin.getAuraSkillsIntegration().isEnabled()) {
+            try {
+                // Use dispatchCommand to get token balance
+                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                org.bukkit.command.ConsoleCommandSender consoleSender = Bukkit.getConsoleSender();
+                Bukkit.dispatchCommand(consoleSender, "skillcoins check " + player.getName());
+                // Try reading from AuraSkills API directly if available
+                org.bukkit.plugin.Plugin auraSkills = Bukkit.getPluginManager().getPlugin("AuraSkills");
+                if (auraSkills != null) {
+                    // Access economy provider through reflection
+                    try {
+                        Class<?> apiClass = Class.forName("dev.aurelium.auraskills.api.AuraSkillsApi");
+                        Object api = apiClass.getMethod("get").invoke(null);
+                        Object economyProvider = apiClass.getMethod("getEconomyProvider").invoke(api);
+                        Class<?> currencyTypeClass = Class.forName("dev.aurelium.auraskills.common.skillcoins.CurrencyType");
+                        Object tokensEnum = currencyTypeClass.getField("TOKENS").get(null);
+                        Object balance = economyProvider.getClass().getMethod("getBalance", java.util.UUID.class, currencyTypeClass)
+                            .invoke(economyProvider, player.getUniqueId(), tokensEnum);
+                        tokens = ((Number) balance).doubleValue();
+                    } catch (Exception reflectionError) {
+                        plugin.debug("Could not access AuraSkills economy via reflection: " + reflectionError.getMessage());
+                        tokens = 0;
+                    }
+                }
+            } catch (Exception e) {
+                plugin.debug("Failed to get token balance: " + e.getMessage());
+                tokens = 0;
+            }
+        }
         context.put("balance", coins);
         context.put("coins", String.format("%.0f", coins)); // For navbar display
-        context.put("tokens", tokens);
+        context.put("tokens", String.format("%.0f", tokens));
         
         applyUniversalNavbar(inv, player, "main", context);
     }
@@ -455,8 +488,26 @@ public class QuestMenu {
                 }
                 return;
             }
-            if (slot == 53) { // Close button
-                player.closeInventory();
+            if (slot == 53) { // Close/Back button
+                // For shop menus, go back instead of closing
+                if (menuType.startsWith("skillcoins_shop_section")) {
+                    openSimplifiedShopItems(player);
+                } else if (menuType.equals("skillcoins_transaction")) {
+                    // Get category from transaction data
+                    ShopItemData item = transactionItems.get(player.getUniqueId());
+                    if (item != null) {
+                        // Go back to section - need to find section name from item
+                        openSimplifiedShopItems(player); // For now just go to main
+                    } else {
+                        player.closeInventory();
+                    }
+                } else if (menuType.equals("skillcoins_token_exchange")) {
+                    openSimplifiedShop(player);
+                } else if (menuType.equals("skillcoins_shop_main")) {
+                    openMainMenu(player); // Go back to main quest menu from shop
+                } else {
+                    player.closeInventory();
+                }
                 return;
             }
             // Other navbar slots are decorative
@@ -499,7 +550,9 @@ public class QuestMenu {
                                 String materialName = sec.getString("material", "STONE");
                                 Material icon = Material.matchMaterial(materialName);
                                 if (icon == null) icon = Material.STONE;
-                                openShopSection(player, display, icon);
+                                // Strip color codes from display name for file lookup
+                                String cleanName = ChatColor.stripColor(hex(display));
+                                openShopSection(player, cleanName, icon);
                                 return;
                             }
                         } catch (Exception e) {
@@ -752,11 +805,25 @@ public class QuestMenu {
     private void showQuestDetails(Player player, int quest) {
         player.closeInventory();
         
-        // Quest 6: Simply complete it
+        // Quest 6: Check if already completed to prevent multiple rewards
         if (quest == 6) {
+            PlayerData data = plugin.getPlayerDataManager().getData(player);
+            PlayerData.QuestProgress progress = data.getQuestProgress(6);
+            
+            // Prevent multiple completions
+            if (progress.isCompleted()) {
+                player.sendMessage(hex(plugin.getMessageManager().get("quest.already-completed")));
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                return;
+            }
+            
+            // Complete Quest 6
             plugin.getQuestManager().completeQuest(player, 6);
             player.sendMessage(hex(plugin.getMessageManager().get("success.quest-complete-welcome")));
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+            
+            // Cancel any pending reminder tasks
+            cancelQuest6Reminders(player);
             return;
         }
         
@@ -801,6 +868,76 @@ public class QuestMenu {
      */
     public void handleClose(Player player) {
         openMenus.remove(player.getUniqueId());
+        // Cancel Quest 6 reminders when menu is closed
+        cancelQuest6Reminders(player);
+    }
+    
+    /**
+     * Start Quest 6 reminder and auto-complete system
+     */
+    private void startQuest6Reminders(Player player) {
+        // Cancel any existing reminders first
+        cancelQuest6Reminders(player);
+        
+        UUID uuid = player.getUniqueId();
+        
+        // Send immediate instruction
+        player.sendMessage(hex(plugin.getMessageManager().get("quest6.instruction")));
+        player.sendMessage(hex(plugin.getMessageManager().get("quest6.instruction-detail")));
+        
+        // Schedule reminder at 10 seconds
+        int task1 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                PlayerData data = plugin.getPlayerDataManager().getData(player);
+                if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
+                    player.sendMessage(hex(plugin.getMessageManager().get("quest6.reminder-10s")));
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.7f, 1.5f);
+                }
+            }
+        }, 200L).getTaskId(); // 10 seconds
+        
+        // Schedule reminder at 30 seconds
+        int task2 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                PlayerData data = plugin.getPlayerDataManager().getData(player);
+                if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
+                    player.sendMessage(hex(plugin.getMessageManager().get("quest6.reminder-30s")));
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.7f);
+                }
+            }
+        }, 600L).getTaskId(); // 30 seconds
+        
+        // Schedule auto-complete at 35 seconds
+        int task3 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                PlayerData data = plugin.getPlayerDataManager().getData(player);
+                if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
+                    player.sendMessage(hex(plugin.getMessageManager().get("quest6.auto-complete")));
+                    plugin.getQuestManager().completeQuest(player, 6);
+                    player.closeInventory();
+                }
+            }
+            quest6ReminderTasks.remove(uuid);
+        }, 700L).getTaskId(); // 35 seconds
+        
+        // Store the tasks for later cancellation
+        quest6ReminderTasks.put(uuid, task1); // We'll cancel all scheduled tasks below
+    }
+    
+    /**
+     * Cancel Quest 6 reminder tasks for a player
+     */
+    private void cancelQuest6Reminders(Player player) {
+        UUID uuid = player.getUniqueId();
+        if (quest6ReminderTasks.containsKey(uuid)) {
+            // Cancel all scheduled tasks for this player
+            plugin.getServer().getScheduler().getPendingTasks().stream()
+                .filter(task -> task.getOwner().equals(plugin) && 
+                        task.getTaskId() >= quest6ReminderTasks.get(uuid))
+                .forEach(task -> plugin.getServer().getScheduler().cancelTask(task.getTaskId()));
+            
+            quest6ReminderTasks.remove(uuid);
+        }
     }
     
     // ==================== UTILITY METHODS ====================
@@ -1036,8 +1173,31 @@ public class QuestMenu {
         
         // Get player balance
         double coins = 0;
+        double tokens = 0;
         if (plugin.getVaultIntegration() != null) {
             coins = plugin.getVaultIntegration().getBalance(player);
+        }
+        // Get tokens from AuraSkills
+        if (plugin.getAuraSkillsIntegration() != null && plugin.getAuraSkillsIntegration().isEnabled()) {
+            try {
+                org.bukkit.plugin.Plugin auraSkills = Bukkit.getPluginManager().getPlugin("AuraSkills");
+                if (auraSkills != null) {
+                    try {
+                        Class<?> apiClass = Class.forName("dev.aurelium.auraskills.api.AuraSkillsApi");
+                        Object api = apiClass.getMethod("get").invoke(null);
+                        Object economyProvider = apiClass.getMethod("getEconomyProvider").invoke(api);
+                        Class<?> currencyTypeClass = Class.forName("dev.aurelium.auraskills.common.skillcoins.CurrencyType");
+                        Object tokensEnum = currencyTypeClass.getField("TOKENS").get(null);
+                        Object balance = economyProvider.getClass().getMethod("getBalance", java.util.UUID.class, currencyTypeClass)
+                            .invoke(economyProvider, player.getUniqueId(), tokensEnum);
+                        tokens = ((Number) balance).doubleValue();
+                    } catch (Exception reflectionError) {
+                        tokens = -1;
+                    }
+                }
+            } catch (Exception e) {
+                tokens = -1;
+            }
         }
         
         // Player head (slot 0) - EXACT SkillCoins style
@@ -1091,12 +1251,19 @@ public class QuestMenu {
                         Material icon = Material.matchMaterial(materialName);
                         if (icon == null) icon = Material.STONE;
                         
+                        // Strip color codes from display name to get clean section name for file lookup
+                        String cleanName = ChatColor.stripColor(hex(display));
+                        
                         // Load item count from corresponding shop file
-                        int itemCount = loadShopItemCount(display);
+                        int itemCount = loadShopItemCount(cleanName);
+                        // Ensure count shows at least 1 even if shop file isn't found (fallback items)
+                        if (itemCount == 0) {
+                            itemCount = getShopItemsForCategory(cleanName).size();
+                        }
                         
                         inv.setItem(slot, createShopCategory(icon, 
-                                ChatColor.of("#FFFFFF") + display,
-                                "Open " + display + " shop",
+                                hex(display),
+                                "Open " + cleanName + " shop",
                                 itemCount, true));
                     } catch (Exception e) {
                         plugin.getLogger().warning("Failed to load section: " + sectionFile.getName() + " - " + e.getMessage());
@@ -1165,6 +1332,7 @@ public class QuestMenu {
         context.put("menu_name", category + " Shop");
         context.put("menu_description", "Shop category: " + category);
         context.put("balance", (int) Math.round(coins));
+        context.put("previous_menu", "main_shop"); // Add previous_menu to show Back instead of Close
         applyUniversalNavbar(inv, player, "shop_section", context);
         
         // Track menu
@@ -1861,7 +2029,7 @@ public class QuestMenu {
         List<ShopItemData> loaded = loadShopPageItems(category);
         if (!loaded.isEmpty()) return loaded;
 
-        // Fallback to the small built-in list
+        // Fallback to the expanded built-in list with more items
         List<ShopItemData> items = new ArrayList<>();
         switch (category.toLowerCase()) {
             case "food":
@@ -1870,6 +2038,9 @@ public class QuestMenu {
                 items.add(new ShopItemData(Material.COOKED_BEEF, "Steak", 25, 12, true));
                 items.add(new ShopItemData(Material.COOKED_PORKCHOP, "Cooked Porkchop", 25, 12, true));
                 items.add(new ShopItemData(Material.GOLDEN_APPLE, "Golden Apple", 500, 250, true));
+                items.add(new ShopItemData(Material.COOKED_CHICKEN, "Cooked Chicken", 20, 10, true));
+                items.add(new ShopItemData(Material.BAKED_POTATO, "Baked Potato", 12, 6, true));
+                items.add(new ShopItemData(Material.COOKED_MUTTON, "Cooked Mutton", 22, 11, true));
                 break;
             case "tools":
                 items.add(new ShopItemData(Material.WOODEN_PICKAXE, "Wooden Pickaxe", 20, 5, true));
@@ -1877,18 +2048,30 @@ public class QuestMenu {
                 items.add(new ShopItemData(Material.IRON_PICKAXE, "Iron Pickaxe", 150, 50, true));
                 items.add(new ShopItemData(Material.WOODEN_AXE, "Wooden Axe", 20, 5, true));
                 items.add(new ShopItemData(Material.STONE_AXE, "Stone Axe", 50, 15, true));
+                items.add(new ShopItemData(Material.IRON_AXE, "Iron Axe", 140, 45, true));
+                items.add(new ShopItemData(Material.WOODEN_SHOVEL, "Wooden Shovel", 18, 4, true));
+                items.add(new ShopItemData(Material.STONE_SHOVEL, "Stone Shovel", 45, 12, true));
+                items.add(new ShopItemData(Material.IRON_SHOVEL, "Iron Shovel", 130, 40, true));
                 break;
             case "resources":
                 items.add(new ShopItemData(Material.OAK_LOG, "Oak Log", 5, 2, true));
                 items.add(new ShopItemData(Material.COBBLESTONE, "Cobblestone", 2, 1, true));
                 items.add(new ShopItemData(Material.IRON_INGOT, "Iron Ingot", 100, 50, true));
                 items.add(new ShopItemData(Material.COAL, "Coal", 10, 5, true));
+                items.add(new ShopItemData(Material.COPPER_INGOT, "Copper Ingot", 30, 15, true));
+                items.add(new ShopItemData(Material.GOLD_INGOT, "Gold Ingot", 150, 75, true));
+                items.add(new ShopItemData(Material.REDSTONE, "Redstone", 20, 10, true));
+                items.add(new ShopItemData(Material.LAPIS_LAZULI, "Lapis Lazuli", 25, 12, true));
                 break;
             case "blocks":
                 items.add(new ShopItemData(Material.STONE, "Stone", 3, 1, true));
                 items.add(new ShopItemData(Material.OAK_PLANKS, "Oak Planks", 3, 1, true));
                 items.add(new ShopItemData(Material.GLASS, "Glass", 10, 5, true));
                 items.add(new ShopItemData(Material.TORCH, "Torch", 5, 2, true));
+                items.add(new ShopItemData(Material.DIRT, "Dirt", 2, 1, true));
+                items.add(new ShopItemData(Material.SAND, "Sand", 4, 2, true));
+                items.add(new ShopItemData(Material.GRAVEL, "Gravel", 4, 2, true));
+                items.add(new ShopItemData(Material.BRICK, "Brick", 8, 4, true));
                 break;
         }
         return items;

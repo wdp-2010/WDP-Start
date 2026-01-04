@@ -1,128 +1,192 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                       POTIONS SHOP - BALANCED ECONOMY V2                      ║
+# ╠══════════════════════════════════════════════════════════════════════════════╣
+# ║ Pricing Philosophy:                                                           ║
+# ║ - Base potions: Cheap, encourage experimentation                              ║
+# ║ - Common effects: Moderate prices for convenience                             ║
+# ║ - Combat potions: Higher prices (healing, strength, etc.)                     ║
+# ║ - Brewing ingredients: Based on mob drop rarity                               ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
 pages:
   page1:
     items:
-      # Brewing Basics
+      # ═══════ BREWING INGREDIENTS - Common ═══════
       '1':
-        material: BREWING_STAND
-        buy: 60
-        sell: 15
+        material: GLASS_BOTTLE
+        buy: 2
+        sell: 0
       '2':
-        material: CAULDRON
-        buy: 50
-        sell: 12
+        material: NETHER_WART
+        buy: 6
+        sell: 1
       '3':
+        material: REDSTONE
+        buy: 3
+        sell: 0
+      '4':
+        material: GLOWSTONE_DUST
+        buy: 5
+        sell: 1
+      '5':
+        material: GUNPOWDER
+        buy: 4
+        sell: 1
+      '6':
+        material: SUGAR
+        buy: 2
+        sell: 0
+      
+      # ═══════ BREWING INGREDIENTS - Uncommon ═══════
+      '7':
+        material: SPIDER_EYE
+        buy: 3
+        sell: 0
+      '8':
+        material: FERMENTED_SPIDER_EYE
+        buy: 8
+        sell: 2
+      '9':
+        material: MAGMA_CREAM
+        buy: 15
+        sell: 4
+      '10':
         material: BLAZE_POWDER
         buy: 20
-        sell: 5
-      '4':
-        material: NETHER_WART
-        buy: 15
-        sell: 4
-      '5':
-        material: GLASS_BOTTLE
-        buy: 5
-        sell: 1
-      
-      # Base Potions
-      '6':
-        material: POTION
-        buy: 10
-        sell: 2.5
-      '7':
-        material: SPLASH_POTION
-        buy: 15
-        sell: 4
-      '8':
-        material: LINGERING_POTION
-        buy: 25
         sell: 6
-      
-      # Potion Ingredients
-      '9':
-        material: SUGAR
-        buy: 5
-        sell: 1
-      '10':
-        material: RABBIT_FOOT
-        buy: 30
-        sell: 7
       '11':
         material: GLISTERING_MELON_SLICE
-        buy: 10
-        sell: 2.5
+        buy: 25
+        sell: 7
       '12':
-        material: SPIDER_EYE
-        buy: 8
-        sell: 2
-      '13':
-        material: FERMENTED_SPIDER_EYE
-        buy: 15
-        sell: 4
-      '14':
-        material: MAGMA_CREAM
-        buy: 25
-        sell: 6
-      '15':
-        material: BLAZE_ROD
-        buy: 40
-        sell: 10
-      '16':
-        material: GHAST_TEAR
-        buy: 35
-        sell: 9
-      '17':
         material: GOLDEN_CARROT
+        buy: 35
+        sell: 10
+      
+      # ═══════ BREWING INGREDIENTS - Rare ═══════
+      '13':
+        material: GHAST_TEAR
+        buy: 45
+        sell: 13
+      '14':
+        material: RABBIT_FOOT
+        buy: 35
+        sell: 10
+      '15':
+        material: PHANTOM_MEMBRANE
+        buy: 30
+        sell: 9
+      '16':
+        material: DRAGON_BREATH
+        buy: 80
+        sell: 24
+      
+      # ═══════ UTILITY POTIONS ═══════
+      '17':
+        material: POTION
+        buy: 5
+        sell: 1
+        name: "&fWater Bottle"
+      '18':
+        material: POTION
         buy: 15
         sell: 4
-      '18':
-        material: PUFFERFISH
-        buy: 20
-        sell: 5
+        potion: "mundane"
+        name: "&7Mundane Potion"
       '19':
-        material: TURTLE_HELMET
-        buy: 150
-        sell: 37
-      '20':
-        material: PHANTOM_MEMBRANE
-        buy: 35
-        sell: 9
-      
-      # Modifiers
-      '21':
-        material: REDSTONE
-        buy: 10
-        sell: 2.5
-      '22':
-        material: GLOWSTONE_DUST
-        buy: 8
-        sell: 2
-      '23':
-        material: GUNPOWDER
-        buy: 10
-        sell: 2.5
-      '24':
-        material: DRAGON_BREATH
-        buy: 100
-        sell: 25
-      
-      # Special Items
-      '25':
-        material: ENCHANTED_GOLDEN_APPLE
-        buy: 500
-        sell: 125
-      '26':
-        material: GOLDEN_APPLE
-        buy: 100
-        sell: 25
-      '27':
-        material: TOTEM_OF_UNDYING
-        buy: 1000
-        sell: 250
-      '28':
-        material: ENDER_PEARL
-        buy: 25
+        material: POTION
+        buy: 20
         sell: 6
-      '29':
-        material: ENDER_EYE
-        buy: 50
+        potion: "awkward"
+        name: "&dAwkward Potion"
+      
+      # ═══════ EFFECT POTIONS ═══════
+      '20':
+        material: POTION
+        buy: 35
+        sell: 10
+        potion: "fire_resistance"
+        name: "&6Fire Resistance"
+      '21':
+        material: POTION
+        buy: 45
+        sell: 13
+        potion: "healing"
+        name: "&cHealing"
+      '22':
+        material: POTION
+        buy: 55
+        sell: 16
+        potion: "strength"
+        name: "&4Strength"
+      '23':
+        material: POTION
+        buy: 40
         sell: 12
+        potion: "swiftness"
+        name: "&bSwiftness"
+      '24':
+        material: POTION
+        buy: 50
+        sell: 15
+        potion: "regeneration"
+        name: "&dRegeneration"
+      '25':
+        material: POTION
+        buy: 30
+        sell: 9
+        potion: "night_vision"
+        name: "&1Night Vision"
+      '26':
+        material: POTION
+        buy: 25
+        sell: 7
+        potion: "water_breathing"
+        name: "&3Water Breathing"
+      '27':
+        material: POTION
+        buy: 35
+        sell: 10
+        potion: "invisibility"
+        name: "&7Invisibility"
+      '28':
+        material: POTION
+        buy: 40
+        sell: 12
+        potion: "leaping"
+        name: "&aLeaping"
+      '29':
+        material: POTION
+        buy: 45
+        sell: 13
+        potion: "slow_falling"
+        name: "&fSlow Falling"
+
+      # ═══════ SPLASH POTIONS (Higher cost) ═══════
+      '30':
+        material: SPLASH_POTION
+        buy: 55
+        sell: 16
+        potion: "healing"
+        name: "&cSplash Healing"
+      '31':
+        material: SPLASH_POTION
+        buy: 65
+        sell: 19
+        potion: "strength"
+        name: "&4Splash Strength"
+      '32':
+        material: SPLASH_POTION
+        buy: 50
+        sell: 15
+        potion: "harming"
+        name: "&8Splash Harming"
+
+      # ═══════ BREWING EQUIPMENT ═══════
+      '33':
+        material: BREWING_STAND
+        buy: 65
+        sell: 19
+      '34':
+        material: CAULDRON
+        buy: 45
+        sell: 13

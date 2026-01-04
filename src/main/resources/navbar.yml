@@ -2,6 +2,10 @@
 # ║                    Unified Navbar Configuration                            ║
 # ║                         WDP Plugin System                                  ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
+
+# Configuration version - DO NOT EDIT
+config-version: 1
+
 # Layout: [Balance] [Glass] [Glass] [Prev] [Page] [Next] [Glass] [Glass] [Back/Close]
 # Slot 53 shows BACK when previous_menu exists, otherwise shows CLOSE
 

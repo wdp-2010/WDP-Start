@@ -1,4 +1,14 @@
 enable: true
 slot: 39
-material: EXPERIENCE_BOTTLE
-displayname: 'Skill Levels'
+title: ''
+hidden: false
+sub-section: false
+display-item: false
+fill-item:
+  material: AIR
+nav-bar:
+  mode: INHERIT
+item:
+  material: EXPERIENCE_BOTTLE
+  displayname: '&e✪ Skill Levels'
+  name: '&e✪ Skill Levels'

@@ -3,6 +3,9 @@
 # ║                    Supports hex colors: &#RRGGBB                            ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
+# Language version - DO NOT EDIT unless updating translations
+language-version: "1.0.0"
+
 # Prefix for all messages
 prefix: "&#FFD700[WDP-Start]&#FFFFFF "
 
@@ -71,6 +74,13 @@ quest:
   quest6:
     complete: "&#55FF55&l✓ &#55FF55All quests complete! Good luck on your adventure!"
   
+  # Quest 6 instructions and reminders
+  instruction: "&#FFD700&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  instruction-detail: "&#FFFF55&l➤ CLICK THE GLOWING QUEST ICON &#FFFF55to complete!"
+  reminder-10s: "&#FFFF55⚠ Don't forget to click the &#FFD700&lGood Luck!&#FFFF55 quest icon!"
+  reminder-30s: "&#FF5555⚠ Last chance! Click the &#FFD700&lGood Luck!&#FF5555 quest icon to finish!"
+  auto-complete: "&#55FF55&l✓ Quest auto-completed! You're all set!"
+  
   # All complete
   all-complete:
     - ""
@@ -108,6 +118,7 @@ rewards:
   header: "&#FFD700&l✦ &#FFD700Rewards:"
   skillcoins: "&#FFD700  + {amount} ⛃"
   skilltokens: "&#FF55FF  + {amount} 🎟"
+  item: "&#55FFFF  + {amount}x {item}"
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            Command Messages                                 │
 # └─────────────────────────────────────────────────────────────────────────────┘
@@ -311,10 +322,13 @@ shop:
       name: "&#00FFFF🎟 Token Exchange"
       lore:
         - ""
-        - "&#808080Exchange ⛃ for 🎟 tokens"
-        - "&#808080Tokens can be used for special purchases"
+        - "&#808080Exchange your ⛃ SkillCoins"
+        - "&#808080for powerful 🎟 SkillTokens!"
         - ""
-        - "&#FFFF00▸ Click to open!"
+        - "&#55FF55Tokens unlock skill upgrades"
+        - "&#55FF55and special abilities!"
+        - ""
+        - "&#FFFF00▸ Click to exchange!"
     close:
       name: "&#FF5555✖ Close"
       lore:
@@ -646,7 +660,7 @@ quest-progress:
 # └─────────────────────────────────────────────────────────────────────────────┘
 success:
   purchased-item: "&#55FF55✓ Purchased {quantity}x {item} for &#FFD700{cost} SkillCoins&#55FF55!"
-  purchased-token: "&#55FF55✓ Purchased &#00FFFF{quantity} SkillToken&#55FF55 for &#FFD700{cost} SkillCoins&#55FF55!"
+  purchased-token: "&#55FF55✓ Token exchange complete! Check /quest for your next objective."
   quest-complete: "&#55FF55&l✓ &#55FF55Quest completed! Type /start to continue your journey!"
   quest-complete-welcome: "&#55FF55&l✓ Quest completed! Welcome to the server!"
   quest-hint: "&#FFD700&l➤ &#FFFFFF{hint}"

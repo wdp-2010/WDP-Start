@@ -1,4 +1,14 @@
 enable: true
 slot: 15
-material: ENDER_PEARL
-displayname: 'Miscellaneous'
+title: ''
+hidden: false
+sub-section: false
+display-item: false
+fill-item:
+  material: AIR
+nav-bar:
+  mode: INHERIT
+item:
+  material: ENDER_EYE
+  displayname: '&f✹ Miscellaneous'
+  name: '&f✹ Miscellaneous'

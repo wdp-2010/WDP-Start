@@ -1,194 +1,157 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                        BLOCKS SHOP - BALANCED ECONOMY V2                      ║
+# ╠══════════════════════════════════════════════════════════════════════════════╣
+# ║ Pricing Philosophy:                                                           ║
+# ║ - Common blocks: Very cheap, mining is easier than buying                     ║
+# ║ - Decorative: Small premium for convenience                                   ║
+# ║ - Colored blocks: Uniform pricing for fairness                                ║
+# ║ - Special blocks: Based on crafting complexity + rarity                       ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
 pages:
   page1:
     items:
-      # Stone Blocks
+      # ═══════ NATURAL BLOCKS ═══════
       '1':
-        material: STONE
-        buy: 2
-        sell: 0.5
-      '2':
-        material: COBBLESTONE
-        buy: 1
-        sell: 0.25
-      '3':
-        material: DEEPSLATE
-        buy: 3
-        sell: 0.75
-      '4':
-        material: COBBLED_DEEPSLATE
-        buy: 2
-        sell: 0.5
-      '5':
-        material: GRANITE
-        buy: 2
-        sell: 0.5
-      '6':
-        material: DIORITE
-        buy: 2
-        sell: 0.5
-      '7':
-        material: ANDESITE
-        buy: 2
-        sell: 0.5
-      '8':
-        material: CALCITE
-        buy: 3
-        sell: 0.75
-      '9':
-        material: TUFF
-        buy: 3
-        sell: 0.75
-      '10':
-        material: DRIPSTONE_BLOCK
-        buy: 4
-        sell: 1
-      
-      # Wood Blocks
-      '11':
-        material: OAK_PLANKS
-        buy: 2
-        sell: 0.5
-      '12':
-        material: SPRUCE_PLANKS
-        buy: 2
-        sell: 0.5
-      '13':
-        material: BIRCH_PLANKS
-        buy: 2
-        sell: 0.5
-      '14':
-        material: JUNGLE_PLANKS
-        buy: 2
-        sell: 0.5
-      '15':
-        material: ACACIA_PLANKS
-        buy: 2
-        sell: 0.5
-      '16':
-        material: DARK_OAK_PLANKS
-        buy: 2
-        sell: 0.5
-      '17':
-        material: MANGROVE_PLANKS
-        buy: 3
-        sell: 0.75
-      '18':
-        material: CHERRY_PLANKS
-        buy: 3
-        sell: 0.75
-      '19':
-        material: BAMBOO_PLANKS
-        buy: 2
-        sell: 0.5
-      '20':
-        material: CRIMSON_PLANKS
-        buy: 4
-        sell: 1
-      '21':
-        material: WARPED_PLANKS
-        buy: 4
-        sell: 1
-      
-      # Dirt & Sand
-      '22':
         material: DIRT
-        buy: 1
-        sell: 0.25
-      '23':
+        buy: 0.25
+        sell: 0.07
+      '2':
         material: GRASS_BLOCK
-        buy: 2
-        sell: 0.5
-      '24':
+        buy: 0.8
+        sell: 0.24
+      '3':
         material: SAND
-        buy: 2
-        sell: 0.5
-      '25':
-        material: RED_SAND
-        buy: 3
-        sell: 0.75
-      '26':
+        buy: 0.35
+        sell: 0.1
+      '4':
         material: GRAVEL
-        buy: 2
-        sell: 0.5
-      '27':
+        buy: 0.2
+        sell: 0.06
+      '5':
         material: CLAY
-        buy: 5
-        sell: 1
-      '28':
-        material: TERRACOTTA
-        buy: 8
-        sell: 2
+        buy: 0.5
+        sell: 0.15
+      '6':
+        material: MUD
+        buy: 0.4
+        sell: 0.12
       
-      # Glass
-      '29':
-        material: GLASS
-        buy: 3
+      # ═══════ WOOD TYPES ═══════
+      '7':
+        material: OAK_LOG
+        buy: 2.25
+        sell: 0.67
+      '8':
+        material: SPRUCE_LOG
+        buy: 2.25
+        sell: 0.67
+      '9':
+        material: BIRCH_LOG
+        buy: 2.25
+        sell: 0.67
+      '10':
+        material: JUNGLE_LOG
+        buy: 2.75
+        sell: 0.82
+      '11':
+        material: ACACIA_LOG
+        buy: 2.75
+        sell: 0.82
+      '12':
+        material: DARK_OAK_LOG
+        buy: 2.75
+        sell: 0.82
+      '13':
+        material: MANGROVE_LOG
+        buy: 2.75
+        sell: 0.82
+      '14':
+        material: CHERRY_LOG
+        buy: 2.5
         sell: 0.75
-      '30':
-        material: WHITE_STAINED_GLASS
-        buy: 4
-        sell: 1
-      '31':
-        material: GLASS_PANE
-        buy: 2
-        sell: 0.5
+      '15':
+        material: CRIMSON_STEM
+        buy: 2.75
+        sell: 0.82
+      '16':
+        material: WARPED_STEM
+        buy: 2.75
+        sell: 0.82
       
-      # Special Blocks
-      '32':
-        material: GLOWSTONE
+      # ═══════ STONE VARIANTS ═══════
+      '17':
+        material: STONE_BRICKS
+        buy: 2.25
+        sell: 0.67
+      '18':
+        material: BRICKS
+        buy: 3.5
+        sell: 1.05
+      '19':
+        material: SMOOTH_STONE
+        buy: 2.25
+        sell: 0.67
+      '20':
+        material: SANDSTONE
+        buy: 2.25
+        sell: 0.67
+      '21':
+        material: RED_SANDSTONE
+        buy: 2.75
+        sell: 0.82
+      '22':
+        material: PRISMARINE
+        buy: 12.5
+        sell: 3.75
+      '23':
+        material: DARK_PRISMARINE
         buy: 15
-        sell: 4
-      '33':
+        sell: 4.5
+      '24':
         material: SEA_LANTERN
-        buy: 20
-        sell: 5
-      '34':
-        material: OBSIDIAN
-        buy: 25
-        sell: 6
-      '35':
+        buy: 28.75
+        sell: 8.62
+      
+      # ═══════ GLASS & TERRACOTTA ═══════
+      '25':
+        material: GLASS
+        buy: 2.25
+        sell: 0.67
+      '26':
+        material: WHITE_STAINED_GLASS
+        buy: 2.75
+        sell: 0.82
+      '27':
+        material: TERRACOTTA
+        buy: 2.75
+        sell: 0.82
+      '28':
+        material: WHITE_GLAZED_TERRACOTTA
+        buy: 6.5
+        sell: 1.95
+      
+      # ═══════ SPECIAL BLOCKS ═══════
+      '29':
+        material: SPONGE
+        buy: 55
+        sell: 16.5
+      '30':
         material: CRYING_OBSIDIAN
-        buy: 35
+        buy: 30
         sell: 9
-      '36':
-        material: NETHERRACK
-        buy: 1
-        sell: 0.25
-      '37':
+      '31':
         material: END_STONE
-        buy: 5
-        sell: 1
-      '38':
+        buy: 6.5
+        sell: 1.95
+      '32':
         material: PURPUR_BLOCK
         buy: 10
-        sell: 2.5
-      
-      # Packed/Compressed
-      '39':
+        sell: 3
+      '33':
+        material: HONEYCOMB_BLOCK
+        buy: 16.25
+        sell: 4.87
+      '34':
         material: PACKED_ICE
         buy: 10
-        sell: 2.5
-      '40':
-        material: BLUE_ICE
-        buy: 50
-        sell: 12
-      '41':
-        material: SNOW_BLOCK
-        buy: 5
-        sell: 1
-      '42':
-        material: HAY_BLOCK
-        buy: 15
-        sell: 4
-      '43':
-        material: SLIME_BLOCK
-        buy: 40
-        sell: 10
-      '44':
-        material: HONEY_BLOCK
-        buy: 30
-        sell: 7
-      '45':
-        material: MAGMA_BLOCK
-        buy: 20
-        sell: 5
+        sell: 3

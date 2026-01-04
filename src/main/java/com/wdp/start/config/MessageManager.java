@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 public class MessageManager {
     
     private final WDPStartPlugin plugin;
+    private final ConfigMigration migration;
     private FileConfiguration messages;
     private File messagesFile;
     private String currentLanguage = "en";
@@ -36,6 +37,7 @@ public class MessageManager {
     
     public MessageManager(WDPStartPlugin plugin) {
         this.plugin = plugin;
+        this.migration = new ConfigMigration(plugin);
         loadMessages();
     }
     
@@ -79,6 +81,9 @@ public class MessageManager {
                 new InputStreamReader(defaultStream));
             messages.setDefaults(defaultConfig);
         }
+        
+        // Check language version
+        migration.checkLanguageVersion(messagesFile, "messages.yml");
     }
     
     /**

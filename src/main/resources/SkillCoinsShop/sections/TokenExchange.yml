@@ -1,4 +1,14 @@
 enable: true
 slot: 38
-material: EMERALD
-displayname: 'Token Exchange'
+title: ''
+hidden: false
+sub-section: false
+display-item: false
+fill-item:
+  material: AIR
+nav-bar:
+  mode: INHERIT
+item:
+  material: EMERALD
+  displayname: '&b◆ Token Exchange'
+  name: '&b◆ Token Exchange'

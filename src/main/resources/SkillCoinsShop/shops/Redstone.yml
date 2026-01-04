@@ -1,168 +1,161 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                       REDSTONE SHOP - BALANCED ECONOMY V2                     ║
+# ╠══════════════════════════════════════════════════════════════════════════════╣
+# ║ Pricing Philosophy:                                                           ║
+# ║ - Basic components: Very cheap, encourage building                            ║
+# ║ - Logic gates: Based on material cost                                         ║
+# ║ - Pistons/Observers: Moderate price, iron-based                               ║
+# ║ - Rails: Cheap enough to build tracks                                         ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
 pages:
   page1:
     items:
-      # Basic Redstone
+      # ═══════ BASIC REDSTONE ═══════
       '1':
         material: REDSTONE
-        buy: 10
-        sell: 2.5
-      '2':
-        material: REDSTONE_BLOCK
-        buy: 90
-        sell: 22
-      '3':
-        material: REDSTONE_TORCH
-        buy: 8
-        sell: 2
-      '4':
-        material: REDSTONE_LAMP
-        buy: 25
-        sell: 6
-      '5':
-        material: LEVER
-        buy: 5
-        sell: 1
-      '6':
-        material: STONE_BUTTON
         buy: 3
         sell: 0.75
+      '2':
+        material: REDSTONE_BLOCK
+        buy: 27
+        sell: 6.75
+      '3':
+        material: REDSTONE_TORCH
+        buy: 4.25
+        sell: 1.06
+      '4':
+        material: REDSTONE_LAMP
+        buy: 22.5
+        sell: 5.63
+      '5':
+        material: LEVER
+        buy: 2.25
+        sell: 0.56
+      '6':
+        material: STONE_BUTTON
+        buy: 2.25
+        sell: 0.56
+      
+      # ═══════ PRESSURE PLATES ═══════
       '7':
-        material: OAK_BUTTON
+        material: STONE_PRESSURE_PLATE
         buy: 3
         sell: 0.75
       '8':
         material: OAK_PRESSURE_PLATE
-        buy: 5
-        sell: 1
+        buy: 3
+        sell: 0.75
       '9':
-        material: STONE_PRESSURE_PLATE
-        buy: 5
-        sell: 1
-      '10':
         material: HEAVY_WEIGHTED_PRESSURE_PLATE
-        buy: 15
-        sell: 4
-      '11':
+        buy: 27.5
+        sell: 6.88
+      '10':
         material: LIGHT_WEIGHTED_PRESSURE_PLATE
-        buy: 15
-        sell: 4
+        buy: 32.5
+        sell: 8.13
       
-      # Logic Components
-      '12':
-        material: REPEATER
-        buy: 20
-        sell: 5
-      '13':
-        material: COMPARATOR
-        buy: 25
-        sell: 6
-      '14':
-        material: OBSERVER
-        buy: 40
-        sell: 10
-      '15':
-        material: DAYLIGHT_DETECTOR
-        buy: 30
-        sell: 7
-      '16':
-        material: TRIPWIRE_HOOK
-        buy: 15
-        sell: 4
-      '17':
-        material: TARGET
-        buy: 20
-        sell: 5
-      
-      # Pistons
-      '18':
+      # ═══════ PISTONS & OBSERVERS ═══════
+      '11':
         material: PISTON
-        buy: 45
-        sell: 11
-      '19':
+        buy: 27.5
+        sell: 6.88
+      '12':
         material: STICKY_PISTON
-        buy: 60
-        sell: 15
-      '20':
+        buy: 37.5
+        sell: 9.38
+      '13':
+        material: OBSERVER
+        buy: 32.5
+        sell: 8.13
+      '14':
         material: SLIME_BLOCK
-        buy: 40
-        sell: 10
-      '21':
+        buy: 70
+        sell: 17.5
+      '15':
         material: HONEY_BLOCK
-        buy: 30
-        sell: 7
+        buy: 52.5
+        sell: 13.13
       
-      # Dispensers/Droppers
-      '22':
-        material: DISPENSER
-        buy: 40
-        sell: 10
-      '23':
-        material: DROPPER
-        buy: 35
-        sell: 9
-      '24':
-        material: HOPPER
-        buy: 80
-        sell: 20
+      # ═══════ LOGIC COMPONENTS ═══════
+      '16':
+        material: REPEATER
+        buy: 16.25
+        sell: 4.06
+      '17':
+        material: COMPARATOR
+        buy: 27.5
+        sell: 6.88
+      '18':
+        material: TARGET
+        buy: 32.5
+        sell: 8.13
+      '19':
+        material: DAYLIGHT_DETECTOR
+        buy: 37.5
+        sell: 9.38
+      '20':
+        material: TRIPWIRE_HOOK
+        buy: 8.5
+        sell: 2.13
       
-      # Doors & Gates
-      '25':
-        material: OAK_DOOR
-        buy: 10
-        sell: 2.5
-      '26':
+      # ═══════ DOORS & GATES ═══════
+      '21':
         material: IRON_DOOR
-        buy: 30
-        sell: 7
-      '27':
-        material: OAK_TRAPDOOR
-        buy: 8
-        sell: 2
-      '28':
+        buy: 22.5
+        sell: 5.63
+      '22':
         material: IRON_TRAPDOOR
-        buy: 25
-        sell: 6
-      '29':
+        buy: 27.5
+        sell: 6.88
+      '23':
         material: OAK_FENCE_GATE
-        buy: 10
-        sell: 2.5
+        buy: 5.5
+        sell: 1.38
       
-      # Rails
-      '30':
+      # ═══════ RAILS & MINECARTS ═══════
+      '24':
         material: RAIL
-        buy: 5
-        sell: 1
-      '31':
+        buy: 3.25
+        sell: 0.81
+      '25':
         material: POWERED_RAIL
-        buy: 15
-        sell: 4
-      '32':
+        buy: 16.25
+        sell: 4.06
+      '26':
         material: DETECTOR_RAIL
-        buy: 10
-        sell: 2.5
-      '33':
+        buy: 13.75
+        sell: 3.44
+      '27':
         material: ACTIVATOR_RAIL
-        buy: 10
-        sell: 2.5
-      '34':
+        buy: 13.75
+        sell: 3.44
+      '28':
         material: MINECART
-        buy: 60
-        sell: 15
+        buy: 32.5
+        sell: 8.13
+      '29':
+        material: CHEST_MINECART
+        buy: 40.5
+        sell: 10.13
+      '30':
+        material: HOPPER_MINECART
+        buy: 57.5
+        sell: 14.38
       
-      # Special
-      '35':
+      # ═══════ DISPENSERS & HOPPERS ═══════
+      '31':
+        material: DISPENSER
+        buy: 27.5
+        sell: 6.88
+      '32':
+        material: DROPPER
+        buy: 22.5
+        sell: 5.63
+      '33':
+        material: HOPPER
+        buy: 47.5
+        sell: 11.88
+      '34':
         material: TNT
-        buy: 50
-        sell: 12
-      '36':
-        material: NOTE_BLOCK
-        buy: 30
-        sell: 7
-      '37':
-        material: JUKEBOX
-        buy: 50
-        sell: 12
-      '38':
-        material: LECTERN
-        buy: 50
-        sell: 12
+        buy: 37.5
+        sell: 9.38
