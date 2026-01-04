@@ -1,160 +1,290 @@
-# ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║                    MISCELLANEOUS SHOP - BALANCED ECONOMY V2                   ║
-# ╠══════════════════════════════════════════════════════════════════════════════╣
-# ║ Pricing Philosophy:                                                           ║
-# ║ - Rare items: High prices, encourages exploration                             ║
-# ║ - Utility items: Moderate prices for convenience                              ║
-# ║ - Spawn eggs: Very expensive (creative-tier, for fun)                         ║
-# ║ - Decorative: Small markup for convenience                                    ║
-# ╚══════════════════════════════════════════════════════════════════════════════╝
 pages:
   page1:
     items:
-      # ═══════ VALUABLE RARE ITEMS ═══════
       '1':
-        material: NETHER_STAR
-        buy: 1200
-        sell: 360
+        material: ANVIL
+        buy: 187.25
+        sell: 46.82
       '2':
-        material: DRAGON_EGG
-        buy: 5000
-        sell: 1500
+        material: AXOLOTL_BUCKET
+        buy: 19.47
+        sell: 4.87
       '3':
-        material: BEACON
-        buy: 1500
-        sell: 450
+        material: BELL
+        buy: 1000
+        sell: 250
       '4':
-        material: CONDUIT
-        buy: 800
-        sell: 240
+        material: BRUSH
+        buy: 7.88
+        sell: 1.97
       '5':
-        material: HEART_OF_THE_SEA
-        buy: 350
-        sell: 105
+        material: CARROT_ON_A_STICK
+        buy: 7.08
+        sell: 1.77
       '6':
-        material: NAUTILUS_SHELL
-        buy: 45
-        sell: 13
-      
-      # ═══════ END ITEMS ═══════
-      '7':
-        material: END_CRYSTAL
-        buy: 150
-        sell: 45
-      '8':
-        material: END_ROD
-        buy: 15
-        sell: 4
-      '9':
-        material: CHORUS_FRUIT
-        buy: 8
-        sell: 2
-      '10':
-        material: POPPED_CHORUS_FRUIT
-        buy: 12
-        sell: 3
-      '11':
-        material: DRAGON_BREATH
-        buy: 80
-        sell: 24
-      
-      # ═══════ MUSIC & DECORATION ═══════
-      '12':
-        material: NOTE_BLOCK
-        buy: 10
-        sell: 3
-      '13':
-        material: JUKEBOX
-        buy: 65
-        sell: 19
-      '14':
-        material: MUSIC_DISC_13
-        buy: 120
-        sell: 36
-      '15':
-        material: MUSIC_DISC_CAT
-        buy: 120
-        sell: 36
-      '16':
-        material: MUSIC_DISC_BLOCKS
-        buy: 150
-        sell: 45
-      '17':
-        material: MUSIC_DISC_PIGSTEP
-        buy: 300
-        sell: 90
-      
-      # ═══════ UTILITY ITEMS ═══════
-      '18':
-        material: CLOCK
-        buy: 30
-        sell: 9
-      '19':
-        material: COMPASS
-        buy: 20
-        sell: 6
-      '20':
-        material: RECOVERY_COMPASS
-        buy: 200
-        sell: 60
-      '21':
-        material: MAP
-        buy: 12
-        sell: 3
-      '22':
-        material: SADDLE
-        buy: 35
+        material: COBWEB
+        buy: 40
         sell: 10
-      '23':
-        material: HORSE_ARMOR_LEATHER
-        buy: 25
+      '7':
+        material: COD_BUCKET
+        buy: 25.77
+        sell: 6.45
+      '8':
+        material: ELYTRA
+        buy: -1.0
+        sell: -1
+      '9':
+        material: ENDER_CHEST
+        buy: 273.12
+        sell: 68.28
+      '10':
+        material: ENDER_EYE
+        buy: 10.11
+        sell: 2.53
+      '11':
+        material: EXPERIENCE_BOTTLE
+        buy: 107.94
+        sell: -1
+      '999':
+        material: FIREWORK
+        buy: 303
+        sell: 75
+        duration: 2
+        colors:
+        - cyan
+        - purple
+        fade-colors:
+        - black
+        - gray
+        flicker: true
+        trail: true
+        shape: BURST
+      '12':
+        material: GLOW_INK_SAC
+        buy: 5.5
+        sell: 1.38
+      '13':
+        material: GLOWSTONE_DUST
+        buy: 7
+        sell: 1.75
+      '14':
+        material: HONEYCOMB
+        buy: 3.15
+        sell: 0.79
+      '15':
+        material: LAVA_BUCKET
+        buy: 18.4
+        sell: 4.6
+      '16':
+        material: LEAD
+        buy: 17.33
+        sell: 4.34
+      '17':
+        material: LILY_PAD
+        buy: 28
         sell: 7
-      '24':
-        material: HORSE_ARMOR_IRON
-        buy: 55
-        sell: 16
-      '25':
-        material: HORSE_ARMOR_GOLD
-        buy: 80
-        sell: 24
-      '26':
-        material: HORSE_ARMOR_DIAMOND
-        buy: 180
-        sell: 54
-      
-      # ═══════ SPAWN EGGS (VERY EXPENSIVE) ═══════
-      # These are convenience items for builders/farmers
-      '27':
-        material: VILLAGER_SPAWN_EGG
-        buy: 500
-        sell: 150
-      '28':
-        material: COW_SPAWN_EGG
-        buy: 150
-        sell: 45
-      '29':
-        material: SHEEP_SPAWN_EGG
-        buy: 150
-        sell: 45
-      '30':
-        material: PIG_SPAWN_EGG
-        buy: 150
-        sell: 45
-      '31':
-        material: CHICKEN_SPAWN_EGG
+      '18':
+        material: LODESTONE
+        buy: 2492.3
+        sell: -1
+      '19':
+        material: MAP
+        buy: 29.06
+        sell: 7.27
+      '20':
+        material: MOSS_BLOCK
+        buy: 1
+        sell: 0.25
+      '21':
+        material: NAME_TAG
         buy: 100
-        sell: 30
-      
-      # ═══════ BANNERS & DECORATION ═══════
+        sell: 25
+      '23':
+        material: POWDER_SNOW_BUCKET
+        buy: 33.99
+        sell: 8.5
+      '24':
+        material: PUFFERFISH_BUCKET
+        buy: 25.77
+        sell: 6.45
+      '26':
+        material: SADDLE
+        buy: 60
+        sell: 15
+      '27':
+        material: SALMON_BUCKET
+        buy: 25.77
+        sell: 6.45
+      '28':
+        material: SCAFFOLDING
+        buy: 1.33
+        sell: 0.34
+      '29':
+        material: SHULKER_SHELL
+        buy: 7
+        sell: 1.75
+      '30':
+        material: SNIFFER_EGG
+        buy: 23
+        sell: 5.75
+      '31':
+        material: SNOW
+        buy: 6.62
+        sell: 1.66
       '32':
-        material: WHITE_BANNER
-        buy: 15
-        sell: 4
+        material: SNOWBALL
+        buy: 3
+        sell: 0.75
       '33':
-        material: PAINTING
-        buy: 8
-        sell: 2
+        material: SPONGE
+        buy: 525
+        sell: 131.25
       '34':
-        material: ITEM_FRAME
+        material: SPYGLASS
+        buy: 3.31
+        sell: 0.83
+      '35':
+        material: TADPOLE_BUCKET
+        buy: 19.47
+        sell: 4.87
+      '36':
+        material: TOTEM_OF_UNDYING
+        buy: 100
+        sell: 25
+      '38':
+        material: TROPICAL_FISH_BUCKET
+        buy: 25.77
+        sell: 6.45
+      '39':
+        material: TURTLE_EGG
+        buy: 15
+        sell: 3.75
+      '40':
+        material: WARPED_FUNGUS_ON_A_STICK
+        buy: 23.65
+        sell: 5.92
+      '41':
+        material: WATER_BUCKET
+        buy: 18.34
+        sell: 4.59
+      '42':
+        material: WIND_CHARGE
+        buy: 5.25
+        sell: 1.32
+      '43':
+        material: WRITABLE_BOOK
+        buy: 48.95
+        sell: 12.24
+      '44':
+        material: CREEPER_BANNER_PATTERN
+        buy: 630.12
+        sell: 157.53
+  page2:
+    items:
+      '45':
+        material: FLOW_BANNER_PATTERN
+        buy: 1200
+        sell: 300
+      '46':
+        material: FLOWER_BANNER_PATTERN
+        buy: 1.17
+        sell: 0.3
+      '47':
+        material: GLOBE_BANNER_PATTERN
+        buy: 330.75
+        sell: 82.69
+      '48':
+        material: GUSTER_BANNER_PATTERN
+        buy: 800
+        sell: 200
+      '49':
+        material: MOJANG_BANNER_PATTERN
+        buy: 10500.12
+        sell: 2625.03
+      '50':
+        material: PIGLIN_BANNER_PATTERN
+        buy: 10000
+        sell: 2500
+      '51':
+        material: SKULL_BANNER_PATTERN
+        buy: 1050.12
+        sell: 262.53
+      '52':
+        material: CLOCK
+        buy: 38.41
+        sell: 9.61
+      '53':
+        material: COMPASS
+        buy: 26.83
+        sell: 6.71
+      '54':
+        material: RECOVERY_COMPASS
+        buy: 868.17
+        sell: 217.05
+      '55':
+        material: BIG_DRIPLEAF
         buy: 10
+        sell: 2.5
+      '56':
+        material: SMALL_DRIPLEAF
+        buy: 10
+        sell: 2.5
+      '57':
+        material: BEACON
+        buy: 1601.52
+        sell: 400.38
+      '58':
+        material: END_ROD
+        buy: 2.14
+        sell: 0.54
+      '59':
+        material: LANTERN
+        buy: 6.5
+        sell: 1.63
+      '60':
+        material: SOUL_LANTERN
+        buy: 9.26
+        sell: 2.32
+      '61':
+        material: CAMPFIRE
+        buy: 16.79
+        sell: 4.2
+      '62':
+        material: SOUL_CAMPFIRE
+        buy: 21.78
+        sell: 5.45
+      '63':
+        material: SCULK
+        buy: 12
         sell: 3
+      '64':
+        material: SCULK_CATALYST
+        buy: 5000
+        sell: 1250
+      '65':
+        material: SCULK_SHRIEKER
+        buy: 7500.0
+        sell: 1750.0
+        dynamic-pricing:
+          max-stock: 20
+      '66':
+        material: OMINOUS_BOTTLE
+        buy: 17500
+        sell: 3875
+        ominous-strength: 5
+      '23':
+        material: RED_BED
+        buy: 75.0
+        sell: -1.0
+      '24':
+        material: VILLAGER_SPAWN_EGG
+        buy: 1000.0
+        sell: 500.0
+      '25':
+        material: BLAZE_SPAWN_EGG
+        buy: 10000.0
+        sell: 5000.0
+      '26':
+        material: END_CRYSTAL
+        buy: 400.0
+        sell: -1.0

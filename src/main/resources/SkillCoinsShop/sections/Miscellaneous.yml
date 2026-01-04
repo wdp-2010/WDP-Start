@@ -1,5 +1,5 @@
 enable: true
-slot: 15
+slot: 25
 title: ''
 hidden: false
 sub-section: false
@@ -9,6 +9,6 @@ fill-item:
 nav-bar:
   mode: INHERIT
 item:
-  material: ENDER_EYE
-  displayname: '&f✹ Miscellaneous'
-  name: '&f✹ Miscellaneous'
+  material: SADDLE
+  displayname: '&c&lMiscellaneous'
+  name: '&c&lMiscellaneous'

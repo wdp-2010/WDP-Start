@@ -1,5 +1,5 @@
 enable: true
-slot: 33
+slot: 23
 title: ''
 hidden: false
 sub-section: false
@@ -9,8 +9,8 @@ fill-item:
 nav-bar:
   mode: INHERIT
 item:
-  material: REDSTONE
+  material: ENCHANTED_BOOK
   lore:
-  - '&4&lFor all redstone geeks!'
-  displayname: '&c&lRedstone'
-  name: '&c&lRedstone'
+  - '&5&lGear up with enchantments!'
+  displayname: '&d&lEnchanting'
+  name: '&d&lEnchanting'

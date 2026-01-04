@@ -1,5 +1,5 @@
-enable: true
-slot: 20
+enable: false
+slot: 42
 title: ''
 hidden: false
 sub-section: false
@@ -9,6 +9,6 @@ fill-item:
 nav-bar:
   mode: INHERIT
 item:
-  material: GRASS_BLOCK
-  displayname: '&2&lBlocks'
-  name: '&2&lBlocks'
+  material: BEDROCK
+  displayname: Z_EverythingElse
+  name: Z_EverythingElse

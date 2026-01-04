@@ -1,159 +1,119 @@
-# ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║                        FARMING SHOP - BALANCED ECONOMY V2                     ║
-# ╠══════════════════════════════════════════════════════════════════════════════╣
-# ║ Pricing Philosophy:                                                           ║
-# ║ - Crops: Very cheap to buy, farming skill should be the income source         ║
-# ║ - Seeds: Nearly free to encourage farming                                     ║
-# ║ - Animal products: Based on breeding difficulty                               ║
-# ║ - Rare items: Encourages actual farming over shop buying                      ║
-# ╚══════════════════════════════════════════════════════════════════════════════╝
 pages:
   page1:
     items:
-      # ═══════ SEEDS - Nearly free to start farming ═══════
       '1':
-        material: WHEAT_SEEDS
-        buy: 1
-        sell: 0.5
+        material: BAMBOO
+        buy: 0.1
+        sell: 0.03
       '2':
-        material: BEETROOT_SEEDS
-        buy: 1
-        sell: 0.5
+        material: BEE_NEST
+        buy: -1
+        sell: 10
       '3':
-        material: MELON_SEEDS
-        buy: 3
-        sell: 1
+        material: BEEHIVE
+        buy: 16.87
+        sell: 4.22
       '4':
-        material: PUMPKIN_SEEDS
-        buy: 3
-        sell: 1
+        material: BEETROOT
+        buy: 6
+        sell: 1.5
       '5':
-        material: TORCHFLOWER_SEEDS
-        buy: 15
-        sell: 4
+        material: BEETROOT_SEEDS
+        buy: 3
+        sell: 0.75
       '6':
-        material: PITCHER_POD
-        buy: 18
-        sell: 5
-      
-      # ═══════ BASIC CROPS ═══════
-      '7':
-        material: WHEAT
+        material: BROWN_MUSHROOM
         buy: 2
         sell: 0.5
+      '7':
+        material: CACTUS
+        buy: 0.1
+        sell: 0.03
       '8':
         material: CARROT
-        buy: 2
-        sell: 0.5
+        buy: 5
+        sell: 1.25
       '9':
-        material: POTATO
-        buy: 2
-        sell: 0.5
+        material: CHORUS_FLOWER
+        buy: 1
+        sell: 0.25
       '10':
-        material: BEETROOT
-        buy: 2
-        sell: 0.5
+        material: CHORUS_FRUIT
+        buy: 3
+        sell: 0.75
       '11':
-        material: MELON_SLICE
-        buy: 2
-        sell: 0.5
+        material: COCOA_BEANS
+        buy: 6
+        sell: 1.5
       '12':
+        material: CRIMSON_FUNGUS
+        buy: 6
+        sell: 1.5
+      '13':
+        material: EGG
+        buy: 5
+        sell: 1.25
+      '14':
+        material: KELP
+        buy: 0.1
+        sell: 0.03
+      '15':
+        material: LEATHER
+        buy: 33.6
+        sell: 8.4
+      '16':
+        material: MELON
+        buy: 9.45
+        sell: 2.37
+      '17':
+        material: MELON_SEEDS
+        buy: 3
+        sell: 0.75
+      '18':
+        material: MELON_SLICE
+        buy: 1
+        sell: 0.25
+      '19':
+        material: NETHER_WART
+        buy: 3
+        sell: 0.75
+      '20':
+        material: PITCHER_POD
+        buy: 20.5
+        sell: 5.13
+      '21':
+        material: POTATO
+        buy: 5
+        sell: 1.25
+      '22':
         material: PUMPKIN
         buy: 5
-        sell: 1.5
-      
-      # ═══════ SPECIAL CROPS ═══════
-      '13':
-        material: SUGAR_CANE
-        buy: 3
-        sell: 1
-      '14':
-        material: CACTUS
-        buy: 3
-        sell: 1
-      '15':
-        material: BAMBOO
-        buy: 2
-        sell: 0.5
-      '16':
-        material: KELP
-        buy: 2
-        sell: 0.5
-      '17':
-        material: SWEET_BERRIES
-        buy: 3
-        sell: 1
-      '18':
-        material: GLOW_BERRIES
-        buy: 8
-        sell: 2.5
-      
-      # ═══════ COCOA & NETHERWART ═══════
-      '19':
-        material: COCOA_BEANS
-        buy: 4
-        sell: 1.2
-      '20':
-        material: NETHER_WART
-        buy: 6
-        sell: 1.8
-      
-      # ═══════ FLOWERS ═══════
-      '21':
-        material: DANDELION
-        buy: 2
-        sell: 0.5
-      '22':
-        material: POPPY
-        buy: 2
-        sell: 0.5
+        sell: 1.25
       '23':
-        material: BLUE_ORCHID
-        buy: 4
-        sell: 1.2
+        material: PUMPKIN_SEEDS
+        buy: 1.19
+        sell: 0.3
       '24':
-        material: LILY_OF_THE_VALLEY
-        buy: 5
-        sell: 1.5
+        material: RED_MUSHROOM
+        buy: 2
+        sell: 0.5
       '25':
-        material: WITHER_ROSE
-        buy: 45
-        sell: 13.5
+        material: SUGAR_CANE
+        buy: 0.1
+        sell: 0.03
       '26':
-        material: TORCHFLOWER
-        buy: 25
-        sell: 7.5
-      
-      # ═══════ ANIMAL PRODUCTS ═══════
+        material: TORCHFLOWER_SEEDS
+        buy: 20.5
+        sell: 5.13
       '27':
-        material: LEATHER
-        buy: 8
-        sell: 2.4
+        material: WARPED_FUNGUS
+        buy: 6
+        sell: 1.5
       '28':
-        material: FEATHER
-        buy: 2
-        sell: 0.5
+        material: WHEAT
+        buy: 5
+        sell: 1.25
       '29':
-        material: EGG
-        buy: 2
-        sell: 0.5
-      '30':
-        material: WOOL
+        material: WHEAT_SEEDS
         buy: 3
-        sell: 0.9
-      '31':
-        material: STRING
-        buy: 3
-        sell: 0.9
-      '32':
-        material: HONEYCOMB
-        buy: 8
-        sell: 2.4
-      '33':
-        material: HONEY_BOTTLE
-        buy: 12
-        sell: 3.6
-      '34':
-        material: INK_SAC
-        buy: 4
-        sell: 1.2
+        sell: 0.75

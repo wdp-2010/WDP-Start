@@ -1,5 +1,5 @@
 enable: true
-slot: 20
+slot: 26
 title: ''
 hidden: false
 sub-section: false
@@ -9,6 +9,6 @@ fill-item:
 nav-bar:
   mode: INHERIT
 item:
-  material: GOLDEN_APPLE
-  displayname: '&6🍎 Food'
-  name: '&6🍎 Food'
+  material: COOKED_BEEF
+  displayname: '&6&lFood'
+  name: '&6&lFood'

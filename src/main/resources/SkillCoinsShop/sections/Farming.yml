@@ -1,5 +1,5 @@
 enable: true
-slot: 22
+slot: 21
 title: ''
 hidden: false
 sub-section: false
@@ -10,5 +10,5 @@ nav-bar:
   mode: INHERIT
 item:
   material: WHEAT
-  displayname: '&e&lFarming'
-  name: '&e&lFarming'
+  displayname: '&a&lFarming'
+  name: '&a&lFarming'
