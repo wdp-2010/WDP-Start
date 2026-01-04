@@ -161,7 +161,7 @@ public class WDPStartPlugin extends JavaPlugin {
     
     private void extractSkillCoinsShopResources() {
         try {
-            // Extract sections
+            // Extract sections - ALL sections including EconomyShopGUI
             String[] sectionFiles = {
                 "SkillCoinsShop/sections/Blocks.yml",
                 "SkillCoinsShop/sections/Combat.yml", 
@@ -175,14 +175,24 @@ public class WDPStartPlugin extends JavaPlugin {
                 "SkillCoinsShop/sections/SkillLevels.yml",
                 "SkillCoinsShop/sections/TokenExchange.yml",
                 "SkillCoinsShop/sections/Tokens.yml",
-                "SkillCoinsShop/sections/Tools.yml"
+                "SkillCoinsShop/sections/Tools.yml",
+                "SkillCoinsShop/sections/Decoration.yml",
+                "SkillCoinsShop/sections/Dyes.yml",
+                "SkillCoinsShop/sections/Enchanting.yml",
+                "SkillCoinsShop/sections/Mobs.yml",
+                "SkillCoinsShop/sections/Music.yml",
+                "SkillCoinsShop/sections/Ores.yml",
+                "SkillCoinsShop/sections/SpawnEggs.yml",
+                "SkillCoinsShop/sections/Spawners.yml",
+                "SkillCoinsShop/sections/Workstations.yml",
+                "SkillCoinsShop/sections/Z_EverythingElse.yml"
             };
             
             for (String file : sectionFiles) {
                 saveResource(file, false);
             }
             
-            // Extract shops
+            // Extract shops - ALL shops including EconomyShopGUI
             String[] shopFiles = {
                 "SkillCoinsShop/shops/Blocks.yml",
                 "SkillCoinsShop/shops/Combat.yml",
@@ -196,7 +206,17 @@ public class WDPStartPlugin extends JavaPlugin {
                 "SkillCoinsShop/shops/SkillLevels.yml",
                 "SkillCoinsShop/shops/TokenExchange.yml",
                 "SkillCoinsShop/shops/Tokens.yml",
-                "SkillCoinsShop/shops/Tools.yml"
+                "SkillCoinsShop/shops/Tools.yml",
+                "SkillCoinsShop/shops/Decoration.yml",
+                "SkillCoinsShop/shops/Dyes.yml",
+                "SkillCoinsShop/shops/Enchanting.yml",
+                "SkillCoinsShop/shops/Mobs.yml",
+                "SkillCoinsShop/shops/Music.yml",
+                "SkillCoinsShop/shops/Ores.yml",
+                "SkillCoinsShop/shops/SpawnEggs.yml",
+                "SkillCoinsShop/shops/Spawners.yml",
+                "SkillCoinsShop/shops/Workstations.yml",
+                "SkillCoinsShop/shops/Z_EverythingElse.yml"
             };
             
             for (String file : shopFiles) {

@@ -113,12 +113,9 @@ fi
 # Safety wait for file handles
 sleep 2
 
-# Step 3: Backup existing plugin
+# Step 3: Remove old plugin if exists
 if [ -f "${PLUGIN_DIR}/${JAR_NAME}" ]; then
-    print_step "Backing up existing plugin..."
-    BACKUP_NAME="${PLUGIN_NAME}-backup-$(date +%Y%m%d_%H%M%S).jar"
-    mv "${PLUGIN_DIR}/${JAR_NAME}" "${PLUGIN_DIR}/${BACKUP_NAME}" 2>/dev/null || true
-    print_success "Backup created: ${BACKUP_NAME}"
+    rm -f "${PLUGIN_DIR}/${JAR_NAME}"
 fi
 
 # Step 4: Copy new JAR
