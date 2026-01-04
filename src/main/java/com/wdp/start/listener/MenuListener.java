@@ -10,7 +10,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 
 /**
- * Handles GUI click events for the quest menu
+ * Handles GUI click events for the quest menu and shop menu
  */
 public class MenuListener implements Listener {
     
@@ -27,8 +27,22 @@ public class MenuListener implements Listener {
         }
         
         Inventory inv = event.getInventory();
+        String title = event.getView().getTitle();
         
-        // Check if it's our menu
+        // Check if it's our simple shop menu first
+        if (plugin.getSimpleShopMenu() != null && plugin.getSimpleShopMenu().isShopInventory(title)) {
+            event.setCancelled(true);
+            
+            // Ignore clicks outside the inventory
+            if (event.getRawSlot() < 0 || event.getRawSlot() >= inv.getSize()) {
+                return;
+            }
+            
+            plugin.getSimpleShopMenu().handleClick(player, event.getRawSlot(), inv);
+            return;
+        }
+        
+        // Check if it's our quest menu
         if (!plugin.getQuestMenu().isQuestMenu(inv)) {
             return;
         }
@@ -51,7 +65,15 @@ public class MenuListener implements Listener {
             return;
         }
         
-        // Check if it was our menu
+        String title = event.getView().getTitle();
+        
+        // Check if it was our simple shop menu
+        if (plugin.getSimpleShopMenu() != null && plugin.getSimpleShopMenu().isShopInventory(title)) {
+            plugin.getSimpleShopMenu().handleClose(player);
+            return;
+        }
+        
+        // Check if it was our quest menu
         if (plugin.getQuestMenu().isQuestMenu(event.getInventory())) {
             plugin.getQuestMenu().handleClose(player);
         }

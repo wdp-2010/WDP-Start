@@ -14,6 +14,7 @@ import com.wdp.start.path.PortalZoneManager;
 import com.wdp.start.path.RTPManager;
 import com.wdp.start.player.PlayerDataManager;
 import com.wdp.start.quest.QuestManager;
+import com.wdp.start.shop.SimpleShopMenu;
 import com.wdp.start.storage.DatabaseManager;
 import com.wdp.start.ui.QuestMenu;
 import net.md_5.bungee.api.ChatColor;
@@ -42,6 +43,7 @@ public class WDPStartPlugin extends JavaPlugin {
     private DatabaseManager databaseManager;
     private QuestManager questManager;
     private QuestMenu questMenu;
+    private SimpleShopMenu simpleShopMenu;
     private PathGuideManager pathGuideManager;
     private PortalZoneManager portalZoneManager;
     private RTPManager rtpManager;
@@ -146,6 +148,10 @@ public class WDPStartPlugin extends JavaPlugin {
         // Quest menu
         questMenu = new QuestMenu(this);
         
+        // Simple shop menu (for Quest 3 & 4)
+        simpleShopMenu = new SimpleShopMenu(this);
+        simpleShopMenu.initialize();
+        
         // Path guide manager
         pathGuideManager = new PathGuideManager(this);
         
@@ -189,7 +195,7 @@ public class WDPStartPlugin extends JavaPlugin {
             };
             
             for (String file : sectionFiles) {
-                saveResource(file, false);
+                saveResource(file, true);
             }
             
             // Extract shops - ALL shops including EconomyShopGUI
@@ -220,7 +226,7 @@ public class WDPStartPlugin extends JavaPlugin {
             };
             
             for (String file : shopFiles) {
-                saveResource(file, false);
+                saveResource(file, true);
             }
             
             getLogger().info("SkillCoinsShop resources extracted successfully.");
@@ -298,6 +304,9 @@ public class WDPStartPlugin extends JavaPlugin {
         reloadConfig();
         configManager.reload();
         messageManager.reload();
+        if (simpleShopMenu != null) {
+            simpleShopMenu.reload();
+        }
         getLogger().info("Configuration reloaded.");
     }
     
@@ -325,6 +334,10 @@ public class WDPStartPlugin extends JavaPlugin {
     
     public QuestMenu getQuestMenu() {
         return questMenu;
+    }
+    
+    public SimpleShopMenu getSimpleShopMenu() {
+        return simpleShopMenu;
     }
     
     public VaultIntegration getVaultIntegration() {

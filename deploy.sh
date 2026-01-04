@@ -118,6 +118,13 @@ if [ -f "${PLUGIN_DIR}/${JAR_NAME}" ]; then
     rm -f "${PLUGIN_DIR}/${JAR_NAME}"
 fi
 
+# Step 3.5: Remove old shop directory to ensure fresh deployment
+if [ -d "${PLUGIN_DIR}/${PLUGIN_NAME}/SkillCoinsShop" ]; then
+    print_step "Removing old SkillCoinsShop directory..."
+    rm -rf "${PLUGIN_DIR}/${PLUGIN_NAME}/SkillCoinsShop"
+    print_success "Old shop removed"
+fi
+
 # Step 4: Copy new JAR
 print_step "Copying new plugin to server..."
 cp "target/${JAR_NAME}" "${PLUGIN_DIR}/"
@@ -140,6 +147,11 @@ if [ ! -f "${CONFIG_DIR}/messages.yml" ]; then
     print_step "Copying default messages.yml..."
     cp "src/main/resources/messages.yml" "${CONFIG_DIR}/"
 fi
+
+# Copy SkillCoinsShop directory (always fresh)
+print_step "Copying SkillCoinsShop directory..."
+cp -r "src/main/resources/SkillCoinsShop" "${CONFIG_DIR}/"
+print_success "SkillCoinsShop copied"
 
 # Step 6: Set permissions
 print_step "Setting file permissions..."

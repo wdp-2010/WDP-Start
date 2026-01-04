@@ -176,7 +176,7 @@ public class QuestListener implements Listener {
                 
                 // Open simplified shop menu (items only, no token exchange)
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    plugin.getQuestMenu().openSimplifiedShopItems(player);
+                    plugin.getSimpleShopMenu().openMainMenu(player, 3);
                 });
                 
                 return;
@@ -187,9 +187,9 @@ public class QuestListener implements Listener {
         if ((data.getCurrentQuest() == 1 || data.getCurrentQuest() == 2) && command.startsWith("/shop")) {
             event.setCancelled(true);
             
-            // Open simplified shop menu for testing
+            // Open simplified shop menu for testing (use quest 3 mode)
             Bukkit.getScheduler().runTask(plugin, () -> {
-                plugin.getQuestMenu().openSimplifiedShopItems(player);
+                plugin.getSimpleShopMenu().openMainMenu(player, 3);
             });
             
             return;
@@ -211,9 +211,9 @@ public class QuestListener implements Listener {
                     }, 5L);
                 }
                 
-                // Open simplified token exchange menu
+                // Open simplified token exchange menu (Quest 4 mode)
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    plugin.getQuestMenu().openSimplifiedShop(player);
+                    plugin.getSimpleShopMenu().openMainMenu(player, 4);
                 });
                 
                 return;

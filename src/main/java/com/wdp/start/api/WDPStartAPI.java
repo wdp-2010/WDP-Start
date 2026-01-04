@@ -240,7 +240,9 @@ public class WDPStartAPI {
      */
     public static void openSimplifiedShop(Player player) {
         if (!isAvailable()) return;
-        plugin.getQuestMenu().openSimplifiedShop(player);
+        if (plugin.getSimpleShopMenu() != null) {
+            plugin.getSimpleShopMenu().openMainMenu(player, 4);
+        }
     }
     
     /**
@@ -249,7 +251,9 @@ public class WDPStartAPI {
      */
     public static void openSimplifiedShopItems(Player player) {
         if (!isAvailable()) return;
-        plugin.getQuestMenu().openSimplifiedShopItems(player);
+        if (plugin.getSimpleShopMenu() != null) {
+            plugin.getSimpleShopMenu().openMainMenu(player, 3);
+        }
     }
     
     /**

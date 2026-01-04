@@ -1,0 +1,7 @@
+# Premium Tokens Shop
+# This section is disabled by default
+
+pages:
+  page1:
+    items:
+      # Example items - add token purchases here
