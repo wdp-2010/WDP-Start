@@ -212,16 +212,17 @@ quest5:
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest6:
   # Discord invite link
-  discord-link: "https://discord.gg/yourserver"
+  discord-link: "https://dsc.gg/wdp-server"
   
   # Final rewards for completing all tutorial quests
   # Generous to give players a head start in the economy
   final-rewards:
-    skillcoins: 50
-    skilltokens: 1
+    skillcoins: 500
+    skilltokens: 25
     items:
-      - "IRON_INGOT:4"
-      - "BREAD:8"
+      - "DIAMOND:3"
+      - "IRON_INGOT:16"
+      - "BREAD:32"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                          Cancellation & Refunds                             │
