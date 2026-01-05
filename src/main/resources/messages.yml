@@ -74,7 +74,7 @@ quest:
   quest6:
     complete: "&#55FF55&l✓ &#55FF55All quests complete! Good luck on your adventure!"
   
-  # Quest 6 instructions and reminders
+  # Quest 6 instructions and reminders (at root level for QuestMenu access)
   instruction: "&#FFD700&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   instruction-detail: "&#FFFF55&l➤ CLICK THE GLOWING QUEST ICON &#FFFF55to complete!"
   reminder-10s: "&#FFFF55⚠ Don't forget to click the &#FFD700&lGood Luck!&#FFFF55 quest icon!"
@@ -91,11 +91,11 @@ quest:
     - "&#55FF55  You've completed all starter quests!"
     - ""
     - "&#FFFFFF  Final Rewards:"
-    - "&#FFD700  ✦ 500 ⛃"
-    - "&#FF55FF  ✦ 25 🎟"
-    - "&#55FFFF  ✦ 3 Diamonds"
-    - "&#AAAAAA  ✦ 16 Iron Ingots"
-    - "&#FFFF55  ✦ 32 Bread"
+    - "&#FFD700  ✦ 500 ⛃ SkillCoins"
+    - "&#FF55FF  ✦ 25 🎟 SkillTokens"
+    - "&#55FFFF  ✦ 3x Diamond"
+    - "&#AAAAAA  ✦ 16x Iron Ingot"
+    - "&#FFFF55  ✦ 32x Bread"
     - ""
     - "&#AAAAAAJoin our Discord for help:"
     - "&#55FFFF{discord}"

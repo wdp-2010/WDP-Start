@@ -80,9 +80,9 @@ public class ShopLoader {
             if (!enabled) return null;
             
             String id = file.getName().replace(".yml", "");
-            String displayName = config.getString("displayname", 
-                    config.getString("item.displayname", 
-                    config.getString("item.name", id)));
+            // DON'T use displayname from YAML - it has unparsed legacy color codes
+            // Instead use ID which will get proper colors from getDisplayColor()
+            String displayName = id;
             
             // Handle slot (some configs use 1-based, we use 0-based internally)
             int slot = config.getInt("slot", -1);
