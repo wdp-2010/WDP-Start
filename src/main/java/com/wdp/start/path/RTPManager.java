@@ -400,6 +400,18 @@ public class RTPManager {
             return null;
         }
         
+        // Check that player is not inside or on top of tree blocks (wood or leaves)
+        if (TREE_LOGS.contains(feetBlock.getType()) || TREE_LOGS.contains(headBlock.getType())) {
+            return null;
+        }
+        if (TREE_LEAVES.contains(feetBlock.getType()) || TREE_LEAVES.contains(headBlock.getType())) {
+            return null;
+        }
+        // Also check ground isn't leaves (would be standing on leaves)
+        if (TREE_LEAVES.contains(groundBlock.getType())) {
+            return null;
+        }
+        
         // Return safe location (center of block, on top of ground)
         return new Location(world, x + 0.5, highestY + 1, z + 0.5);
     }
