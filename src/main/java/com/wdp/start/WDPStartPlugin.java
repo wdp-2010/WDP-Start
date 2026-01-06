@@ -6,7 +6,8 @@ import com.wdp.start.config.MessageManager;
 import com.wdp.start.integration.AuraSkillsIntegration;
 import com.wdp.start.integration.VaultIntegration;
 import com.wdp.start.integration.WorldGuardIntegration;
-import com.wdp.start.listener.MenuListener;
+import com.wdp.start.listener.QuestMenuListener;
+import com.wdp.start.listener.ShopMenuListener;
 import com.wdp.start.listener.PlayerListener;
 import com.wdp.start.listener.QuestListener;
 import com.wdp.start.path.PathGuideManager;
@@ -273,8 +274,9 @@ public class WDPStartPlugin extends JavaPlugin {
         questListener = new QuestListener(this);
         Bukkit.getPluginManager().registerEvents(questListener, this);
         
-        // Menu click events
-        Bukkit.getPluginManager().registerEvents(new MenuListener(this), this);
+        // Menu click events (separated for clarity)
+        Bukkit.getPluginManager().registerEvents(new QuestMenuListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new ShopMenuListener(this), this);
         
         getLogger().info("Listeners registered successfully.");
     }

@@ -2,6 +2,7 @@ package com.wdp.start.shop;
 
 import com.wdp.start.WDPStartPlugin;
 import com.wdp.start.player.PlayerData;
+import com.wdp.start.ui.NavbarManager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -34,6 +35,7 @@ public class SimpleShopMenu {
     
     private final WDPStartPlugin plugin;
     private final ShopLoader shopLoader;
+    private final NavbarManager navbarManager;
     
     // Menu tracking
     private final ConcurrentHashMap<UUID, MenuSession> openMenus = new ConcurrentHashMap<>();
@@ -49,6 +51,7 @@ public class SimpleShopMenu {
     public SimpleShopMenu(WDPStartPlugin plugin) {
         this.plugin = plugin;
         this.shopLoader = new ShopLoader(plugin);
+        this.navbarManager = new NavbarManager(plugin);
     }
     
     /**
@@ -149,6 +152,11 @@ public class SimpleShopMenu {
             int slot = section.getSlot();
             if (slot < 0 || slot >= 54) continue;
             
+            // Skip if disabled in simplified shop (food, redstone, etc.) - don't show at all
+            if (section.isDisabledInSimplifiedShop()) {
+                continue;
+            }
+            
             boolean available = section.isAvailableForQuest(questNumber);
             
             ItemStack item = new ItemStack(section.getIcon());
@@ -212,7 +220,7 @@ public class SimpleShopMenu {
         String color = section.getDisplayColor();
         String icon = section.getIconChar();
         String cleanName = ChatColor.stripColor(hex(section.getDisplayName()));
-        String title = MENU_ID + ChatColor.of(color) + icon + ChatColor.of("#FFFFFF") + cleanName + " Shop";
+        String title = MENU_ID + ChatColor.of(color) + icon + ChatColor.DARK_GRAY + cleanName + " Shop";
         
         Inventory inv = Bukkit.createInventory(null, 54, title);
         
@@ -298,8 +306,8 @@ public class SimpleShopMenu {
         context.put("balance", (int) Math.round(coins));
         context.put("coins", MONEY_FORMAT.format(coins));
         
-        // Apply unified navbar from QuestMenu's NavbarManager
-        plugin.getQuestMenu().getNavbarManager().applyNavbar(inv, player, "shop_section", context);
+        // Apply unified navbar using local NavbarManager
+        navbarManager.applyNavbar(inv, player, "shop_section", context);
     }
     
     // ==================== TRANSACTION MENU ====================
@@ -315,9 +323,11 @@ public class SimpleShopMenu {
         // Fill background
         fillBackground(inv, Material.BLACK_STAINED_GLASS_PANE);
         
-        // Initialize transaction data (default quantity 1, max 64)
+        // Initialize transaction data (default quantity 1, max 3)
         int quantity = transactionData.containsKey(player.getUniqueId()) ?
                 transactionData.get(player.getUniqueId()).quantity : 1;
+        // Enforce 3 item limit
+        quantity = Math.min(quantity, 3);
         transactionData.put(player.getUniqueId(), new TransactionData(item, sectionId, quantity));
         
         // Item display (slot 13)
@@ -353,45 +363,39 @@ public class SimpleShopMenu {
         }
         inv.setItem(13, display);
         
-        // Quantity controls (row 3: slots 19-25) - EXACT same layout as TokenExchange
-        // -10 button (slot 19) - using custom model data 1023, blank if disabled
-        if (quantity > 10) {
-            ItemStack minus10 = new ItemStack(Material.RED_STAINED_GLASS_PANE);
-            ItemMeta minus10Meta = minus10.getItemMeta();
-            if (minus10Meta != null) {
-                minus10Meta.setDisplayName(ChatColor.of("#FF5555") + "-- -10");
-                List<String> minus10Lore = new ArrayList<>();
-                minus10Lore.add("");
-                minus10Lore.add(ChatColor.of("#808080") + "Remove 10 items");
-                minus10Meta.setLore(minus10Lore);
-                minus10Meta.setCustomModelData(1023); // Dark red button with --
-                minus10.setItemMeta(minus10Meta);
-            }
-            inv.setItem(19, minus10);
-        }
+        // Quantity controls (row 3: slots 19-25) - Max 3 items
+        // -10 button (slot 19) - REMOVED for 3 item limit
         
-        // -1 button (slot 20) - using custom model data 1022, blank if disabled
+        // -1 button (slot 20)
         if (quantity > 1) {
-            ItemStack minus = new ItemStack(Material.ORANGE_STAINED_GLASS_PANE);
+            ItemStack minus = new ItemStack(Material.ORANGE_TERRACOTTA);
             ItemMeta minusMeta = minus.getItemMeta();
             if (minusMeta != null) {
-                minusMeta.setDisplayName(ChatColor.of("#FF5555") + "- -1");
+                minusMeta.setDisplayName(ChatColor.RED + "▼ -1 Item");
                 List<String> minusLore = new ArrayList<>();
                 minusLore.add("");
-                minusLore.add(ChatColor.of("#808080") + "Remove 1 item");
+                minusLore.add(ChatColor.GRAY + "Remove 1 from quantity");
                 minusMeta.setLore(minusLore);
-                minusMeta.setCustomModelData(1022); // Light red button with -
                 minus.setItemMeta(minusMeta);
             }
             inv.setItem(20, minus);
+        } else {
+            // Show disabled state for -1 button
+            ItemStack minusDisabled = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+            ItemMeta disabledMeta = minusDisabled.getItemMeta();
+            if (disabledMeta != null) {
+                disabledMeta.setDisplayName(ChatColor.GRAY + "[Limit Reached]");
+                minusDisabled.setItemMeta(disabledMeta);
+            }
+            inv.setItem(20, minusDisabled);
         }
         
         // Quantity display (slot 22 - center)
-        // Use paper if item max stack size is not 64, otherwise show the item itself
+        // Use paper ONLY if item is unstackable (max stack size <= 16)
         int maxStackSize = item.getMaterial().getMaxStackSize();
         ItemStack qtyDisplay;
-        if (maxStackSize != 64) {
-            // Non-standard stack size - use paper with quantity
+        if (maxStackSize <= 16) {
+            // Unstackable or low-stack item - use paper with quantity
             qtyDisplay = new ItemStack(Material.PAPER, Math.min(quantity, 64));
             ItemMeta qtyMeta = qtyDisplay.getItemMeta();
             if (qtyMeta != null) {
@@ -405,81 +409,44 @@ public class SimpleShopMenu {
                 qtyMeta.setLore(qtyLore);
                 qtyDisplay.setItemMeta(qtyMeta);
             }
-        } else {
-            // Standard 64 stack - show the actual item
-            qtyDisplay = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-            ItemMeta qtyMeta = qtyDisplay.getItemMeta();
-            if (qtyMeta != null) {
-                qtyMeta.setDisplayName(ChatColor.of("#FFFF00") + "Quantity: " + ChatColor.WHITE + quantity);
-                List<String> qtyLore = new ArrayList<>();
-                qtyLore.add("");
-                qtyLore.add(ChatColor.of("#808080") + "Use the buttons to adjust");
-                qtyMeta.setLore(qtyLore);
-                qtyDisplay.setItemMeta(qtyMeta);
-            }
+            inv.setItem(22, qtyDisplay);
         }
-        inv.setItem(22, qtyDisplay);
+        // For stackable items (maxStackSize > 16), don't show the paper display
+        // Slot 22 stays as border (black glass pane)
         
-        // +1 button (slot 24) - using custom model data 1020, blank if disabled
-        if (quantity < 64) {
-            ItemStack plus = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
+        // +1 button (slot 24) - Max 3 items
+        if (quantity < 3) {
+            ItemStack plus = new ItemStack(Material.LIME_TERRACOTTA);
             ItemMeta plusMeta = plus.getItemMeta();
             if (plusMeta != null) {
-                plusMeta.setDisplayName(ChatColor.of("#55FF55") + "+ +1");
+                plusMeta.setDisplayName(ChatColor.of("#55FF55") + "▲ +1 Item");
                 List<String> plusLore = new ArrayList<>();
                 plusLore.add("");
-                plusLore.add(ChatColor.of("#808080") + "Add 1 item");
+                plusLore.add(ChatColor.GRAY + "Add 1 to quantity");
                 plusMeta.setLore(plusLore);
-                plusMeta.setCustomModelData(1020); // Lime green button with +
                 plus.setItemMeta(plusMeta);
             }
             inv.setItem(24, plus);
-        }
-        
-        // +10 button (slot 25) - using custom model data 1021, blank if disabled
-        if (quantity + 10 <= 64) {
-            ItemStack plus10 = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
-            ItemMeta plus10Meta = plus10.getItemMeta();
-            if (plus10Meta != null) {
-                plus10Meta.setDisplayName(ChatColor.of("#55FF55") + "++ +10");
-                List<String> plus10Lore = new ArrayList<>();
-                plus10Lore.add("");
-                plus10Lore.add(ChatColor.of("#808080") + "Add 10 items");
-                plus10Meta.setLore(plus10Lore);
-                plus10Meta.setCustomModelData(1021); // Dark green button with ++
-                plus10.setItemMeta(plus10Meta);
+        } else {
+            // Show disabled state for +1 button at max (3 items)
+            ItemStack maxed = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+            ItemMeta maxedMeta = maxed.getItemMeta();
+            if (maxedMeta != null) {
+                maxedMeta.setDisplayName(ChatColor.GRAY + "[Limit Reached]");
+                maxed.setItemMeta(maxedMeta);
             }
-            inv.setItem(25, plus10);
+            inv.setItem(24, maxed);
         }
         
-        // Quick select button (slot 31 - below quantity controls)
-        ItemStack quickSelect = new ItemStack(Material.NETHER_STAR);
-        ItemMeta quickMeta = quickSelect.getItemMeta();
-        if (quickMeta != null) {
-            quickMeta.setDisplayName(ChatColor.of("#FFFF00") + "⚡ Quick Select");
-            List<String> quickLore = new ArrayList<>();
-            quickLore.add("");
-            quickLore.add(ChatColor.of("#808080") + "Quickly set to:");
-            quickLore.add(ChatColor.of("#FFD700") + "  • " + ChatColor.WHITE + "1, 4, 8, 16, 32, or 64 items");
-            quickLore.add("");
-            quickLore.add(ChatColor.of("#FFFF00") + "▸ Click to open!");
-            quickMeta.setLore(quickLore);
-            quickSelect.setItemMeta(quickMeta);
-        }
-        inv.setItem(31, quickSelect);
+        // +10 button (slot 25) - REMOVED for 3 item limit
         
-        // Balance display (slot 45)
-        ItemStack balanceItem = new ItemStack(Material.GOLD_NUGGET);
-        ItemMeta balanceMeta = balanceItem.getItemMeta();
-        if (balanceMeta != null) {
-            balanceMeta.setDisplayName(ChatColor.GOLD + "Balance");
-            List<String> balanceLore = new ArrayList<>();
-            balanceLore.add("");
-            balanceLore.add(ChatColor.of("#FFD700") + "Coins: " + ChatColor.WHITE + MONEY_FORMAT.format(balance));
-            balanceMeta.setLore(balanceLore);
-            balanceItem.setItemMeta(balanceMeta);
-        }
-        inv.setItem(45, balanceItem);
+        // Quick select removed - no preset buttons
+        
+        // Add navbar with back to section menu
+        Map<String, Object> context = new HashMap<>();
+        context.put("coins", MONEY_FORMAT.format(balance));
+        context.put("previous_menu", "section"); // Shows back button
+        navbarManager.applyNavbar(inv, player, "shop_transaction", context);
         
         // Confirm button (slot 49 - center bottom)
         ItemStack confirm;
@@ -513,9 +480,6 @@ public class SimpleShopMenu {
         }
         inv.setItem(49, confirm);
         
-        // Close button (slot 53)
-        addCloseButton(inv);
-        
         // Open and track
         player.openInventory(inv);
         openMenus.put(player.getUniqueId(), new MenuSession("transaction", questNumber, sectionId, 0));
@@ -523,66 +487,7 @@ public class SimpleShopMenu {
         playSound(player, Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
     }
     
-    /**
-     * Open quick select menu for quantity presets
-     */
-    private void openQuickSelectMenu(Player player, TransactionData data, int questNumber) {
-        String title = ChatColor.of("#FFFF00") + "⚡" + ChatColor.DARK_GRAY + " Quick Select Amount";
-        Inventory inv = Bukkit.createInventory(null, 27, MENU_ID + title);
-        
-        // Fill background
-        fillBackground(inv, Material.BLACK_STAINED_GLASS_PANE);
-        
-        // Preset buttons (centered row: slots 10-16)
-        int[] presets = {1, 4, 8, 16, 32, 64};
-        Material[] materials = {
-            Material.GOLD_NUGGET,
-            Material.GOLD_INGOT, 
-            Material.GOLD_BLOCK,
-            Material.EMERALD,
-            Material.EMERALD_BLOCK,
-            Material.DIAMOND
-        };
-        
-        int[] slots = {10, 11, 12, 13, 14, 16}; // Skip 15 for visual spacing
-        
-        for (int i = 0; i < presets.length; i++) {
-            int preset = presets[i];
-            ItemStack button = new ItemStack(materials[i]);
-            ItemMeta meta = button.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(ChatColor.of("#FFD700") + String.valueOf(preset) + 
-                        (preset == 1 ? " Item" : " Items"));
-                List<String> lore = new ArrayList<>();
-                lore.add("");
-                lore.add(ChatColor.of("#808080") + "Set quantity to " + ChatColor.WHITE + preset);
-                lore.add("");
-                lore.add(ChatColor.of("#FFFF00") + "▸ Click to select!");
-                meta.setLore(lore);
-                button.setItemMeta(meta);
-            }
-            inv.setItem(slots[i], button);
-        }
-        
-        // Back button (slot 22)
-        ItemStack back = new ItemStack(Material.SPYGLASS);
-        ItemMeta backMeta = back.getItemMeta();
-        if (backMeta != null) {
-            backMeta.setDisplayName(ChatColor.of("#FF5555") + "← Back");
-            List<String> backLore = new ArrayList<>();
-            backLore.add("");
-            backLore.add(ChatColor.of("#808080") + "Return to transaction");
-            backMeta.setLore(backLore);
-            back.setItemMeta(backMeta);
-        }
-        inv.setItem(22, back);
-        
-        // Open and track
-        player.openInventory(inv);
-        openMenus.put(player.getUniqueId(), new MenuSession("quick_select", questNumber, data.sectionId, 0));
-        
-        playSound(player, Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
-    }
+    // Quick select menu removed - no preset buttons
     
     // ==================== TOKEN EXCHANGE MENU ====================
     
@@ -605,76 +510,92 @@ public class SimpleShopMenu {
         ItemStack tokenDisplay = new ItemStack(Material.EMERALD);
         ItemMeta tokenMeta = tokenDisplay.getItemMeta();
         if (tokenMeta != null) {
-            tokenMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.token-display.name")));
-            tokenMeta.setLore(plugin.getMessageManager().getList("shop.token-exchange.token-display.lore",
-                    "quantity", "1",
-                    "cost", String.valueOf(tokenCost),
-                    "total", String.valueOf(tokenCost)).stream().map(this::hex).toList());
+            tokenMeta.setDisplayName(ChatColor.of("#00FFFF") + "⭐ Skill Token");
+            List<String> lore = new ArrayList<>();
+            lore.add("");
+            lore.add(ChatColor.GRAY + "Quantity: " + ChatColor.WHITE + "1");
+            lore.add(ChatColor.GRAY + "Cost: " + ChatColor.GOLD + MONEY_FORMAT.format(tokenCost) + " Coins");
+            lore.add("");
+            lore.add(ChatColor.GRAY + "Total Cost: " + ChatColor.GOLD + MONEY_FORMAT.format(tokenCost) + " Coins");
+            tokenMeta.setLore(lore);
             tokenDisplay.setItemMeta(tokenMeta);
         }
         inv.setItem(13, tokenDisplay);
         
-        // Quantity display (slot 22) - fixed at 1 for tutorial
-        ItemStack qtyDisplay = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
+        // -1 button (slot 20) - ORANGE_TERRACOTTA, disabled since quantity is fixed at 1
+        ItemStack minus = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta minusMeta = minus.getItemMeta();
+        if (minusMeta != null) {
+            minusMeta.setDisplayName(ChatColor.GRAY + "[Limit Reached]");
+            minus.setItemMeta(minusMeta);
+        }
+        inv.setItem(20, minus);
+        
+        // Quantity display (slot 22) - fixed at 1
+        ItemStack qtyDisplay = new ItemStack(Material.PAPER);
         ItemMeta qtyMeta = qtyDisplay.getItemMeta();
         if (qtyMeta != null) {
-            qtyMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.quantity-display.name",
-                    "quantity", "1")));
-            qtyMeta.setLore(plugin.getMessageManager().getList("shop.token-exchange.quantity-display.lore").stream()
-                    .map(this::hex).toList());
+            qtyMeta.setDisplayName(ChatColor.of("#FFFF00") + "Quantity: " + ChatColor.WHITE + "1");
+            List<String> qtyLore = new ArrayList<>();
+            qtyLore.add("");
+            qtyLore.add(ChatColor.GRAY + "Item: " + ChatColor.WHITE + "Skill Token");
+            qtyLore.add(ChatColor.GRAY + "Maximum: " + ChatColor.WHITE + "1 item");
+            qtyLore.add("");
+            qtyLore.add(ChatColor.GRAY + "Fixed quantity for tutorial");
+            qtyMeta.setLore(qtyLore);
             qtyDisplay.setItemMeta(qtyMeta);
         }
         inv.setItem(22, qtyDisplay);
         
-        // Balance display (slot 31)
-        ItemStack balanceItem = new ItemStack(Material.GOLD_INGOT);
-        ItemMeta balanceMeta = balanceItem.getItemMeta();
-        if (balanceMeta != null) {
-            balanceMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.balance.name")));
-            balanceMeta.setLore(plugin.getMessageManager().getList("shop.token-exchange.balance.lore",
-                    "coins", MONEY_FORMAT.format(balance),
-                    "required", String.valueOf(tokenCost)).stream().map(this::hex).toList());
-            balanceItem.setItemMeta(balanceMeta);
+        // +1 button (slot 24) - LIME_TERRACOTTA, disabled since quantity is fixed at 1
+        ItemStack plus = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta plusMeta = plus.getItemMeta();
+        if (plusMeta != null) {
+            plusMeta.setDisplayName(ChatColor.GRAY + "[Limit Reached]");
+            plus.setItemMeta(plusMeta);
         }
-        inv.setItem(31, balanceItem);
+        inv.setItem(24, plus);
+        
+        // Balance display (slot 45) - handled by navbar
         
         // Confirm button (slot 49)
         ItemStack confirm;
         if (canAfford) {
-            confirm = new ItemStack(Material.LIME_CONCRETE);
+            confirm = new ItemStack(Material.EMERALD_BLOCK);
             ItemMeta confirmMeta = confirm.getItemMeta();
             if (confirmMeta != null) {
-                confirmMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.confirm.can-buy.name")));
-                confirmMeta.setLore(plugin.getMessageManager().getList("shop.token-exchange.confirm.can-buy.lore",
-                        "quantity", "1",
-                        "total", String.valueOf(tokenCost)).stream().map(this::hex).toList());
+                confirmMeta.setDisplayName(ChatColor.of("#55FF55") + "✔ CONFIRM PURCHASE");
+                List<String> lore = new ArrayList<>();
+                lore.add("");
+                lore.add(ChatColor.GRAY + "Purchasing: " + ChatColor.of("#00FFFF") + "1 Token");
+                lore.add(ChatColor.GRAY + "Cost: " + ChatColor.GOLD + MONEY_FORMAT.format(tokenCost) + " Coins");
+                lore.add(ChatColor.GRAY + "Balance after: " + ChatColor.WHITE + MONEY_FORMAT.format(balance - tokenCost));
+                lore.add("");
+                lore.add(ChatColor.GREEN + "▸ Click to purchase!");
+                confirmMeta.setLore(lore);
                 confirm.setItemMeta(confirmMeta);
             }
         } else {
-            confirm = new ItemStack(Material.RED_CONCRETE);
+            confirm = new ItemStack(Material.REDSTONE_BLOCK);
             ItemMeta confirmMeta = confirm.getItemMeta();
             if (confirmMeta != null) {
-                confirmMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.confirm.cannot-buy.name")));
-                confirmMeta.setLore(plugin.getMessageManager().getList("shop.token-exchange.confirm.cannot-buy.lore").stream()
-                        .map(this::hex).toList());
+                confirmMeta.setDisplayName(ChatColor.of("#FF5555") + "✖ INSUFFICIENT COINS");
+                List<String> lore = new ArrayList<>();
+                lore.add("");
+                lore.add(ChatColor.GRAY + "Cost: " + ChatColor.RED + MONEY_FORMAT.format(tokenCost) + " Coins");
+                lore.add(ChatColor.GRAY + "You have: " + ChatColor.WHITE + MONEY_FORMAT.format(balance));
+                lore.add(ChatColor.GRAY + "Need: " + ChatColor.RED + MONEY_FORMAT.format(tokenCost - balance) + " more");
+                confirmMeta.setLore(lore);
                 confirm.setItemMeta(confirmMeta);
             }
         }
         inv.setItem(49, confirm);
         
-        // Back button (slot 45)
-        ItemStack back = new ItemStack(Material.ARROW);
-        ItemMeta backMeta = back.getItemMeta();
-        if (backMeta != null) {
-            backMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.token-exchange.back.name")));
-            backMeta.setLore(plugin.getMessageManager().getList("shop.token-exchange.back.lore").stream()
-                    .map(this::hex).toList());
-            back.setItemMeta(backMeta);
-        }
-        inv.setItem(45, back);
-        
-        // Close button (slot 53)
-        addCloseButton(inv);
+        // Add navbar with back to main menu
+        Map<String, Object> context = new HashMap<>();
+        context.put("coins", MONEY_FORMAT.format(balance));
+        context.put("previous_menu", "main_shop"); // Shows back button
+        navbarManager.applyNavbar(inv, player, "shop_token_exchange", context);
         
         // Open and track
         player.openInventory(inv);
@@ -699,7 +620,6 @@ public class SimpleShopMenu {
             case "main" -> handleMainMenuClick(player, slot, session);
             case "section" -> handleSectionClick(player, slot, session);
             case "transaction" -> handleTransactionClick(player, slot, session);
-            case "quick_select" -> handleQuickSelectClick(player, slot, session);
             case "token_exchange" -> handleTokenExchangeClick(player, slot, session);
             default -> false;
         };
@@ -798,12 +718,7 @@ public class SimpleShopMenu {
             return true;
         }
         
-        // -10 button (slot 19)
-        if (slot == 19 && data.quantity > 10) {
-            data.quantity -= 10;
-            openBuyTransaction(player, data.item, data.sectionId, session.questNumber);
-            return true;
-        }
+        // -10 button (slot 19) - REMOVED for 3 item limit
         
         // -1 button (slot 20)
         if (slot == 20 && data.quantity > 1) {
@@ -812,25 +727,14 @@ public class SimpleShopMenu {
             return true;
         }
         
-        // +1 button (slot 24)
-        if (slot == 24 && data.quantity < 64) {
+        // +1 button (slot 24) - Max 3 items
+        if (slot == 24 && data.quantity < 3) {
             data.quantity++;
             openBuyTransaction(player, data.item, data.sectionId, session.questNumber);
             return true;
         }
         
-        // +10 button (slot 25)
-        if (slot == 25 && data.quantity + 10 <= 64) {
-            data.quantity += 10;
-            openBuyTransaction(player, data.item, data.sectionId, session.questNumber);
-            return true;
-        }
-        
-        // Quick select button (slot 31)
-        if (slot == 31) {
-            openQuickSelectMenu(player, data, session.questNumber);
-            return true;
-        }
+        // +10 button (slot 25) - REMOVED for 3 item limit
         
         // Confirm button (slot 49)
         if (slot == 49) {
@@ -841,41 +745,7 @@ public class SimpleShopMenu {
         return true;
     }
     
-    /**
-     * Handle quick select menu click
-     */
-    private boolean handleQuickSelectClick(Player player, int slot, MenuSession session) {
-        TransactionData data = transactionData.get(player.getUniqueId());
-        if (data == null) {
-            openMainMenu(player, session.questNumber);
-            return true;
-        }
-        
-        // Back button (slot 22)
-        if (slot == 22) {
-            openBuyTransaction(player, data.item, data.sectionId, session.questNumber);
-            return true;
-        }
-        
-        // Preset buttons (slots 10-16, excluding 15)
-        Map<Integer, Integer> presetMap = Map.of(
-            10, 1,
-            11, 4,
-            12, 8,
-            13, 16,
-            14, 32,
-            16, 64
-        );
-        
-        if (presetMap.containsKey(slot)) {
-            data.quantity = presetMap.get(slot);
-            openBuyTransaction(player, data.item, data.sectionId, session.questNumber);
-            playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.0f);
-            return true;
-        }
-        
-        return true;
-    }
+    // Quick select click handler removed - no preset buttons
     
     /**
      * Handle token exchange click
@@ -977,14 +847,11 @@ public class SimpleShopMenu {
         com.wdp.start.api.WDPStartAPI.trackCoinSpending(player, tokenCost);
         com.wdp.start.api.WDPStartAPI.notifyTokenPurchase(player, 1);
         
-        player.sendMessage(hex(plugin.getMessageManager().get("success.purchased-token",
-                "quantity", "1",
-                "cost", String.valueOf(tokenCost))));
-        
         playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.8f);
         
-        // Notify quest listener for Quest 4
+        // Notify quest listener for Quest 4 - this will trigger completeQuest() which sends the completion message
         plugin.getQuestListener().onTokenPurchase(player, 1);
+        // Note: Quest completion message is sent by completeQuest() - no extra message needed
         
         // Return to main menu
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
@@ -1040,15 +907,18 @@ public class SimpleShopMenu {
     }
     
     /**
-     * Add close button to inventory
+     * Add close button to inventory (for main menu only)
+     * For menus that need back buttons, use the navbar system instead
      */
     private void addCloseButton(Inventory inv) {
         ItemStack close = new ItemStack(Material.BARRIER);
         ItemMeta meta = close.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(hex(plugin.getMessageManager().get("shop.main.close.name")));
-            meta.setLore(plugin.getMessageManager().getList("shop.main.close.lore").stream()
-                    .map(this::hex).toList());
+            meta.setDisplayName(ChatColor.of("#FF5555") + "✗ Close");
+            List<String> lore = new ArrayList<>();
+            lore.add("");
+            lore.add(ChatColor.of("#808080") + "Close shop");
+            meta.setLore(lore);
             close.setItemMeta(meta);
         }
         inv.setItem(53, close);

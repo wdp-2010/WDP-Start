@@ -4,6 +4,7 @@ import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a shop section/category (Food, Tools, Resources, etc.)
@@ -82,16 +83,40 @@ public class ShopSection {
         return items.size();
     }
     
+    // Disabled categories for simplified shop (Quest 3)
+    private static final Set<String> DISABLED_CATEGORIES = Set.of(
+        "food", "redstone", "potion", "potions", "decoration", "decorations",
+        "blocks", "block", "workshop", "workshops", "workstation", "workstations",
+        "music", "musicdiscs", "music_discs"
+    );
+    
+    /**
+     * Check if this section is disabled in the simplified shop
+     */
+    public boolean isDisabledInSimplifiedShop() {
+        String lower = id.toLowerCase();
+        for (String disabled : DISABLED_CATEGORIES) {
+            if (lower.contains(disabled)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     /**
      * Check if this section should be available during a specific quest
      * @param currentQuest The player's current quest number
      * @return true if this section is accessible
      */
     public boolean isAvailableForQuest(int currentQuest) {
-        // Quest 3: All regular sections available, token exchange disabled
+        // Quest 3: Regular sections available, but not token exchange, skill levels, or disabled categories
         // Quest 4: Only token exchange available
         
         if (currentQuest == 3) {
+            // Check if in disabled categories
+            if (isDisabledInSimplifiedShop()) {
+                return false;
+            }
             // Regular items only, no token exchange or skill levels
             return !tokenExchange && !skillLevels;
         } else if (currentQuest == 4) {

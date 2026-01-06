@@ -194,9 +194,14 @@ public class RTPManager {
                                 }
 
                                 player.teleport(finalLocation);
-                                // Remove blindness and show success title
+                                // Remove blindness and show success - clean chat with objective
                                 player.removePotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS);
-                                player.sendTitle(WDPStartPlugin.hex("&#55FF55&l✦ Welcome to your starting area! ✦"), WDPStartPlugin.hex("&#AAAAAAYou've been teleported near a tree."), 10, 80, 10);
+                                
+                                // Clear chat for clean objective display
+                                for (int i = 0; i < 20; i++) player.sendMessage("");
+                                
+                                // Show clean objective title (no subtitle when chat is closed)
+                                player.sendTitle(WDPStartPlugin.hex("&#55FF55&l✦ NEXT OBJECTIVE ✦"), "", 10, 80, 20);
 
                                 if (plugin.getConfigManager().isSoundsEnabled()) {
                                     player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
@@ -226,9 +231,14 @@ public class RTPManager {
                 finalLocation.getChunk().load(true);
                 player.teleport(finalLocation);
 
-                // Remove blindness and show success title
+                // Remove blindness and show success - clean chat with objective
                 player.removePotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS);
-                player.sendTitle(WDPStartPlugin.hex("&#55FF55&l✦ Welcome to your starting area! ✦"), WDPStartPlugin.hex("&#AAAAAAYou've been teleported near a tree."), 10, 80, 10);
+                
+                // Clear chat for clean objective display
+                for (int i = 0; i < 20; i++) player.sendMessage("");
+                
+                // Show clean objective title (no subtitle when chat is closed)
+                player.sendTitle(WDPStartPlugin.hex("&#55FF55&l✦ NEXT OBJECTIVE ✦"), "", 10, 80, 20);
 
                 if (plugin.getConfigManager().isSoundsEnabled()) {
                     player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
