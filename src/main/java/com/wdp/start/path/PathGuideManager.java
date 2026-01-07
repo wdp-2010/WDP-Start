@@ -266,11 +266,17 @@ public class PathGuideManager {
         private final Player player;
         private List<Location> path;
         private int currentIndex;
+        private long startTime;
+        private boolean isPaused;
+        private long pauseEndTime;
         
         public PathSession(Player player, List<Location> path) {
             this.player = player;
             this.path = path;
             this.currentIndex = 0;
+            this.startTime = System.currentTimeMillis();
+            this.isPaused = false;
+            this.pauseEndTime = 0;
         }
         
         public Player getPlayer() {
@@ -280,10 +286,16 @@ public class PathGuideManager {
         public void resetPath(List<Location> newPath) {
             this.path = newPath;
             this.currentIndex = 0;
+            this.startTime = System.currentTimeMillis();
+            this.isPaused = false;
+            this.pauseEndTime = 0;
         }
         
         public void restartAnimation() {
             this.currentIndex = 0;
+            this.startTime = System.currentTimeMillis();
+            this.isPaused = false;
+            this.pauseEndTime = 0;
         }
         
         /**
@@ -293,6 +305,17 @@ public class PathGuideManager {
         public boolean animate() {
             if (path.isEmpty()) {
                 return true;
+            }
+            
+            // Check if currently paused for minimum runtime
+            if (isPaused) {
+                long now = System.currentTimeMillis();
+                if (now >= pauseEndTime) {
+                    // Pause finished
+                    isPaused = false;
+                    return true; // Path animation completed with pause
+                }
+                return false; // Still paused, don't animate
             }
             
             // Show particle at current position
@@ -319,10 +342,31 @@ public class PathGuideManager {
             
             // Check if we've reached the end
             if (currentIndex >= path.size()) {
+                // Check minimum runtime requirement
+                int minimumRuntime = plugin.getConfigManager().getPathMinimumRuntime();
+                if (minimumRuntime > 0) {
+                    long now = System.currentTimeMillis();
+                    long elapsedSeconds = (now - startTime) / 1000;
+                    
+                    if (elapsedSeconds < minimumRuntime) {
+                        // Need to pause
+                        long pauseDuration = (minimumRuntime - elapsedSeconds) * 1000;
+                        pauseEndTime = now + pauseDuration;
+                        isPaused = true;
+                        return false; // Continue animating (paused state)
+                    }
+                }
                 return true; // Path ended, needs recalculation
             }
             
             return false;
+        }
+        
+        /**
+         * Get elapsed time in seconds
+         */
+        public long getElapsedSeconds() {
+            return (System.currentTimeMillis() - startTime) / 1000;
         }
     }
 }

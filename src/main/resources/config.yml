@@ -4,7 +4,7 @@
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
 # Configuration version - DO NOT EDIT
-config-version: 2
+config-version: 3
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            General Settings                                  │
@@ -58,6 +58,11 @@ particle-path:
   
   # Recalculate path interval (ticks) - only recalculates when path ends
   recalculate-on-end: true
+  
+  # Minimum time for path to play (in seconds)
+  # If path completes before this time, it will pause until minimum is reached
+  # Set to 0 to disable
+  minimum-runtime: 5
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                          Quest 1: Leave & Teleport                          │

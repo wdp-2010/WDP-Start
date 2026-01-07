@@ -596,10 +596,22 @@ quests:
     quest6: "Good Luck!"
     unknown: "Unknown"
   descriptions:
+    # Single-line format (simple description)
     quest1: "Leave spawn and get teleported to the wild"
-    quest2: "Reach Foraging level 1"
+    
+    # Multi-line format (list of lines)
+    quest2:
+      - "Reach Foraging level 1"
+      - "&#AAAAAAChop trees to gain XP!"
+    
+    # Single-line
     quest3: "Open /shop and buy an item"
-    quest4: "Convert SkillCoins to Tokens"
+    
+    # Multi-line example with colors
+    quest4:
+      - "Convert SkillCoins to Tokens"
+      - "&#FFD700Tokens unlock skill upgrades!"
+    
     quest5: "Open /quest and complete the task"
     quest6: "Join Discord for help!"
     unknown: "Unknown"

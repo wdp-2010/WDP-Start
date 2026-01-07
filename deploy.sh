@@ -148,6 +148,11 @@ if [ ! -f "${CONFIG_DIR}/messages.yml" ]; then
     cp "src/main/resources/messages.yml" "${CONFIG_DIR}/"
 fi
 
+if [ ! -f "${CONFIG_DIR}/navbar.yml" ]; then
+    print_step "Copying default navbar.yml..."
+    cp "src/main/resources/navbar.yml" "${CONFIG_DIR}/"
+fi
+
 # Copy SkillCoinsShop directory (always fresh)
 print_step "Copying SkillCoinsShop directory..."
 cp -r "src/main/resources/SkillCoinsShop" "${CONFIG_DIR}/"

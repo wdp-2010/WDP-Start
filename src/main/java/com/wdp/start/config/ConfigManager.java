@@ -105,6 +105,10 @@ public class ConfigManager {
         return config.getBoolean("particle-path.show-full-path", true);
     }
     
+    public int getPathMinimumRuntime() {
+        return config.getInt("particle-path.minimum-runtime", 20);
+    }
+    
     // ==================== QUEST 1: LEAVE & TELEPORT ====================
     
     public int getQuest1SkillCoins() {

@@ -536,7 +536,7 @@ public class QuestMenu {
                             if (secSlot == slot) {
                                 String fname = sectionFile.getName().replace(".yml", "").toLowerCase();
                                 // Handle token exchange differently for quest 4
-                                if (fname.contains("tokenexchange")) {
+                                if (fname.contains("token_exchange") || fname.contains("token exchange")) {
                                     if (isQuest4) {
                                         openTokenExchange(player);
                                         return;
@@ -596,7 +596,7 @@ public class QuestMenu {
                             int secSlot = sec.getInt("slot", -1);
                             if (secSlot == slot) {
                                 String fname = sectionFile.getName().replace(".yml", "").toLowerCase();
-                                if (fname.contains("tokenexchange")) {
+                                if (fname.contains("token_exchange") || fname.contains("token exchange")) {
                                     openTokenExchange(player);
                                     return;
                                 }
@@ -1571,7 +1571,7 @@ public class QuestMenu {
 
                 // Keep TokenExchange clickable if present
                 String fname = sectionFile.getName().replace(".yml", "").toLowerCase();
-                if (fname.contains("tokenexchange")) {
+                if (fname.contains("token_exchange") || fname.contains("token exchange")) {
                     ItemStack tokenExchange = new ItemStack(Material.EMERALD);
                     ItemMeta tokenMeta = tokenExchange.getItemMeta();
                     if (tokenMeta != null) {

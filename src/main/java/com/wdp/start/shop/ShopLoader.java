@@ -95,7 +95,7 @@ public class ShopLoader {
             
             // Determine section type
             String lowerName = id.toLowerCase();
-            boolean isTokenExchange = lowerName.contains("tokenexchange");
+            boolean isTokenExchange = lowerName.contains("token_exchange") || lowerName.contains("token exchange");
             boolean isSkillLevels = lowerName.contains("skilllevels") || lowerName.contains("tokens");
             
             return new ShopSection(id, displayName, icon, slot, enabled, isTokenExchange, isSkillLevels);

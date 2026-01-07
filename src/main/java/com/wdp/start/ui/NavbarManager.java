@@ -47,6 +47,10 @@ public class NavbarManager {
         }
 
         for (String itemName : config.getConfigurationSection("navbar").getKeys(false)) {
+            // Skip quest_progress (slot 49) for shop menus - confirm button needs that slot
+            if ("quest_progress".equals(itemName) && menuType != null && menuType.startsWith("shop")) {
+                continue;
+            }
             Map<String, Object> itemConfig = config.getConfigurationSection("navbar." + itemName).getValues(false);
             
             // Handle glass_fill with multiple slots
@@ -114,6 +118,15 @@ public class NavbarManager {
                     inv.setItem(slot, createGlassPane());
                     continue;
                 }
+            }
+            
+            // Handle balance display with tokens from AuraSkills
+            if ("balance".equals(itemName)) {
+                ItemStack balanceItem = createBalanceItem(player, context);
+                if (balanceItem != null) {
+                    inv.setItem(slot, balanceItem);
+                }
+                continue;
             }
             
             ItemStack item = createNavbarItem(itemName, itemConfig, player, context);
@@ -196,6 +209,57 @@ public class NavbarManager {
             }
             inv.setItem(startSlot + i, item);
         }
+    }
+    
+    /**
+     * Create the balance display item with coins and tokens
+     */
+    private ItemStack createBalanceItem(Player player, Map<String, Object> context) {
+        // Get coins balance
+        double coins = 0;
+        if (plugin.getVaultIntegration() != null) {
+            coins = plugin.getVaultIntegration().getBalance(player);
+        }
+        
+        // Get tokens from AuraSkills
+        double tokens = 0;
+        if (plugin.getAuraSkillsIntegration() != null && plugin.getAuraSkillsIntegration().isEnabled()) {
+            try {
+                org.bukkit.plugin.Plugin auraSkills = org.bukkit.Bukkit.getPluginManager().getPlugin("AuraSkills");
+                if (auraSkills != null) {
+                    // Access economy provider through reflection
+                    try {
+                        Class<?> apiClass = Class.forName("dev.aurelium.auraskills.api.AuraSkillsApi");
+                        Object api = apiClass.getMethod("get").invoke(null);
+                        Object economyProvider = apiClass.getMethod("getEconomyProvider").invoke(api);
+                        Class<?> currencyTypeClass = Class.forName("dev.aurelium.auraskills.common.skillcoins.CurrencyType");
+                        Object tokensEnum = currencyTypeClass.getField("TOKENS").get(null);
+                        Object balance = economyProvider.getClass().getMethod("getBalance", java.util.UUID.class, currencyTypeClass)
+                            .invoke(economyProvider, player.getUniqueId(), tokensEnum);
+                        tokens = ((Number) balance).doubleValue();
+                    } catch (Exception reflectionError) {
+                        plugin.debug("Could not access AuraSkills tokens: " + reflectionError.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                plugin.debug("Failed to get token balance: " + e.getMessage());
+            }
+        }
+        
+        // Create the item
+        ItemStack item = new ItemStack(Material.GOLD_NUGGET);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(hex("§6Balance:"));
+            List<String> lore = new ArrayList<>();
+            lore.add(" ");
+            lore.add(hex("§eSkillCoins: §6" + String.format("%,.0f", coins) + " ⛃"));
+            lore.add(hex("§aTokens: §2" + String.format("%,.0f", tokens) + " 🎟"));
+            meta.setLore(lore);
+            item.setItemMeta(meta);
+        }
+        
+        return item;
     }
     
     private String hex(String message) {

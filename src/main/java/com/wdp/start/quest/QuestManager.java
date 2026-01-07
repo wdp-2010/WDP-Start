@@ -423,18 +423,18 @@ public class QuestManager {
     }
     
     /**
-     * Get quest description
+     * Get quest description (supports multiline from messages.yml)
      */
     public String getQuestDescription(int quest) {
-        return switch (quest) {
-            case 1 -> "Leave spawn and get teleported to the wild";
-            case 2 -> "Reach Foraging level 1";
-            case 3 -> "Open /shop and buy an item";
-            case 4 -> "Convert SkillCoins to Tokens";
-            case 5 -> "Open /quests and complete the task";
-            case 6 -> "Join Discord for help!";
-            default -> "Unknown";
-        };
+        String path = "quests.descriptions.quest" + quest;
+        List<String> descLines = plugin.getMessageManager().getList(path);
+        
+        if (descLines.isEmpty()) {
+            return "Unknown";
+        }
+        
+        // Join multiple lines with newline for display
+        return String.join("\n", descLines);
     }
     
     /**
