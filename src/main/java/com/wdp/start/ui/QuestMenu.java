@@ -40,6 +40,9 @@ public class QuestMenu {
     // Track open menus
     private final ConcurrentHashMap<UUID, MenuSession> openMenus = new ConcurrentHashMap<>();
     
+    // Track Quest 5 reminder tasks
+    private final ConcurrentHashMap<UUID, Integer> quest5ReminderTasks = new ConcurrentHashMap<>();
+    
     // Track Quest 6 reminder tasks
     private final ConcurrentHashMap<UUID, Integer> quest6ReminderTasks = new ConcurrentHashMap<>();
     
@@ -190,7 +193,10 @@ public class QuestMenu {
         
         // Objective
         lore.add(hex(plugin.getMessageManager().get("menu.quest-item.objective")));
-        lore.add(hex(plugin.getMessageManager().get("menu.quest-item.objective-format", "description", desc)));
+        // Support multiline descriptions
+        for (String descLine : desc.split("\n")) {
+            lore.add(hex(plugin.getMessageManager().get("menu.quest-item.objective-format", "description", descLine)));
+        }
         lore.add(" ");
         
         // Progress (if in progress)
@@ -299,22 +305,13 @@ public class QuestMenu {
         // Get tokens from AuraSkills via command output parsing
         if (plugin.getAuraSkillsIntegration() != null && plugin.getAuraSkillsIntegration().isEnabled()) {
             try {
-                // Use dispatchCommand to get token balance
-                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-                org.bukkit.command.ConsoleCommandSender consoleSender = Bukkit.getConsoleSender();
-                Bukkit.dispatchCommand(consoleSender, "skillcoins check " + player.getName());
                 // Try reading from AuraSkills API directly if available
-                org.bukkit.plugin.Plugin auraSkills = Bukkit.getPluginManager().getPlugin("AuraSkills");
-                if (auraSkills != null) {
-                    // Access economy provider through reflection
+                org.bukkit.plugin.Plugin auraSkillsPlugin = Bukkit.getPluginManager().getPlugin("AuraSkills");
+                if (auraSkillsPlugin != null) {
+                    // Use public API method
                     try {
-                        Class<?> apiClass = Class.forName("dev.aurelium.auraskills.api.AuraSkillsApi");
-                        Object api = apiClass.getMethod("get").invoke(null);
-                        Object economyProvider = apiClass.getMethod("getEconomyProvider").invoke(api);
-                        Class<?> currencyTypeClass = Class.forName("dev.aurelium.auraskills.common.skillcoins.CurrencyType");
-                        Object tokensEnum = currencyTypeClass.getField("TOKENS").get(null);
-                        Object balance = economyProvider.getClass().getMethod("getBalance", java.util.UUID.class, currencyTypeClass)
-                            .invoke(economyProvider, player.getUniqueId(), tokensEnum);
+                        java.lang.reflect.Method getTokensMethod = auraSkillsPlugin.getClass().getMethod("getPlayerTokens", java.util.UUID.class);
+                        Object balance = getTokensMethod.invoke(auraSkillsPlugin, player.getUniqueId());
                         tokens = ((Number) balance).doubleValue();
                     } catch (Exception reflectionError) {
                         plugin.debug("Could not access AuraSkills economy via reflection: " + reflectionError.getMessage());
@@ -628,8 +625,13 @@ public class QuestMenu {
                 if (stoneMined >= 5) {
                     // Quest is complete - complete it instantly
                     plugin.getQuestManager().completeQuest(player, 5);
-                    player.sendMessage(hex(plugin.getMessageManager().get("success.quest-complete")));
-                    player.closeInventory();
+                    
+                    // Cancel any pending reminder tasks
+                    cancelQuest5Reminders(player);
+                    
+                    plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                        player.closeInventory();
+                    }, 5L);
                 } else {
                     // Quest not complete - show progress feedback and refresh the view
                     player.sendMessage(hex(plugin.getMessageManager().get("quest-progress.stone-progress", 
@@ -770,6 +772,10 @@ public class QuestMenu {
                 
                 if (stoneMined >= 5) {
                     plugin.getQuestManager().completeQuest(player, 5);
+                    
+                    // Cancel any pending reminder tasks
+                    cancelQuest5Reminders(player);
+                    
                     plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                         openMainMenu(player);
                     }, 5L);
@@ -822,8 +828,6 @@ public class QuestMenu {
             
             // Complete Quest 6
             plugin.getQuestManager().completeQuest(player, 6);
-            player.sendMessage(hex(plugin.getMessageManager().get("success.quest-complete-welcome")));
-            player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
             
             // Cancel any pending reminder tasks
             cancelQuest6Reminders(player);
@@ -878,7 +882,7 @@ public class QuestMenu {
     /**
      * Start Quest 6 reminder and auto-complete system
      */
-    private void startQuest6Reminders(Player player) {
+    public void triggerQuest6Reminders(Player player) {
         // Cancel any existing reminders first
         cancelQuest6Reminders(player);
         
@@ -940,6 +944,74 @@ public class QuestMenu {
                 .forEach(task -> plugin.getServer().getScheduler().cancelTask(task.getTaskId()));
             
             quest6ReminderTasks.remove(uuid);
+        }
+    }
+    
+    /**
+     * Start Quest 5 reminder and auto-complete system
+     */
+    public void triggerQuest5Reminders(Player player) {
+        // Cancel any existing reminders first
+        cancelQuest5Reminders(player);
+        
+        UUID uuid = player.getUniqueId();
+        
+        // Send immediate instruction
+        player.sendMessage(hex(plugin.getMessageManager().get("quest5.instruction")));
+        player.sendMessage(hex(plugin.getMessageManager().get("quest5.instruction-detail")));
+        
+        // Schedule reminder at 10 seconds
+        int task1 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                PlayerData data = plugin.getPlayerDataManager().getData(player);
+                if (data.getCurrentQuest() == 5 && !data.isQuestCompleted(5)) {
+                    player.sendMessage(hex(plugin.getMessageManager().get("quest5.reminder-10s")));
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.7f, 1.5f);
+                }
+            }
+        }, 200L).getTaskId(); // 10 seconds
+        
+        // Schedule reminder at 30 seconds
+        int task2 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                PlayerData data = plugin.getPlayerDataManager().getData(player);
+                if (data.getCurrentQuest() == 5 && !data.isQuestCompleted(5)) {
+                    player.sendMessage(hex(plugin.getMessageManager().get("quest5.reminder-30s")));
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.7f);
+                }
+            }
+        }, 600L).getTaskId(); // 30 seconds
+        
+        // Schedule auto-complete at 35 seconds
+        int task3 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                PlayerData data = plugin.getPlayerDataManager().getData(player);
+                if (data.getCurrentQuest() == 5 && !data.isQuestCompleted(5)) {
+                    player.sendMessage(hex(plugin.getMessageManager().get("quest5.auto-complete")));
+                    plugin.getQuestManager().completeQuest(player, 5);
+                    player.closeInventory();
+                }
+            }
+            quest5ReminderTasks.remove(uuid);
+        }, 700L).getTaskId(); // 35 seconds
+        
+        // Store the tasks for later cancellation
+        quest5ReminderTasks.put(uuid, task1);
+    }
+    
+    /**
+     * Cancel Quest 5 reminder tasks for a player
+     */
+    private void cancelQuest5Reminders(Player player) {
+        UUID uuid = player.getUniqueId();
+        if (quest5ReminderTasks.containsKey(uuid)) {
+            // Cancel all scheduled tasks for this player
+            plugin.getServer().getScheduler().getPendingTasks().stream()
+                .filter(task -> task.getOwner().equals(plugin) && 
+                        task.getTaskId() >= quest5ReminderTasks.get(uuid))
+                .forEach(task -> plugin.getServer().getScheduler().cancelTask(task.getTaskId()));
+            
+            quest5ReminderTasks.remove(uuid);
         }
     }
     

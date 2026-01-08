@@ -1,6 +1,4 @@
 package com.wdp.start.config;
-
-import com.wdp.start.WDPStartPlugin;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;

@@ -246,6 +246,24 @@ public class QuestManager {
             if (quest == 1) {
                 checkAndCompleteQuest2IfReady(player, data);
             }
+            
+            // Special handling: if quest 4 just completed, start quest 5 reminders
+            if (quest == 4) {
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                    if (player.isOnline()) {
+                        plugin.getQuestMenu().triggerQuest5Reminders(player);
+                    }
+                }, 20L); // 1 second delay
+            }
+            
+            // Special handling: if quest 5 just completed, start quest 6 reminders
+            if (quest == 5) {
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                    if (player.isOnline()) {
+                        plugin.getQuestMenu().triggerQuest6Reminders(player);
+                    }
+                }, 20L); // 1 second delay
+            }
         } else {
             // All quests complete!
             data.setCompleted(true);

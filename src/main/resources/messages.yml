@@ -59,17 +59,20 @@ quest:
     complete: "&#55FF55&l✓ &#55FF55Foraging level reached!"
   
   quest3:
-    step1: "&#55FFFF➤ &#FFFFFFOpened the shop!"
     topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} ⛃ &#FFFFFFto buy items!"
     complete: "&#55FF55&l✓ &#55FF55Item purchased! You know how to use the shop!"
   
   quest4:
-    step1: "&#55FFFF➤ &#FFFFFFOpened the token exchange!"
     topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} ⛃ &#FFFFFFto complete your purchase!"
     complete: "&#55FF55&l✓ &#55FF55Token purchased! You can now buy skill upgrades."
   
   quest5:
     complete: "&#55FF55&l✓ &#55FF55You've learned how the quest menu works!"
+    instruction: "&#FFD700&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    instruction-detail: "&#FFFF55&l➤ CLICK THE EMERALD ICON &#FFFF55to complete!"
+    reminder-10s: "&#FFFF55⚠ Don't forget to click the &#FFD700&lSimplified Quest Menu&#FFFF55 icon!"
+    reminder-30s: "&#FF5555⚠ Last chance! Click the &#FFD700&lSimplified Quest Menu&#FF5555 icon to finish!"
+    auto-complete: "&#55FF55&l✓ Quest auto-completed! Moving on!"
   
   quest6:
     complete: "&#55FF55&l✓ &#55FF55All quests complete! Good luck on your adventure!"
@@ -613,7 +616,9 @@ quests:
       - "&#FFD700Tokens unlock skill upgrades!"
     
     quest5: "Open /quest and complete the task"
-    quest6: "Join Discord for help!"
+    quest6: 
+      - "Join Discord for help!"
+      - "Click this icon to finish your tutorial"
     unknown: "Unknown"
   hints:
     quest1: "Walk towards the spawn exit to begin!"

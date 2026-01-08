@@ -225,17 +225,12 @@ public class NavbarManager {
         double tokens = 0;
         if (plugin.getAuraSkillsIntegration() != null && plugin.getAuraSkillsIntegration().isEnabled()) {
             try {
-                org.bukkit.plugin.Plugin auraSkills = org.bukkit.Bukkit.getPluginManager().getPlugin("AuraSkills");
-                if (auraSkills != null) {
-                    // Access economy provider through reflection
+                org.bukkit.plugin.Plugin auraSkillsPlugin = org.bukkit.Bukkit.getPluginManager().getPlugin("AuraSkills");
+                if (auraSkillsPlugin != null) {
+                    // Use public API method
                     try {
-                        Class<?> apiClass = Class.forName("dev.aurelium.auraskills.api.AuraSkillsApi");
-                        Object api = apiClass.getMethod("get").invoke(null);
-                        Object economyProvider = apiClass.getMethod("getEconomyProvider").invoke(api);
-                        Class<?> currencyTypeClass = Class.forName("dev.aurelium.auraskills.common.skillcoins.CurrencyType");
-                        Object tokensEnum = currencyTypeClass.getField("TOKENS").get(null);
-                        Object balance = economyProvider.getClass().getMethod("getBalance", java.util.UUID.class, currencyTypeClass)
-                            .invoke(economyProvider, player.getUniqueId(), tokensEnum);
+                        java.lang.reflect.Method getTokensMethod = auraSkillsPlugin.getClass().getMethod("getPlayerTokens", java.util.UUID.class);
+                        Object balance = getTokensMethod.invoke(auraSkillsPlugin, player.getUniqueId());
                         tokens = ((Number) balance).doubleValue();
                     } catch (Exception reflectionError) {
                         plugin.debug("Could not access AuraSkills tokens: " + reflectionError.getMessage());
