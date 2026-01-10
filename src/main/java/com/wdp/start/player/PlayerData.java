@@ -93,27 +93,6 @@ public class PlayerData {
         return lastUpdated;
     }
     
-    // ==================== TRANSIENT SUPPRESSION ====================
-    /**
-     * Suppress AuraSkills level-up messages until the specified epoch millis.
-     * Used to avoid race conditions during quest completion.
-     */
-    private long suppressLevelUpUntil = 0;
-
-    public void setSuppressLevelUpUntil(long untilMillis) {
-        this.suppressLevelUpUntil = untilMillis;
-        this.lastUpdated = System.currentTimeMillis();
-    }
-
-    public void clearSuppressLevelUp() {
-        this.suppressLevelUpUntil = 0;
-        this.lastUpdated = System.currentTimeMillis();
-    }
-
-    public boolean isSuppressLevelUpActive() {
-        return System.currentTimeMillis() < suppressLevelUpUntil;
-    }
-
     // ==================== SETTERS ====================
     
     public void setPlayerName(String playerName) {

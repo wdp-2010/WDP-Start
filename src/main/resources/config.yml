@@ -160,9 +160,6 @@ quest2:
   # Rewards (given when reaching level 1) - teaches skill leveling
   rewards:
     skillcoins: 20
-  
-  # These are used in the AuraSkills-style override message
-  completion-message: "Use your SkillCoins in the shop!"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                       Quest 3: Shop Tutorial                                │

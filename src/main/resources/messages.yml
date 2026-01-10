@@ -23,12 +23,15 @@ welcome:
     - ""
     - "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     - ""
-    - "    &#AAAAAANew here? Start your adventure!"
+    - "    &#AAAAAANew to the server? Start a guided tutorial!"
     - ""
     - "         &#55FFFF&l▶ /start"
     - ""
-    - "    &#AAAAAAComplete quests to earn rewards"
-    - "    &#AAAAAAand learn about the server!"
+    - "    &#AAAAAALearn how to:"
+    - "    &#FFFFFF• Explore the world safely"
+    - "    &#FFFFFF• Level up your skills"
+    - "    &#FFFFFF• Use the economy & shop"
+    - "    &#FFFFFF• Complete quests for rewards"
     - ""
     - "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     - ""
@@ -38,67 +41,64 @@ welcome:
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest:
   # Starting quests
-  started: "&aQuest chain started! Complete each quest in order."
-  already-started: "&cYou've already started the quest chain!"
-  already-completed: "&aYou've already completed all quests!"
-  next-started: "&aStarted Quest {quest}! Check your quest menu for details."
-  already-experienced: "&cYou are already experienced! No need for starter quests."
-  
-  # Progress
-  objective-complete: "&#55FF55&l✓ &#55FF55{objective}"
-  quest-complete: "&#FFD700&l★ &#FFD700Quest Complete: &#FFFFFF{quest}"
+  started: "&#55FF55Tutorial started! Follow the objectives to learn the server mechanics."
+  already-started: "&#FFFF55You're already doing the tutorial! Type &#FFFFFF/start &#FFFF55to see your progress."
+  already-completed: "&#55FF55You've already finished the tutorial! You're all set to play."
+  next-started: "&#55FF55Next objective ready! Check your quest menu."
+  already-experienced: "&#FFAA00You already know the basics! The tutorial is for new players only."
   
   # Specific quest messages
   quest1:
-    step1: "&#55FFFF➤ &#FFFFFFStep into the wild..."
-    step2: "&#55FFFF➤ &#FFFFFFYou're being teleported to safety!"
-    complete: "&#55FF55&l✓ &#55FF55Welcome to the wilderness! Your adventure begins."
+    step1: "&#55FFFF➤ &#FFFFFFWalk toward the exit portal to leave the spawn area"
+    step2: "&#55FFFF➤ &#FFFFFFTeleporting you to a safe location in the wilderness!"
+    complete: "&#55FF55&l✓ &#55FF55You're now in the wilderness! Start gathering resources and building."
   
   quest2:
-    progress: "&#FFFF55➤ &#FFFFFFForaging Level: &#55FFFF{level}&#FFFFFF/&#55FFFF1"
-    complete: "&#55FF55&l✓ &#55FF55Foraging level reached!"
+    progress: "&#FFFF55➤ &#FFFFFFForaging Level: &#55FFFF{level}&#FFFFFF/&#55FFFF1 (Chop trees to level up!)"
+    complete: "&#55FF55&l✓ &#55FF55Great! You leveled up by chopping trees and earned coins."
   
   quest3:
-    topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} ⛃ &#FFFFFFto buy items!"
-    complete: "&#55FF55&l✓ &#55FF55Item purchased! You know how to use the shop!"
+    topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} ⛃ coins &#FFFFFFto practice shopping!"
+    complete: "&#55FF55&l✓ &#55FF55Purchase complete! You can now buy items with coins you earn."
   
   quest4:
-    topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} ⛃ &#FFFFFFto complete your purchase!"
-    complete: "&#55FF55&l✓ &#55FF55Token purchased! You can now buy skill upgrades."
+    topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} ⛃ coins &#FFFFFFfor the token exchange!"
+    complete: "&#55FF55&l✓ &#55FF55Token exchanged! Tokens let you unlock powerful skill upgrades."
   
   quest5:
-    complete: "&#55FF55&l✓ &#55FF55You've learned how the quest menu works!"
+    complete: "&#55FF55&l✓ &#55FF55Perfect! You now know how to check your quests anytime."
     instruction: "&#FFD700&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    instruction-detail: "&#FFFF55&l➤ CLICK THE EMERALD ICON &#FFFF55to complete!"
-    reminder-10s: "&#FFFF55⚠ Don't forget to click the &#FFD700&lSimplified Quest Menu&#FFFF55 icon!"
-    reminder-30s: "&#FF5555⚠ Last chance! Click the &#FFD700&lSimplified Quest Menu&#FF5555 icon to finish!"
-    auto-complete: "&#55FF55&l✓ Quest auto-completed! Moving on!"
+    instruction-detail: "&#FFFF55&l➤ CLICK THE GREEN EMERALD ICON &#FFFF55to complete this step!"
+    reminder-10s: "&#FFFF55⚠ Reminder: Click the &#FFD700&lQuest Menu&#FFFF55 emerald icon to continue!"
+    reminder-30s: "&#FF5555⚠ Almost there! Click the &#FFD700&lQuest Menu&#FF5555 icon to finish!"
+    auto-complete: "&#55FF55&l✓ Step completed automatically!"
   
   quest6:
-    complete: "&#55FF55&l✓ &#55FF55All quests complete! Good luck on your adventure!"
+    complete: "&#55FF55&l✓ &#55FF55Tutorial complete! You're ready to play on the server!"
     instruction: "&#FFD700&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    instruction-detail: "&#FFFF55&l➤ CLICK THE GLOWING QUEST ICON &#FFFF55to complete!"
-    reminder-10s: "&#FFFF55⚠ Don't forget to click the &#FFD700&lGood Luck!&#FFFF55 quest icon!"
-    reminder-30s: "&#FF5555⚠ Last chance! Click the &#FFD700&lGood Luck!&#FF5555 quest icon to finish!"
-    auto-complete: "&#55FF55&l✓ Quest auto-completed! You're all set!"
+    instruction-detail: "&#FFFF55&l➤ CLICK THE GLOWING ICON &#FFFF55to finish the tutorial!"
+    reminder-10s: "&#FFFF55⚠ Reminder: Click the &#FFD700&lGood Luck!&#FFFF55 icon to claim your final rewards!"
+    reminder-30s: "&#FF5555⚠ Don't miss out! Click the &#FFD700&lGood Luck!&#FF5555 icon to finish!"
+    auto-complete: "&#55FF55&l✓ Tutorial finished! Enjoy playing!"
   
   # All complete
   all-complete:
     - ""
     - "&#FFD700&l★═══════════════════════════════════════★"
-    - "&#FFFFFF&l     CONGRATULATIONS!"
+    - "&#FFFFFF&l     TUTORIAL COMPLETE!"
     - "&#FFD700&l★═══════════════════════════════════════★"
     - ""
-    - "&#55FF55  You've completed all starter quests!"
+    - "&#55FF55  You've finished the server tutorial!"
+    - "&#FFFFFF  You're now ready to play!"
     - ""
-    - "&#FFFFFF  Final Rewards:"
-    - "&#FFD700  ✦ 500 ⛃ SkillCoins"
-    - "&#FF55FF  ✦ 25 🎟 SkillTokens"
-    - "&#55FFFF  ✦ 3x Diamond"
-    - "&#AAAAAA  ✦ 16x Iron Ingot"
-    - "&#FFFF55  ✦ 32x Bread"
+    - "&#FFFFFF  Final Rewards Claimed:"
+    - "&#FFD700  ✦ 500 coins (buy items in shops)"
+    - "&#FF55FF  ✦ 25 tokens (unlock skill upgrades)"
+    - "&#55FFFF  ✦ 3x Diamond (for tools & armor)"
+    - "&#AAAAAA  ✦ 16x Iron Ingot (for crafting)"
+    - "&#FFFF55  ✦ 32x Bread (stay fed!)"
     - ""
-    - "&#AAAAAAJoin our Discord for help:"
+    - "&#AAAAAANeed help? Join our Discord community:"
     - "&#55FFFF{discord}"
     - ""
     - "&#FFD700&l★═══════════════════════════════════════★"
@@ -108,17 +108,17 @@ quest:
 # │                          Cancellation Messages                              │
 # └─────────────────────────────────────────────────────────────────────────────┘
 cancel:
-  confirm: "&eAre you sure you want to cancel? Type &c/start cancel confirm &eto confirm."
-  cancelled: "&cQuest chain cancelled."
-  refunded: "&aRefunded &e{amount} SkillCoins &athat were not spent."
-  no-refund: "&7No SkillCoins to refund."
+  confirm: "&#FFFF55Are you sure you want to quit the tutorial? Type &#FF5555/start cancel confirm &#FFFF55to confirm."
+  cancelled: "&#FF5555Tutorial cancelled. You can restart anytime with /start"
+  refunded: "&#55FF55Refunded &#FFD700{amount} coins &#55FF55that you didn't spend."
+  no-refund: "&#AAAAAANo coins to refund."
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                             Reward Messages                                 │
 # └─────────────────────────────────────────────────────────────────────────────┘
 rewards:
-  header: "&#FFD700&l✦ &#FFD700Rewards:"
-  skillcoins: "&#FFD700  + {amount} ⛃"
-  skilltokens: "&#FF55FF  + {amount} 🎟"
+  header: "&#FFD700&l✦ &#FFD700Rewards Earned:"
+  skillcoins: "&#FFD700  + {amount} coins (spend in shops)"
+  skilltokens: "&#FF55FF  + {amount} tokens (unlock skill upgrades)"
   item: "&#55FFFF  + {amount}x {item}"
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            Command Messages                                 │
@@ -139,34 +139,34 @@ commands:
     - "&#FFD700&l═══════════════════════════════════════"
     - ""
   
-  no-permission: "&cYou don't have permission to use this command!"
-  player-only: "&cThis command can only be used by players!"
-  unknown: "&cUnknown subcommand. Use &e/start help &cfor help."
+  no-permission: "&#FF5555You don't have permission to use this command!"
+  player-only: "&#FF5555This command can only be used by players!"
+  unknown: "&#FF5555Unknown subcommand. Use &#FFFF55/start help &#FF5555for help."
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            Admin Messages                                   │
 # └─────────────────────────────────────────────────────────────────────────────┘
 admin:
-  reload: "&aConfiguration reloaded successfully!"
-  reset: "&aReset quest progress for &e{player}&a."
-  complete: "&aForce completed quest &e{quest} &afor &e{player}&a."
-  setquest: "&aSet &e{player}&a to quest &e{quest} &a({quest_name})"
-  setquest-target: "&eAdmin set your quest to: &f{quest_name}"
-  player-not-found: "&cPlayer not found: &e{player}"
-  invalid-quest: "&cInvalid quest number: &e{quest} &c(must be 1-6)"
+  reload: "&#55FF55Configuration reloaded successfully!"
+  reset: "&#55FF55Reset quest progress for &#FFFF55{player}&#55FF55."
+  complete: "&#55FF55Force completed quest &#FFFF55{quest} &#55FF55for &#FFFF55{player}&#55FF55."
+  setquest: "&#55FF55Set &#FFFF55{player} &#55FF55to quest &#FFFF55{quest} &#55FF55({quest_name})"
+  setquest-target: "&#FFFF55Admin set your quest to: &#FFFFFF{quest_name}"
+  player-not-found: "&#FF5555Player not found: &#FFFF55{player}"
+  invalid-quest: "&#FF5555Invalid quest number: &#FFFF55{quest} &#FF5555(must be 1-6)"
   usage:
-    reset: "&cUsage: /start reset <player>"
-    complete: "&cUsage: /start complete <player> <quest>"
-    setquest: "&cUsage: /start setquest <player> <quest>\n&7Sets the player to start at a specific quest (1-6)"
-    debug: "&cUsage: /start debug <player>"
+    reset: "&#FF5555Usage: /start reset <player>"
+    complete: "&#FF5555Usage: /start complete <player> <quest>"
+    setquest: "&#FF5555Usage: /start setquest <player> <quest>\n&#AAAAAAASets the player to start at a specific quest (1-6)"
+    debug: "&#FF5555Usage: /start debug <player>"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                             Error Messages                                  │
 # └─────────────────────────────────────────────────────────────────────────────┘
 errors:
-  generic: "&cAn error occurred. Please contact an administrator."
-  not-started: "&cYou haven't started the quest chain yet! Use &e/start &cto begin."
-  quest-locked: "&cThis quest is locked. Complete the previous quest first!"
+  generic: "&#FF5555An error occurred. Please contact a server admin for help."
+  not-started: "&#FFAA00You haven't started the tutorial yet! Use &#FFFFFF/start &#FFAA00to begin."
+  quest-locked: "&#FF5555This step is locked. Complete the previous objectives first!"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                              Menu Messages                                  │
@@ -180,35 +180,35 @@ menu:
     title: "&#FFD700&l✦ &#FFFFFF&lWelcome to WDP! &#FFD700&l✦"
     description:
       - " "
-      - "&#AAAAAATake your first steps on the server"
-      - "&#AAAAAAby completing starter quests!"
+      - "&#AAAAAANew to the server? Complete this tutorial"
+      - "&#AAAAAAtto learn the basics!"
       - " "
-      - "&#55FF55You'll learn about:"
-      - "&#FFFFFF• Exploration & Teleportation"
-      - "&#FFFFFF• Skills & Leveling"
-      - "&#FFFFFF• Progress Tracking"
-      - "&#FFFFFF• Economy & Shopping"
+      - "&#55FF55You'll learn:"
+      - "&#FFFFFF• How to leave spawn safely"
+      - "&#FFFFFF• How to level up skills (like Foraging)"
+      - "&#FFFFFF• How to use the shop and economy"
+      - "&#FFFFFF• How to track your quests"
       - " "
-      - "&#FFD700&lRewards:"
-      - "&#FFD700✦ 300 ⛃"
-      - "&#FF55FF✦ 10 🎟"
-      - "&#55FFFF✦ Starter Items"
+      - "&#FFD700&lFinal Rewards:"
+      - "&#FFD700✦ 600+ coins"
+      - "&#FF55FF✦ 25 tokens"
+      - "&#55FFFF✦ Diamonds, iron, food & more!"
       - " "
     start-button:
-      name: "&#55FF55&l▶ START QUESTS"
+      name: "&#55FF55&l▶ START TUTORIAL"
       lore:
         - " "
-        - "&#AAAAAAClick to begin your adventure!"
+        - "&#AAAAAAClick to begin learning!"
         - " "
-        - "&#FFFF55Tip: You can cancel anytime"
-        - "&#FFFFFFwith /quest cancel"
+        - "&#FFFF55Tip: You can quit anytime"
+        - "&#FFFFFFwith /start cancel"
         - " "
   
   # Progress overview
   progress:
-    title: "&#FFD700&l✦ Progress Overview"
+    title: "&#FFD700&l✦ Tutorial Progress"
     completed: "&#AAAAAACompleted: &#55FF55{completed}&#AAAAAA/&#55FF55{total}"
-    all-complete: "&#55FF55&l✓ All quests complete!"
+    all-complete: "&#55FF55&l✓ Tutorial finished!"
     current: "&#FFFFFFCurrent: &#55FFFF{quest}"
   
   # Quest status labels
@@ -599,52 +599,49 @@ quests:
     quest6: "Good Luck!"
     unknown: "Unknown"
   descriptions:
-    # Single-line format (simple description)
-    quest1: "Leave spawn and get teleported to the wild"
+    # Quest descriptions - clear for new Minecraft players
+    quest1: "Leave the spawn area and teleport to the wilderness"
     
-    # Multi-line format (list of lines)
     quest2:
-      - "Reach Foraging level 1"
-      - "&#AAAAAAChop trees to gain XP!"
+      - "Level up your Foraging skill to level 1"
+      - "&#AAAAAA(Chop logs from trees to gain experience)"
     
-    # Single-line
-    quest3: "Open /shop and buy an item"
+    quest3: "Use /shop to buy an item with coins"
     
-    # Multi-line example with colors
     quest4:
-      - "Convert SkillCoins to Tokens"
-      - "&#FFD700Tokens unlock skill upgrades!"
+      - "Exchange coins for tokens in the shop"
+      - "&#FFD700(Tokens are used to unlock skill upgrades)"
     
-    quest5: "Open /quest and complete the task"
+    quest5: "Learn to use the /quest command to track progress"
     quest6: 
-      - "Join Discord for help!"
-      - "Click this icon to finish your tutorial"
+      - "Finish the tutorial and get your rewards!"
+      - "Join Discord if you need help from the community"
     unknown: "Unknown"
   hints:
-    quest1: "Walk towards the spawn exit to begin!"
-    quest2: "Chop trees to reach Foraging level 1!"
-    quest3: "Type /shop to open the shop and buy an item!"
-    quest4: "Type /shop to open the token exchange!"
-    quest5: "Type /quest to see the quest menu!"
-    default: "Keep going!"
+    quest1: "Walk towards the portal at the spawn exit!"
+    quest2: "Find trees and chop them with an axe (or punch them)!"
+    quest3: "Type /shop to open the shop menu!"
+    quest4: "Type /shop then click the token exchange option!"
+    quest5: "Type /quest to open your quest menu!"
+    default: "Keep following the objectives!"
   next-objectives:
-    quest2: "Chop trees to reach Foraging level 1"
-    quest3: "Open /shop and buy an item"
-    quest4: "Open /shop and exchange tokens"
-    quest5: "Open /quest to see your progress"
-    quest6: "Click to complete and join Discord!"
-    default: "Continue your adventure!"
+    quest2: "Chop trees to level up your Foraging skill to level 1"
+    quest3: "Open /shop and purchase any item with your coins"
+    quest4: "Open /shop and exchange coins for tokens"
+    quest5: "Open /quest to view your quest progress"
+    quest6: "Click the icon to claim your final rewards!"
+    default: "Continue following the tutorial!"
   
-  # Level up message (AuraSkills-style)
+  # Level up message (AuraSkills-style) - the clean big message format the user wants
   level-up:
     header: "&#3CB371▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
     skill-level-up: "  &#FFFFFF&l{skill} &#55FF55&lLEVEL UP"
     skill-progress: "  &#AAAAAA{skill} &#FFFFFF{prev} &#AAAAAA→ &#55FF55{current}"
     quest-complete: "  &#FFD700✦ &#55FF55&lQUEST COMPLETE: &#FFFFFFForaging Kickstart"
-    reward-earned: "  &#AAAAAAYou earned &#FFD700{amount} ⛃&#AAAAAA!"
+    reward-earned: "  &#AAAAAAYou earned &#FFD700{amount} coins&#AAAAAA!"
     next-objective-header: "  &#55FFFF&l➤ NEXT OBJECTIVE"
     next-objective-quest3: "  &#FFFFFFOpen &#FFFF55/shop &#FFFFFFand buy an item"
-    next-objective-hint: "  &#AAAAAASpend Skillcoins in the shop!"
+    next-objective-hint: "  &#AAAAAASpend your coins in the shop!"
   
   # Complete message format
   complete-message:
@@ -674,9 +671,9 @@ quest-progress:
 # │                        Success Messages                                     │
 # └─────────────────────────────────────────────────────────────────────────────┘
 success:
-  purchased-item: "&#55FF55✓ Purchased {quantity}x {item} for &#FFD700{cost} SkillCoins&#55FF55!"
+  purchased-item: "&#55FF55✓ Purchased {quantity}x {item} for &#FFD700{cost} coins&#55FF55!"
   purchased-token: "&#55FF55✓ Token exchange complete! Check /quest for your next objective."
-  quest-complete: "&#55FF55&l✓ &#55FF55Quest completed! Type /start to continue your journey!"
+  quest-complete: "&#55FF55&l✓ &#55FF55Quest completed! Type /start to continue the tutorial!"
   quest-complete-welcome: "&#55FF55&l✓ Quest completed! Welcome to the server!"
   quest-hint: "&#FFD700&l➤ &#FFFFFF{hint}"
 
@@ -684,12 +681,9 @@ success:
 # │                        Additional Error Messages                            │
 # └─────────────────────────────────────────────────────────────────────────────┘
 errors:
-  generic: "&cAn error occurred. Please contact an administrator."
-  not-started: "&cYou haven't started the quest chain yet! Use &e/start &cto begin."
-  quest-locked: "&cThis quest is locked. Complete the previous quest first!"
-  not-enough-coins: "&#FF5555✗ Not enough SkillCoins! You need &#FFD700{amount}"
-  inventory-full: "&#FFAA00⚠ Your inventory was full! Some items may have dropped on the ground."
-  token-not-available: "&#777777✖ Token exchange is not available during this tutorial."
-  feature-not-available: "&#777777✖ This feature is not available during this tutorial."
-  section-not-available: "&#777777✖ This section is not available during the tutorial."
-  mine-stone-first: "&#FF5555✖ You must mine 5 stone first! ({current}/5)"
+  not-enough-coins: "&#FF5555✗ Not enough coins! You need &#FFD700{amount} coins"
+  inventory-full: "&#FFAA00⚠ Your inventory was full! Some items dropped on the ground."
+  token-not-available: "&#777777✖ Token exchange is not available during this part of the tutorial."
+  feature-not-available: "&#777777✖ This feature is not available during the tutorial."
+  section-not-available: "&#777777✖ This section is not available yet. Complete the current objective first."
+  mine-stone-first: "&#FF5555✖ You must mine 5 stone blocks first! ({current}/5)"
