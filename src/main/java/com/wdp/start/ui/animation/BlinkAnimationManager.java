@@ -2,7 +2,7 @@ package com.wdp.start.ui.animation;
 
 import com.wdp.start.WDPStartPlugin;
 import com.wdp.start.player.PlayerData;
-import com.wdp.start.ui.menu.MenuUtils;
+import com.wdp.start.ui.menu.QuestItemBuilder;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -10,9 +10,9 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
-import static com.wdp.start.ui.menu.MenuUtils.*;
+import static com.wdp.start.ui.menu.MenuUtils.addGlow;
 
 /**
  * Manages blinking animations for quest menu items.
@@ -25,9 +25,8 @@ import static com.wdp.start.ui.menu.MenuUtils.*;
 public class BlinkAnimationManager {
     
     private final WDPStartPlugin plugin;
-    
-    // Function to create quest items (injected from QuestMenu)
-    private BiFunction<Integer, PlayerData, ItemStack> questItemCreator;
+    private final Function<Inventory, Boolean> menuChecker;
+    private final QuestItemBuilder questItemBuilder;
     
     // Track active blinking tasks per player
     private final Map<UUID, Integer> blinkingTasks = new ConcurrentHashMap<>();
@@ -40,15 +39,10 @@ public class BlinkAnimationManager {
         true, true, true, true                 // pause
     };
     
-    public BlinkAnimationManager(WDPStartPlugin plugin) {
+    public BlinkAnimationManager(WDPStartPlugin plugin, Function<Inventory, Boolean> menuChecker) {
         this.plugin = plugin;
-    }
-    
-    /**
-     * Set the quest item creator function (called from QuestMenu initialization)
-     */
-    public void setQuestItemCreator(BiFunction<Integer, PlayerData, ItemStack> creator) {
-        this.questItemCreator = creator;
+        this.menuChecker = menuChecker;
+        this.questItemBuilder = new QuestItemBuilder(plugin);
     }
     
     /**
@@ -56,18 +50,14 @@ public class BlinkAnimationManager {
      * 
      * @param player The player viewing the menu
      * @param slot The inventory slot to animate
+     * @param quest The quest number (5 or 6)
+     * @param data Player data for item creation
      */
-    public void startAnimation(Player player, int slot) {
+    public void startBlinking(Player player, int slot, int quest, PlayerData data) {
         UUID uuid = player.getUniqueId();
         
         // Cancel any existing animation first
-        stopAnimation(player);
-        
-        // Ensure we have a quest item creator
-        if (questItemCreator == null) {
-            plugin.debug("BlinkAnimationManager: No quest item creator set, skipping animation");
-            return;
-        }
+        stopBlinking(uuid);
         
         // Create new animation task
         int taskId = plugin.getServer().getScheduler().runTaskTimer(plugin, new Runnable() {
@@ -78,34 +68,31 @@ public class BlinkAnimationManager {
                 try {
                     // Check if player is still online
                     if (!player.isOnline()) {
-                        stopAnimation(player);
+                        stopBlinking(uuid);
                         return;
                     }
                     
                     // Check if menu is still open
                     Inventory topInv = player.getOpenInventory().getTopInventory();
-                    if (!isWDPMenu(topInv)) {
-                        stopAnimation(player);
+                    if (menuChecker != null && !menuChecker.apply(topInv)) {
+                        stopBlinking(uuid);
                         return;
                     }
                     
-                    // Get current player data
-                    PlayerData data = plugin.getPlayerDataManager().getData(player);
-                    
-                    // Determine quest from slot
-                    int quest = slot == 31 ? 5 : 6;
+                    // Get fresh player data
+                    PlayerData currentData = plugin.getPlayerDataManager().getData(player);
                     
                     // Check if quest is still active
-                    if (data.getCurrentQuest() != quest || data.isQuestCompleted(quest)) {
-                        stopAnimation(player);
+                    if (currentData.getCurrentQuest() != quest || currentData.isQuestCompleted(quest)) {
+                        stopBlinking(uuid);
                         return;
                     }
                     
                     // Get current pattern state
                     boolean shouldGlow = BLINK_PATTERN[tick % BLINK_PATTERN.length];
                     
-                    // Create the quest item using the injected creator
-                    ItemStack item = questItemCreator.apply(quest, data);
+                    // Create the quest item
+                    ItemStack item = questItemBuilder.build(quest, currentData, null);
                     
                     // Apply glow based on pattern
                     if (shouldGlow) {
@@ -122,7 +109,7 @@ public class BlinkAnimationManager {
                     
                 } catch (Exception e) {
                     plugin.debug("Blinking animation error: " + e.getMessage());
-                    stopAnimation(player);
+                    stopBlinking(uuid);
                 }
             }
         }, 0L, 3L).getTaskId(); // Update every 3 ticks (0.15 seconds)
@@ -134,14 +121,14 @@ public class BlinkAnimationManager {
     /**
      * Stop blinking animation for a player
      */
-    public void stopAnimation(Player player) {
-        stopAnimation(player.getUniqueId());
+    public void stopBlinking(Player player) {
+        stopBlinking(player.getUniqueId());
     }
     
     /**
      * Stop blinking animation by UUID
      */
-    public void stopAnimation(UUID uuid) {
+    public void stopBlinking(UUID uuid) {
         Integer taskId = blinkingTasks.remove(uuid);
         if (taskId != null) {
             try {
@@ -157,7 +144,7 @@ public class BlinkAnimationManager {
      */
     public void stopAll() {
         for (UUID uuid : blinkingTasks.keySet()) {
-            stopAnimation(uuid);
+            stopBlinking(uuid);
         }
         blinkingTasks.clear();
     }

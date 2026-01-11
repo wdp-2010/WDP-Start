@@ -37,6 +37,29 @@ public class ShopMenuBuilder {
     }
     
     /**
+     * Build the main shop menu
+     * @param player The player
+     * @param isTokenShop If true, build token shop (Quest 4), else item shop (Quest 3)
+     */
+    public Inventory buildMainShopMenu(Player player, boolean isTokenShop) {
+        return isTokenShop ? buildTokenShop(player) : buildMainShop(player);
+    }
+    
+    /**
+     * Build a shop section menu
+     */
+    public Inventory buildShopSection(Player player, String category, Material icon) {
+        return buildSectionMenu(player, category);
+    }
+    
+    /**
+     * Build transaction menu with quantity
+     */
+    public Inventory buildTransactionMenu(Player player, ShopItemData item, int quantity, boolean isBuying) {
+        return buildTransactionMenu(player, item, quantity);
+    }
+    
+    /**
      * Build the main shop menu (Quest 3 - buy items)
      */
     public Inventory buildMainShop(Player player) {

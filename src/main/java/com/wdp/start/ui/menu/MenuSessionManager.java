@@ -1,8 +1,5 @@
 package com.wdp.start.ui.menu;
 
-import com.wdp.start.WDPStartPlugin;
-import org.bukkit.entity.Player;
-
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,63 +9,43 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MenuSessionManager {
     
-    private final WDPStartPlugin plugin;
-    private final ConcurrentHashMap<UUID, MenuSession> activeSessions = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Session> activeSessions = new ConcurrentHashMap<>();
     
-    public MenuSessionManager(WDPStartPlugin plugin) {
-        this.plugin = plugin;
+    public MenuSessionManager() {
     }
     
     /**
-     * Create and register a new menu session
+     * Start a new session
      */
-    public MenuSession createSession(Player player, MenuType type, int currentQuest) {
-        MenuSession session = new MenuSession(player, type, currentQuest);
-        activeSessions.put(player.getUniqueId(), session);
-        return session;
+    public void startSession(UUID uuid, MenuType type, int currentQuest) {
+        activeSessions.put(uuid, new Session(type, currentQuest, null));
     }
     
     /**
-     * Create and register a new menu session with extra data
+     * Start a new session with context
      */
-    public MenuSession createSession(Player player, MenuType type, int currentQuest, String extraData) {
-        MenuSession session = new MenuSession(player, type, currentQuest, extraData);
-        activeSessions.put(player.getUniqueId(), session);
-        return session;
-    }
-    
-    /**
-     * Get the active session for a player
-     */
-    public MenuSession getSession(Player player) {
-        return activeSessions.get(player.getUniqueId());
+    public void startSession(UUID uuid, MenuType type, int currentQuest, String context) {
+        activeSessions.put(uuid, new Session(type, currentQuest, context));
     }
     
     /**
      * Get the active session for a UUID
      */
-    public MenuSession getSession(UUID uuid) {
+    public Session getSession(UUID uuid) {
         return activeSessions.get(uuid);
     }
     
     /**
      * Check if player has an active session
      */
-    public boolean hasSession(Player player) {
-        return activeSessions.containsKey(player.getUniqueId());
+    public boolean hasSession(UUID uuid) {
+        return activeSessions.containsKey(uuid);
     }
     
     /**
-     * Remove a player's session
+     * End a session
      */
-    public void removeSession(Player player) {
-        activeSessions.remove(player.getUniqueId());
-    }
-    
-    /**
-     * Remove a session by UUID
-     */
-    public void removeSession(UUID uuid) {
+    public void endSession(UUID uuid) {
         activeSessions.remove(uuid);
     }
     
@@ -86,67 +63,12 @@ public class MenuSessionManager {
         return activeSessions.size();
     }
     
-    // ==================== MENU SESSION CLASS ====================
+    // ==================== SESSION RECORD ====================
     
     /**
-     * Represents an active menu session for a player
+     * Represents an active menu session
      */
-    public static class MenuSession {
-        private final Player player;
-        private final MenuType type;
-        private final int currentQuest;
-        private final String extraData;
-        private final long createdAt;
-        
-        public MenuSession(Player player, MenuType type, int currentQuest) {
-            this(player, type, currentQuest, null);
-        }
-        
-        public MenuSession(Player player, MenuType type, int currentQuest, String extraData) {
-            this.player = player;
-            this.type = type;
-            this.currentQuest = currentQuest;
-            this.extraData = extraData;
-            this.createdAt = System.currentTimeMillis();
-        }
-        
-        public Player getPlayer() {
-            return player;
-        }
-        
-        public MenuType getType() {
-            return type;
-        }
-        
-        public int getCurrentQuest() {
-            return currentQuest;
-        }
-        
-        public String getExtraData() {
-            return extraData;
-        }
-        
-        public long getCreatedAt() {
-            return createdAt;
-        }
-        
-        /**
-         * Get session age in milliseconds
-         */
-        public long getAge() {
-            return System.currentTimeMillis() - createdAt;
-        }
-        
-        /**
-         * Compatibility method for old code using getMenuType()
-         */
-        public String getMenuType() {
-            if (extraData != null && !extraData.isEmpty()) {
-                return type.getLegacyId() + "_" + extraData;
-            }
-            return type.getLegacyId();
-        }
-    }
+    public record Session(MenuType menuType, int currentQuest, String context) {}
     
     // ==================== MENU TYPE ENUM ====================
     
@@ -155,54 +77,30 @@ public class MenuSessionManager {
      */
     public enum MenuType {
         /** Main quest menu showing all 6 quests */
-        MAIN_MENU("main"),
+        MAIN,
         
         /** Welcome menu for new players */
-        WELCOME("welcome"),
+        WELCOME,
         
         /** Quest detail view */
-        QUEST_DETAIL("quest_detail"),
+        QUEST_DETAIL,
         
         /** Simplified quest view (Quest 5) */
-        SIMPLIFIED_QUEST("simplified_quest"),
+        QUEST_VIEW,
         
         /** SkillCoins shop main menu */
-        SHOP_MAIN("skillcoins_shop_main"),
+        SHOP_MAIN,
         
         /** SkillCoins shop category section */
-        SHOP_SECTION("skillcoins_shop_section"),
+        SHOP_SECTION,
         
         /** Shop item transaction (buy/sell) */
-        SHOP_TRANSACTION("skillcoins_transaction"),
+        TRANSACTION,
         
         /** Token exchange menu (Quest 4) */
-        TOKEN_EXCHANGE("token_exchange"),
+        TOKEN_EXCHANGE,
         
         /** Shop for tokens only (Quest 4 main) */
-        SHOP_TOKENS("skillcoins_shop_tokens");
-        
-        private final String legacyId;
-        
-        MenuType(String legacyId) {
-            this.legacyId = legacyId;
-        }
-        
-        public String getLegacyId() {
-            return legacyId;
-        }
-        
-        /**
-         * Get MenuType from legacy ID string
-         */
-        public static MenuType fromLegacyId(String id) {
-            if (id == null) return MAIN_MENU;
-            
-            for (MenuType type : values()) {
-                if (id.startsWith(type.legacyId)) {
-                    return type;
-                }
-            }
-            return MAIN_MENU;
-        }
+        TOKEN_SHOP
     }
 }

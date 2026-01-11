@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 /**
  * Unified quest reminder system for Quest 5 and Quest 6.
@@ -24,12 +25,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class QuestReminderManager {
     
     private final WDPStartPlugin plugin;
+    private final BiConsumer<Player, Integer> autoCompleteCallback;
     
     // Track scheduled tasks per player per quest
     private final ConcurrentHashMap<UUID, Set<Integer>> reminderTasks = new ConcurrentHashMap<>();
     
-    public QuestReminderManager(WDPStartPlugin plugin) {
+    public QuestReminderManager(WDPStartPlugin plugin, BiConsumer<Player, Integer> autoCompleteCallback) {
         this.plugin = plugin;
+        this.autoCompleteCallback = autoCompleteCallback;
     }
     
     // ==================== PUBLIC API ====================
@@ -47,7 +50,7 @@ public class QuestReminderManager {
         }
         
         // Cancel any existing reminders first
-        cancelReminders(player);
+        cancelAllReminders(player);
         
         UUID uuid = player.getUniqueId();
         PlayerData data = plugin.getPlayerDataManager().getData(player);
@@ -88,7 +91,14 @@ public class QuestReminderManager {
     /**
      * Cancel all reminders for a player
      */
-    public void cancelReminders(Player player) {
+    public void cancelReminders(Player player, int quest) {
+        cancelAllReminders(player); // For now, cancel all - quest-specific can be added later
+    }
+    
+    /**
+     * Cancel all reminders for a player (any quest)
+     */
+    public void cancelAllReminders(Player player) {
         UUID uuid = player.getUniqueId();
         Set<Integer> tasks = reminderTasks.remove(uuid);
         
@@ -194,8 +204,15 @@ public class QuestReminderManager {
             if (data.getCurrentQuest() != quest || data.isQuestCompleted(quest)) return;
             
             player.sendMessage(MenuUtils.hex(plugin.getMessageManager().get(messageKey)));
-            plugin.getQuestManager().completeQuest(player, quest);
-            player.closeInventory();
+            
+            // Use callback for auto-complete instead of direct call
+            if (autoCompleteCallback != null) {
+                autoCompleteCallback.accept(player, quest);
+            } else {
+                // Fallback: complete directly
+                plugin.getQuestManager().completeQuest(player, quest);
+                player.closeInventory();
+            }
             
             // Clean up tasks
             reminderTasks.remove(uuid);

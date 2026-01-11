@@ -31,10 +31,16 @@ public class Quest5MenuBuilder {
      * Build the Quest 5 simplified view
      */
     public Inventory build(Player player) {
+        return build(player, plugin.getPlayerDataManager().getData(player));
+    }
+    
+    /**
+     * Build the Quest 5 simplified view with provided data
+     */
+    public Inventory build(Player player, PlayerData data) {
         String title = hex(plugin.getMessageManager().get("quest-view.title"));
         Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
         
-        PlayerData data = plugin.getPlayerDataManager().getData(player);
         PlayerData.QuestProgress progress = data.getQuestProgress(5);
         
         // Get stone mining progress

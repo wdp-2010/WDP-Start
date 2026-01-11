@@ -144,6 +144,29 @@ public class ShopDataLoader {
         return null;
     }
     
+    /**
+     * Get section info by slot (for coordinator compatibility)
+     */
+    public SectionInfo getSectionInfoBySlot(int slot) {
+        ShopSection section = getSectionBySlot(slot);
+        if (section == null) return null;
+        return new SectionInfo(section.id(), section.displayName(), section.icon());
+    }
+    
+    /**
+     * Get items for a category (alias for coordinator compatibility)
+     */
+    public List<ShopItemData> getItemsForCategory(String category) {
+        return getItems(category);
+    }
+    
+    // ==================== SECTION INFO RECORD ====================
+    
+    /**
+     * Simplified section info for coordinator
+     */
+    public record SectionInfo(String fileName, String displayName, Material icon) {}
+    
     // ==================== ITEMS ====================
     
     /**
