@@ -54,7 +54,7 @@ public class BlinkAnimationManager {
      * @param quest The quest number (5 or 6)
      * @param data Player data for item creation
      */
-    public void startBlinking(Player player, int slot, int quest, PlayerData data) {
+    public void startBlinking(Player player, int slot, int quest, PlayerData data, boolean allowIfCompleted) {
         UUID uuid = player.getUniqueId();
         
         // Cancel any existing animation first
@@ -83,8 +83,8 @@ public class BlinkAnimationManager {
                     // Get fresh player data
                     PlayerData currentData = plugin.getPlayerDataManager().getData(player);
                     
-                    // Check if quest is still active
-                    if (currentData.getCurrentQuest() != quest || currentData.isQuestCompleted(quest)) {
+                    // Check if quest is still active; allow completion blinking if requested
+                    if (currentData.getCurrentQuest() != quest || (!allowIfCompleted && currentData.isQuestCompleted(quest))) {
                         stopBlinking(uuid);
                         return;
                     }

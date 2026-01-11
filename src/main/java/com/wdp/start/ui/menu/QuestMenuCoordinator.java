@@ -183,6 +183,10 @@ public class QuestMenuCoordinator {
         Inventory inv = quest5Builder.build(player, data);
         player.openInventory(inv);
         sessionManager.startSession(player.getUniqueId(), MenuSessionManager.MenuType.QUEST_VIEW, 5);
+        // If Quest 5 is already completed, make emerald in quest view flash
+        if (data.isQuestCompleted(5)) {
+            blinkManager.startBlinking(player, 9, 5, data, true);
+        }
         playSound(player);
     }
     
@@ -526,12 +530,14 @@ public class QuestMenuCoordinator {
 
         // Quest 5: blink only when the quest is COMPLETE (emerald flashes when completed)
         if (data.isQuestCompleted(5)) {
-            blinkManager.startBlinking(player, 31, 5, data);
+            // Blink emerald in main menu when Quest 5 is complete
+            blinkManager.startBlinking(player, 31, 5, data, true);
         }
         
         // Quest 6: blink and reminders when it's the current quest and not completed
         if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
-            blinkManager.startBlinking(player, 33, 6, data);
+            // Disk should flash while quest 6 is active and not yet completed
+            blinkManager.startBlinking(player, 33, 6, data, false);
             reminderManager.triggerReminders(player, 6);
         }
     }
