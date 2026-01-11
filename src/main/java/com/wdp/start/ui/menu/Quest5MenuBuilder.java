@@ -47,7 +47,8 @@ public class Quest5MenuBuilder {
         int stoneMined = progress != null ? progress.getCounter("stone_mined", 0) : 0;
         int stoneTarget = 5;
         double completion = Math.min(100.0, (stoneMined * 100.0) / stoneTarget);
-        boolean isComplete = stoneMined >= stoneTarget;
+        boolean hasRequiredStone = stoneMined >= stoneTarget;
+        boolean canComplete = hasRequiredStone && !data.isQuestCompleted(5);
         
         // Get player balance
         double coins = 0;
@@ -82,18 +83,18 @@ public class Quest5MenuBuilder {
         
         // === QUEST ROW (Row 1: slots 9-17) ===
         // Quest icon (slot 9)
-        String questName = isComplete 
+        String questName = hasRequiredStone 
             ? hex(plugin.getMessageManager().get("quest-view.quest-icon.complete.name"))
             : hex(plugin.getMessageManager().get("quest-view.quest-icon.incomplete.name"));
         List<String> questLore = plugin.getMessageManager().getList("quest-view.quest-icon.lore",
             "current", String.valueOf(stoneMined),
             "total", String.valueOf(stoneTarget));
         ItemStack questIcon = createItem(
-            isComplete ? Material.EMERALD : Material.COMPASS,
+            hasRequiredStone ? Material.EMERALD : Material.COMPASS,
             questName,
             questLore.stream().map(MenuUtils::hex).toArray(String[]::new)
         );
-        if (isComplete) addGlow(questIcon);
+        if (canComplete) addGlow(questIcon);
         inv.setItem(9, questIcon);
         
         // Progress bar (8 segments, slots 10-17)
@@ -110,8 +111,31 @@ public class Quest5MenuBuilder {
     }
     
     /**
-     * Create a progress bar segment
+     * Create the quest icon item for blinking animation
      */
+    public ItemStack createQuestIcon(PlayerData data) {
+        PlayerData.QuestProgress progress = data.getQuestProgress(5);
+        
+        // Get stone mining progress
+        int stoneMined = progress != null ? progress.getCounter("stone_mined", 0) : 0;
+        int stoneTarget = 5;
+        boolean hasRequiredStone = stoneMined >= stoneTarget;
+        boolean canComplete = hasRequiredStone && !data.isQuestCompleted(5);
+        
+        String questName = hasRequiredStone 
+            ? hex(plugin.getMessageManager().get("quest-view.quest-icon.complete.name"))
+            : hex(plugin.getMessageManager().get("quest-view.quest-icon.incomplete.name"));
+        List<String> questLore = plugin.getMessageManager().getList("quest-view.quest-icon.lore",
+            "current", String.valueOf(stoneMined),
+            "total", String.valueOf(stoneTarget));
+        ItemStack questIcon = createItem(
+            hasRequiredStone ? Material.EMERALD : Material.COMPASS,
+            questName,
+            questLore.stream().map(MenuUtils::hex).toArray(String[]::new)
+        );
+        if (canComplete) addGlow(questIcon);
+        return questIcon;
+    }
     private ItemStack createProgressSegment(int segmentIndex, double completion, boolean isHard) {
         final int SEGMENTS = 8;
         final int FILLS_PER_SEGMENT = 5;
@@ -121,20 +145,32 @@ public class Quest5MenuBuilder {
         int unitsBeforeThis = segmentIndex * FILLS_PER_SEGMENT;
         int unitsInThisSegment = Math.max(0, Math.min(FILLS_PER_SEGMENT, totalFilledUnits - unitsBeforeThis));
         
-        // Create visual segment
-        String color = isHard ? "§c" : "§a";
-        String filled = isHard ? "§c█" : "§a█";
-        String empty = "§7░";
+        // Use resource pack items like WDP-Quest
+        String modelType = isHard ? "hard" : "normal";
+        String modelName = "progress_" + modelType + "_" + unitsInThisSegment;
         
-        StringBuilder bar = new StringBuilder();
-        for (int i = 0; i < 5; i++) {
-            bar.append(i < unitsInThisSegment ? filled : empty);
-        }
-        
+        // Create item using any base material (will be replaced by resource pack)
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta meta = item.getItemMeta();
+        
         if (meta != null) {
-            meta.setDisplayName(bar.toString());
+            // Set the item model component
+            try {
+                // Use the same namespace as WDP-Quest
+                item = Bukkit.getItemFactory().createItemStack(
+                    "minecraft:paper[minecraft:item_model=\"wdp_quest:" + modelName + "\"]"
+                );
+                meta = item.getItemMeta();
+            } catch (Exception e) {
+                // Fallback for older versions or if the above fails
+                plugin.getLogger().warning("Failed to set item_model, falling back to plain item: " + e.getMessage());
+            }
+            
+            // Visual feedback in name and lore (fallback without resource pack)
+            String color = isHard ? "§c" : "§a";
+            String segmentBar = createSegmentVisual(unitsInThisSegment, isHard);
+            
+            meta.setDisplayName(segmentBar);
             
             List<String> lore = new ArrayList<>();
             lore.add("§7Segment " + (segmentIndex + 1) + "/8");
@@ -148,5 +184,20 @@ public class Quest5MenuBuilder {
         }
         
         return item;
+    }
+    
+    /**
+     * Create visual segment bar for fallback
+     */
+    private String createSegmentVisual(int fillLevel, boolean isHard) {
+        String filled = isHard ? "§c█" : "§a█";
+        String empty = "§7░";
+        
+        StringBuilder bar = new StringBuilder();
+        for (int i = 0; i < 5; i++) {
+            bar.append(i < fillLevel ? filled : empty);
+        }
+        
+        return bar.toString();
     }
 }

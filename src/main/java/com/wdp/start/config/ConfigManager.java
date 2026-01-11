@@ -234,6 +234,30 @@ public class ConfigManager {
         return config.getInt("quest5.auto-complete-delay", 0);
     }
     
+    public boolean isQuest5BlinkingEnabled() {
+        return config.getBoolean("quest5.blinking.enabled", true);
+    }
+    
+    public int getQuest5BlinkingIntervalTicks() {
+        return config.getInt("quest5.blinking.interval-ticks", 3);
+    }
+    
+    public List<Boolean> getQuest5BlinkingPattern() {
+        return config.getBooleanList("quest5.blinking.pattern");
+    }
+    
+    public boolean isMainMenuBlinkingEnabled() {
+        return config.getBoolean("main-menu.blinking.enabled", true);
+    }
+    
+    public int getMainMenuBlinkingIntervalTicks() {
+        return config.getInt("main-menu.blinking.interval-ticks", 3);
+    }
+    
+    public List<Boolean> getMainMenuBlinkingPattern() {
+        return config.getBooleanList("main-menu.blinking.pattern");
+    }
+    
     // ==================== QUEST 6: DISCORD ====================
     
     public String getDiscordLink() {

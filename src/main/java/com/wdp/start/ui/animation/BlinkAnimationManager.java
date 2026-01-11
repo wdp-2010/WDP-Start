@@ -20,8 +20,7 @@ import static com.wdp.start.ui.menu.MenuUtils.addGlow;
 /**
  * Manages blinking animations for quest menu items.
  * 
- * Pattern: I . I . I . . . . . . I . I . I . . . . . .
- * Where I = no glow, . = glowing
+ * Uses configurable pattern and timing from config.yml
  * 
  * Used for Quest 5 and Quest 6 when they are the current active quest.
  */
@@ -32,14 +31,6 @@ public class BlinkAnimationManager {
     
     // Track active blinking tasks per player
     private final Map<UUID, Integer> blinkingTasks = new ConcurrentHashMap<>();
-    
-    // The blinking pattern (true = glow, false = no glow)
-    private static final boolean[] BLINK_PATTERN = {
-        false, true, false, true, false, true, // 3 blinks
-        true, true, true, true, true,          // pause
-        false, true, false, true, false, true, // 3 blinks
-        true, true, true, true                 // pause
-    };
     
     public BlinkAnimationManager(WDPStartPlugin plugin) {
         this.plugin = plugin;
@@ -59,6 +50,20 @@ public class BlinkAnimationManager {
         
         // Cancel any existing animation first
         stopBlinking(uuid);
+        
+        // Check if blinking is enabled
+        if (!plugin.getConfigManager().isMainMenuBlinkingEnabled()) {
+            return; // No blinking, just show the completed quest
+        }
+        
+        // Get config values
+        final java.util.List<Boolean> pattern = plugin.getConfigManager().getMainMenuBlinkingPattern();
+        final int intervalTicks = plugin.getConfigManager().getMainMenuBlinkingIntervalTicks();
+        
+        // If no pattern defined, use default pattern
+        final java.util.List<Boolean> finalPattern = pattern.isEmpty() 
+            ? java.util.List.of(false, true, false, true, false, true, true, true, true, true, true, false, true, false, true, false, true, true, true, true, true)
+            : pattern;
         
         // Create new animation task
         int taskId = plugin.getServer().getScheduler().runTaskTimer(plugin, new Runnable() {
@@ -90,7 +95,7 @@ public class BlinkAnimationManager {
                     }
                     
                     // Get current pattern state
-                    boolean shouldGlow = BLINK_PATTERN[tick % BLINK_PATTERN.length];
+                    boolean shouldGlow = finalPattern.get(tick % finalPattern.size());
                     
                     if (shouldGlow) {
                         // Create the quest item and add glow
@@ -125,7 +130,7 @@ public class BlinkAnimationManager {
                     stopBlinking(uuid);
                 }
             }
-        }, 0L, 3L).getTaskId(); // Update every 3 ticks (0.15 seconds)
+        }, 0L, intervalTicks).getTaskId(); // Use configurable interval
         
         blinkingTasks.put(uuid, taskId);
         plugin.debug("Started blink animation for " + player.getName() + " at slot " + slot);

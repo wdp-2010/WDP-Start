@@ -498,6 +498,13 @@ quest-view:
       - "&#808080Mine 5 stone blocks to complete this quest"
       - ""
       - "&#808080Progress: &#FFFF00{current}/{total} Stone"
+  details-button:
+    name: "&#00FFFF§lQuest Details"
+    lore:
+      - ""
+      - "&#808080View detailed information"
+      - "&#808080about this quest"
+      - ""
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                          Quest Detail Messages                              │

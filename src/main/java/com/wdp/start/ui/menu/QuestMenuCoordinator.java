@@ -12,8 +12,13 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,6 +59,9 @@ public class QuestMenuCoordinator {
     // Transaction tracking (for shop purchases)
     private final ConcurrentHashMap<UUID, ShopItemData> transactionItems = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Integer> transactionQuantities = new ConcurrentHashMap<>();
+    
+    // Track blinking animation tasks
+    private final ConcurrentHashMap<UUID, Integer> blinkingTasks = new ConcurrentHashMap<>();
     
     public QuestMenuCoordinator(WDPStartPlugin plugin) {
         this.plugin = plugin;
@@ -181,12 +189,153 @@ public class QuestMenuCoordinator {
     public void openQuest5View(Player player) {
         PlayerData data = plugin.getPlayerDataManager().getData(player);
         Inventory inv = quest5Builder.build(player, data);
+        
+        // Add navbar
+        Map<String, Object> context = new HashMap<>();
+        context.put("menu_name", "Quest 5 - Simple Mining");
+        context.put("menu_description", "Complete your first mining quest");
+        context.put("page", 1);
+        context.put("total_pages", 1);
+        
+        int completed = data.getCompletedQuestCount();
+        context.put("completed_quests", completed);
+        context.put("total_quests", 6);
+        context.put("progress_bar", MenuUtils.createProgressBar(completed, 6));
+        
+        String currentQuestName = data.isCompleted() 
+            ? plugin.getMessageManager().get("menu.progress.all-complete")
+            : plugin.getQuestManager().getQuestName(data.getCurrentQuest());
+        context.put("current_quest", currentQuestName);
+        
+        // Currency info
+        double coins = plugin.getVaultIntegration() != null ? plugin.getVaultIntegration().getBalance(player) : 0;
+        context.put("balance", coins);
+        context.put("coins", String.format("%.0f", coins));
+        context.put("tokens", "0");
+        
+        navbarRenderer.apply(inv, player, "quest_view", context);
+        
         player.openInventory(inv);
         sessionManager.startSession(player.getUniqueId(), MenuSessionManager.MenuType.QUEST_VIEW, 5);
-        // If Quest 5 is already completed, make emerald in quest view flash
-        if (data.isQuestCompleted(5)) {
-            blinkManager.startBlinking(player, 9, 5, data, true);
+        // If Quest 5 can be completed (5 stone mined and not completed), make emerald blink
+        PlayerData.QuestProgress progress = data.getQuestProgress(5);
+        int stoneMined = progress != null ? progress.getCounter("stone_mined", 0) : 0;
+        boolean canComplete = stoneMined >= 5 && !data.isQuestCompleted(5);
+        if (canComplete) {
+            startBlinkingAnimation(player, 9);
         }
+        playSound(player);
+    }
+    
+    /**
+     * Open the quest detail view for Quest 5
+     */
+    public void openQuestDetailView(Player player, int questId) {
+        if (questId != 5) return; // Only Quest 5 has detail view for now
+        
+        String title = MenuUtils.hex(plugin.getMessageManager().get("quest-detail.title"));
+        Inventory inv = Bukkit.createInventory(null, 54, MENU_ID + title);
+        
+        PlayerData data = plugin.getPlayerDataManager().getData(player);
+        PlayerData.QuestProgress progress = data.getQuestProgress(5);
+        
+        // Get stone mining progress
+        int stoneMined = progress != null ? progress.getCounter("stone_mined", 0) : 0;
+        int stoneTarget = 5;
+        double completion = Math.min(100.0, (stoneMined * 100.0) / stoneTarget);
+        boolean isComplete = stoneMined >= stoneTarget;
+        
+        // === ROW 0: Header ===
+        // Quest icon (slot 4)
+        String questName = isComplete 
+            ? MenuUtils.hex(plugin.getMessageManager().get("quest-view.quest-icon.complete.name"))
+            : MenuUtils.hex(plugin.getMessageManager().get("quest-view.quest-icon.incomplete.name"));
+        List<String> questLore = plugin.getMessageManager().getList("quest-detail.quest-icon.lore",
+                "required", "0");
+        ItemStack questIcon = MenuUtils.createItem(
+            isComplete ? Material.EMERALD : Material.COMPASS,
+            questName,
+            questLore.stream().map(MenuUtils::hex).toArray(String[]::new)
+        );
+        if (isComplete) MenuUtils.addGlow(questIcon);
+        inv.setItem(4, questIcon);
+        
+        // Status indicator (slot 8)
+        Material statusMat = isComplete ? Material.LIME_DYE : Material.YELLOW_DYE;
+        String statusText = isComplete 
+            ? MenuUtils.hex(plugin.getMessageManager().get("quest-detail.status.completed.name"))
+            : MenuUtils.hex(plugin.getMessageManager().get("quest-detail.status.active.name"));
+        List<String> statusLore = plugin.getMessageManager().getList("quest-detail.status.lore");
+        inv.setItem(8, MenuUtils.createItem(
+            statusMat,
+            statusText,
+            statusLore.stream().map(MenuUtils::hex).toArray(String[]::new)
+        ));
+        
+        // === ROW 1: Full-width progress bar ===
+        for (int seg = 0; seg < 9; seg++) {
+            int slot = 9 + seg; // slots 9-17
+            inv.setItem(slot, createWDPQuestProgressSegment(seg, completion, false));
+        }
+        
+        // === ROW 2: Objectives ===
+        inv.setItem(18, MenuUtils.createItem(
+            Material.PAPER,
+            MenuUtils.hex(plugin.getMessageManager().get("quest-detail.objectives.title")),
+            MenuUtils.hex(plugin.getMessageManager().get("quest-detail.objectives.subtitle"))
+        ));
+        
+        // Objective - Mine 5 Stone (slot 19)
+        Material objMat = isComplete ? Material.LIME_DYE : Material.GRAY_DYE;
+        String objStatus = isComplete 
+            ? MenuUtils.hex(plugin.getMessageManager().get("quest-detail.objectives.complete", "objective", "Mine 5 Stone"))
+            : MenuUtils.hex(plugin.getMessageManager().get("quest-detail.objectives.incomplete", "objective", "Mine 5 Stone"));
+        String objProgress = isComplete 
+            ? MenuUtils.hex(plugin.getMessageManager().get("quest-detail.objectives.progress-complete"))
+            : MenuUtils.hex(plugin.getMessageManager().get("quest-detail.objectives.progress-incomplete", 
+                "current", String.valueOf(stoneMined), "total", String.valueOf(stoneTarget)));
+        
+        inv.setItem(19, MenuUtils.createItem(
+            objMat,
+            objStatus,
+            objProgress
+        ));
+        
+        // === ROW 3: Rewards ===
+        inv.setItem(27, MenuUtils.createItem(
+            Material.CHEST,
+            MenuUtils.hex(plugin.getMessageManager().get("quest-detail.rewards.title")),
+            MenuUtils.hex(plugin.getMessageManager().get("quest-detail.rewards.subtitle"))
+        ));
+        
+        // Reward - 20 SkillCoins (slot 28)
+        List<String> rewardLore = plugin.getMessageManager().getList("quest-detail.rewards.skillcoins.lore");
+        inv.setItem(28, MenuUtils.createItem(
+            Material.GOLD_NUGGET,
+            MenuUtils.hex(plugin.getMessageManager().get("quest-detail.rewards.skillcoins.name", "amount", "20")),
+            rewardLore.stream().map(MenuUtils::hex).toArray(String[]::new)
+        ));
+        
+        // === ROW 4: Empty ===
+        
+        // === ROW 5: Universal navbar ===
+        Map<String, Object> context = new HashMap<>();
+        context.put("previous_menu", "quest_view");
+        context.put("menu_name", "Quest Details");
+        context.put("menu_description", "Detailed quest information");
+        
+        // Currency info for navbar
+        double coins = plugin.getVaultIntegration() != null ? plugin.getVaultIntegration().getBalance(player) : 0;
+        context.put("balance", coins);
+        context.put("coins", String.format("%.0f", coins));
+        context.put("tokens", "0");
+        
+        navbarRenderer.apply(inv, player, "quest_detail", context);
+        
+        // Track menu
+        player.openInventory(inv);
+        sessionManager.startSession(player.getUniqueId(), MenuSessionManager.MenuType.QUEST_DETAIL, 5);
+        
         playSound(player);
     }
     
@@ -237,10 +386,13 @@ public class QuestMenuCoordinator {
             return;
         }
         
-        // Quest clicks
+        // Quest clicks - allow clicking Quest 5 and 6 even if not current quest
         int quest = getQuestFromSlot(slot);
         if (quest > 0 && quest == data.getCurrentQuest()) {
             handleQuestClick(player, quest, data);
+        } else if (quest == 5 || quest == 6) {
+            // For Quest 5 and 6, show objective instead of completing
+            showQuestObjective(player, quest, data);
         }
     }
     
@@ -411,14 +563,17 @@ public class QuestMenuCoordinator {
             PlayerData.QuestProgress progress = data.getQuestProgress(5);
             int stoneMined = progress != null ? progress.getCounter("stone_mined", 0) : 0;
             
-            if (stoneMined >= 5) {
+            if (data.isQuestCompleted(5)) {
+                // Already completed
+                player.sendMessage(MenuUtils.hex(plugin.getMessageManager().get("quest.already-completed")));
+            } else if (stoneMined >= 5) {
+                // Can complete - complete the quest
                 plugin.getQuestManager().completeQuest(player, 5);
                 reminderManager.cancelReminders(player, 5);
                 plugin.getServer().getScheduler().runTaskLater(plugin, player::closeInventory, 5L);
             } else {
-                player.sendMessage(MenuUtils.hex(plugin.getMessageManager().get("quest-progress.stone-progress", 
-                        "current", String.valueOf(stoneMined), "required", "5")));
-                plugin.getServer().getScheduler().runTaskLater(plugin, () -> openQuest5View(player), 2L);
+                // Not ready - open quest details
+                openQuestDetailView(player, 5);
             }
             return;
         }
@@ -443,10 +598,27 @@ public class QuestMenuCoordinator {
     }
     
     private void handleQuestDetailClick(Player player, int slot) {
-        if (slot == 45) {
+        // Quest icon click in details view - complete quest
+        if (slot == 4) {
+            PlayerData data = plugin.getPlayerDataManager().getData(player);
+            PlayerData.QuestProgress progress = data.getQuestProgress(5);
+            int stoneMined = progress != null ? progress.getCounter("stone_mined", 0) : 0;
+            
+            if (stoneMined >= 5) {
+                plugin.getQuestManager().completeQuest(player, 5);
+                reminderManager.cancelReminders(player, 5);
+                plugin.getServer().getScheduler().runTaskLater(plugin, player::closeInventory, 5L);
+            } else {
+                player.sendMessage(MenuUtils.hex(plugin.getMessageManager().get("quest-progress.stone-progress", 
+                        "current", String.valueOf(stoneMined), "required", "5")));
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> openQuestDetailView(player, 5), 2L);
+            }
+            return;
+        }
+        
+        // Back to quest view (slot 53 according to navbar.yml)
+        if (slot == 53) {
             openQuest5View(player);
-        } else if (slot == 53) {
-            player.closeInventory();
         }
     }
     
@@ -583,6 +755,22 @@ public class QuestMenuCoordinator {
     }
     
     /**
+     * Show quest objective/progress for informational clicks
+     */
+    private void showQuestObjective(Player player, int quest, PlayerData data) {
+        if (quest == 5) {
+            PlayerData.QuestProgress progress = data.getQuestProgress(5);
+            int stoneMined = progress != null ? progress.getCounter("stone_mined", 0) : 0;
+            player.sendMessage(MenuUtils.hex(plugin.getMessageManager().get("quest-progress.stone-progress", 
+                    "current", String.valueOf(stoneMined), "required", "5")));
+        } else if (quest == 6) {
+            // For Quest 6, just show a hint since it's more complex
+            String hint = plugin.getMessageManager().get("quests.hints.quest6");
+            player.sendMessage(MenuUtils.hex(plugin.getMessageManager().get("success.quest-hint", "hint", hint)));
+        }
+    }
+    
+    /**
      * Check if an inventory belongs to our menu system
      */
     public boolean isQuestMenu(Inventory inv) {
@@ -616,6 +804,181 @@ public class QuestMenuCoordinator {
     }
     
     // ==================== ACCESSORS FOR LEGACY COMPATIBILITY ====================
+    
+    /**
+     * Create a progress segment using WDP-Quest resource pack
+     */
+    private ItemStack createWDPQuestProgressSegment(int segmentIndex, double completion, boolean isHard) {
+        // Progress bar constants (EXACTLY matching WDP-Quest)
+        final int SEGMENTS = 8;
+        final int FILLS_PER_SEGMENT = 5;
+        final int TOTAL_UNITS = SEGMENTS * FILLS_PER_SEGMENT; // 40
+        
+        // Convert percentage to units (0-40)
+        int totalFilledUnits = (int) Math.round(completion / 100.0 * TOTAL_UNITS);
+        
+        // Calculate this segment's fill level (0-5)
+        int unitsBeforeThis = segmentIndex * FILLS_PER_SEGMENT;
+        int unitsInThisSegment = Math.max(0, Math.min(FILLS_PER_SEGMENT, totalFilledUnits - unitsBeforeThis));
+        
+        // Use the NEW 1.21+ item model system
+        // Each progress level has its own item definition in wdp_quest namespace
+        String modelType = isHard ? "hard" : "normal";
+        String modelName = "progress_" + modelType + "_" + unitsInThisSegment;
+        
+        // Create item using any base material (will be replaced by resource pack)
+        ItemStack item = new ItemStack(Material.PAPER);
+        ItemMeta meta = item.getItemMeta();
+        
+        if (meta != null) {
+            // Set the item model component (NEW 1.21.4+ way)
+            try {
+                item = Bukkit.getItemFactory().createItemStack(
+                    "minecraft:paper[minecraft:item_model=\"wdp_quest:" + modelName + "\"]"
+                );
+                meta = item.getItemMeta();
+            } catch (Exception e) {
+                // Fallback for older versions
+                plugin.getLogger().warning("Failed to set item_model, falling back to plain item: " + e.getMessage());
+            }
+            
+            // Visual feedback in name and lore (fallback without resource pack)
+            String color = isHard ? "§c" : "§a";
+            String segmentBar = createSegmentVisual(unitsInThisSegment, isHard);
+            
+            meta.setDisplayName(segmentBar);
+            
+            List<String> lore = new ArrayList<>();
+            lore.add("§7Segment " + (segmentIndex + 1) + "/8");
+            lore.add("§7Fill: " + color + unitsInThisSegment + "/5");
+            lore.add("");
+            lore.add("§7Overall: §f" + String.format("%.0f", completion) + "%");
+            
+            meta.setLore(lore);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+            item.setItemMeta(meta);
+        }
+        
+        return item;
+    }
+    
+    /**
+     * Create visual segment bar for fallback
+     */
+    private String createSegmentVisual(int fillLevel, boolean isHard) {
+        String filled = isHard ? "§c█" : "§a█";
+        String empty = "§7░";
+        
+        StringBuilder bar = new StringBuilder();
+        for (int i = 0; i < 5; i++) {
+            bar.append(i < fillLevel ? filled : empty);
+        }
+        
+        return bar.toString();
+    }
+    
+    /**
+     * Start blinking animation for quest completion (same as main menu)
+     */
+    private void startBlinkingAnimation(Player player, int slot) {
+        UUID uuid = player.getUniqueId();
+        
+        // Cancel any existing blinking task FIRST
+        if (blinkingTasks.containsKey(uuid)) {
+            try {
+                plugin.getServer().getScheduler().cancelTask(blinkingTasks.get(uuid));
+            } catch (Exception e) {
+                // Task already cancelled or invalid
+            }
+            blinkingTasks.remove(uuid);
+        }
+        
+        // Check if blinking is enabled
+        if (!plugin.getConfigManager().isQuest5BlinkingEnabled()) {
+            return; // No blinking, just show the completed quest
+        }
+        
+        // Get config values
+        final List<Boolean> pattern = plugin.getConfigManager().getQuest5BlinkingPattern();
+        final int intervalTicks = plugin.getConfigManager().getQuest5BlinkingIntervalTicks();
+        
+        // If no pattern defined, use default pattern
+        final List<Boolean> finalPattern = pattern.isEmpty() 
+            ? List.of(false, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true)
+            : pattern;
+        
+        // Start the blinking animation
+        int taskId = plugin.getServer().getScheduler().runTaskTimer(plugin, new Runnable() {
+            int tick = 0;
+            
+            @Override
+            public void run() {
+                try {
+                    if (!player.isOnline()) {
+                        // Player went offline - cancel animation
+                        if (blinkingTasks.containsKey(uuid)) {
+                            plugin.getServer().getScheduler().cancelTask(blinkingTasks.get(uuid));
+                            blinkingTasks.remove(uuid);
+                        }
+                        return;
+                    }
+                    
+                    Inventory topInv = player.getOpenInventory().getTopInventory();
+                    if (!isQuestViewMenu(topInv)) {
+                        // Player closed menu - cancel animation
+                        if (blinkingTasks.containsKey(uuid)) {
+                            plugin.getServer().getScheduler().cancelTask(blinkingTasks.get(uuid));
+                            blinkingTasks.remove(uuid);
+                        }
+                        return;
+                    }
+                    
+                    PlayerData data = plugin.getPlayerDataManager().getData(player);
+                    
+                    // Get current pattern state
+                    boolean shouldGlow = finalPattern.get(tick % finalPattern.size());
+                    
+                    // Create the quest item (always quest 5 for this view)
+                    ItemStack item = quest5Builder.createQuestIcon(data);
+                    
+                    // Add glow based on pattern
+                    if (shouldGlow) {
+                        MenuUtils.addGlow(item);
+                    }
+                    
+                    // Update the item in the inventory
+                    topInv.setItem(slot, item);
+                    
+                    // CRITICAL: Update player's inventory view to refresh client-side display
+                    player.updateInventory();
+                    
+                    tick++;
+                } catch (Exception e) {
+                    plugin.debug("Blinking animation error: " + e.getMessage());
+                    // Silently fail if there's an error
+                    if (blinkingTasks.containsKey(uuid)) {
+                        try {
+                            plugin.getServer().getScheduler().cancelTask(blinkingTasks.get(uuid));
+                        } catch (Exception ex) {
+                            // Already cancelled
+                        }
+                        blinkingTasks.remove(uuid);
+                    }
+                }
+            }
+        }, 0L, intervalTicks).getTaskId(); // Use configurable interval
+        
+        blinkingTasks.put(uuid, taskId);
+    }
+    
+    /**
+     * Check if inventory is a quest view menu
+     */
+    private boolean isQuestViewMenu(Inventory inv) {
+        if (inv == null || inv.getViewers().isEmpty()) return false;
+        String title = inv.getViewers().get(0).getOpenInventory().getTitle();
+        return title != null && title.contains("Quest Menu");
+    }
     
     public MenuSessionManager getSessionManager() {
         return sessionManager;

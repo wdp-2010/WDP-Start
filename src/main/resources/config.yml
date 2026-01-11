@@ -218,6 +218,35 @@ quest5:
   # Auto-complete delay (in seconds) - automatically complete if not done
   # Set to 0 to disable auto-complete
   auto-complete-delay: 0  # Disabled by default (was 35 seconds)
+  
+  # Blinking animation settings for completed quest
+  blinking:
+    # Enable/disable blinking animation when quest is complete
+    enabled: true
+    
+    # Time between each blink state change (in ticks, 20 ticks = 1 second)
+    # Lower values = faster blinking, higher values = slower blinking
+    interval-ticks: 6
+    
+    # Blink pattern - true = glowing emerald, false = gray glass pane
+    # Pattern repeats indefinitely. Example: [false, true, false, true] = blink twice then pause
+    # Set to empty list [] to disable blinking (just show solid emerald)
+    pattern: [false, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true]
+
+# Main menu blinking animation settings for Quest 5 and Quest 6
+main-menu:
+  blinking:
+    # Enable/disable blinking animation when quest is complete in main menu
+    enabled: true
+    
+    # Time between each blink state change (in ticks, 20 ticks = 1 second)
+    # Lower values = faster blinking, higher values = slower blinking
+    interval-ticks: 6
+    
+    # Blink pattern - true = glowing item, false = normal item
+    # Pattern repeats indefinitely. Example: [false, true, false, true] = blink twice then pause
+    # Set to empty list [] to disable blinking (just show solid item)
+    pattern: [false, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true]
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                       Quest 6: Community Support                            │
@@ -260,7 +289,7 @@ cancellation:
   spend-tracking-seconds: 600
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
-# │                              GUI Settings                                    │
+# │                              GUI Settings                                   │
 # └─────────────────────────────────────────────────────────────────────────────┘
 gui:
   # GUI update interval in ticks (20 ticks = 1 second)
