@@ -3,9 +3,12 @@ package com.wdp.start.ui.animation;
 import com.wdp.start.WDPStartPlugin;
 import com.wdp.start.player.PlayerData;
 import com.wdp.start.ui.menu.QuestItemBuilder;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Map;
 import java.util.UUID;
@@ -95,8 +98,21 @@ public class BlinkAnimationManager {
                         addGlow(item);
                         topInv.setItem(slot, item);
                     } else {
-                        // Set the slot to empty to create the blink (false = air)
-                        topInv.setItem(slot, null);
+                        // Create a ghost item (gray pane) that retains the original's name/lore
+                        ItemStack original = questItemBuilder.build(quest, currentData, null);
+                        org.bukkit.inventory.meta.ItemMeta origMeta = original.getItemMeta();
+
+                        org.bukkit.inventory.ItemStack ghost = new org.bukkit.inventory.ItemStack(org.bukkit.Material.GRAY_STAINED_GLASS_PANE);
+                        org.bukkit.inventory.meta.ItemMeta ghostMeta = ghost.getItemMeta();
+                        if (ghostMeta != null) {
+                            if (origMeta != null) {
+                                if (origMeta.hasDisplayName()) ghostMeta.setDisplayName(origMeta.getDisplayName());
+                                if (origMeta.hasLore()) ghostMeta.setLore(origMeta.getLore());
+                            }
+                            ghostMeta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+                            ghost.setItemMeta(ghostMeta);
+                        }
+                        topInv.setItem(slot, ghost);
                     }
                     
                     // Force client refresh

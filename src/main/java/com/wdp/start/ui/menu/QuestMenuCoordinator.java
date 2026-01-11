@@ -519,12 +519,17 @@ public class QuestMenuCoordinator {
         inv.setItem(31, questItemBuilder.build(5, data, null));
         inv.setItem(33, questItemBuilder.build(6, data, null));
         
-        // Start animations and reminders for Quest 5/6
+        // Start reminders for Quest 5 when it's active and not completed
         if (data.getCurrentQuest() == 5 && !data.isQuestCompleted(5)) {
-            blinkManager.startBlinking(player, 31, 5, data);
             reminderManager.triggerReminders(player, 5);
         }
+
+        // Quest 5: blink only when the quest is COMPLETE (emerald flashes when completed)
+        if (data.isQuestCompleted(5)) {
+            blinkManager.startBlinking(player, 31, 5, data);
+        }
         
+        // Quest 6: blink and reminders when it's the current quest and not completed
         if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
             blinkManager.startBlinking(player, 33, 6, data);
             reminderManager.triggerReminders(player, 6);
