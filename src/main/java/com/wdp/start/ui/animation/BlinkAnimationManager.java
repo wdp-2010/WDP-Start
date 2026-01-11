@@ -25,7 +25,6 @@ import static com.wdp.start.ui.menu.MenuUtils.addGlow;
 public class BlinkAnimationManager {
     
     private final WDPStartPlugin plugin;
-    private final Function<Inventory, Boolean> menuChecker;
     private final QuestItemBuilder questItemBuilder;
     
     // Track active blinking tasks per player
@@ -39,9 +38,8 @@ public class BlinkAnimationManager {
         true, true, true, true                 // pause
     };
     
-    public BlinkAnimationManager(WDPStartPlugin plugin, Function<Inventory, Boolean> menuChecker) {
+    public BlinkAnimationManager(WDPStartPlugin plugin) {
         this.plugin = plugin;
-        this.menuChecker = menuChecker;
         this.questItemBuilder = new QuestItemBuilder(plugin);
     }
     
@@ -74,7 +72,7 @@ public class BlinkAnimationManager {
                     
                     // Check if menu is still open
                     Inventory topInv = player.getOpenInventory().getTopInventory();
-                    if (menuChecker != null && !menuChecker.apply(topInv)) {
+                    if (topInv == null || !isWDPMenu(topInv)) {
                         stopBlinking(uuid);
                         return;
                     }
@@ -91,16 +89,15 @@ public class BlinkAnimationManager {
                     // Get current pattern state
                     boolean shouldGlow = BLINK_PATTERN[tick % BLINK_PATTERN.length];
                     
-                    // Create the quest item
-                    ItemStack item = questItemBuilder.build(quest, currentData, null);
-                    
-                    // Apply glow based on pattern
                     if (shouldGlow) {
+                        // Create the quest item and add glow
+                        ItemStack item = questItemBuilder.build(quest, currentData, null);
                         addGlow(item);
+                        topInv.setItem(slot, item);
+                    } else {
+                        // Set the slot to empty to create the blink (false = air)
+                        topInv.setItem(slot, null);
                     }
-                    
-                    // Update the item in inventory
-                    topInv.setItem(slot, item);
                     
                     // Force client refresh
                     player.updateInventory();
@@ -116,6 +113,15 @@ public class BlinkAnimationManager {
         
         blinkingTasks.put(uuid, taskId);
         plugin.debug("Started blink animation for " + player.getName() + " at slot " + slot);
+    }
+    
+    /**
+     * Check if inventory is a WDP menu
+     */
+    private boolean isWDPMenu(Inventory inv) {
+        if (inv == null || inv.getViewers().isEmpty()) return false;
+        String title = inv.getViewers().get(0).getOpenInventory().getTitle();
+        return title != null && title.startsWith("§8§l");
     }
     
     /**

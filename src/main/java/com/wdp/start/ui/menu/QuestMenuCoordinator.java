@@ -68,7 +68,7 @@ public class QuestMenuCoordinator {
         this.sessionManager = new MenuSessionManager();
         
         // Initialize managers with callbacks
-        this.blinkManager = new BlinkAnimationManager(plugin, this::isQuestMenu);
+        this.blinkManager = new BlinkAnimationManager(plugin);
         this.reminderManager = new QuestReminderManager(plugin, this::onReminderAutoComplete);
     }
     

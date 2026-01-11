@@ -191,9 +191,13 @@ public class QuestManager {
         plugin.debug("[QuestManager] " + player.getName() + 
             " completed STEP " + step + " of Quest " + quest + " (" + stepKey + "). Saved to database.");
         
-        // Send step completion message
+        // Send step completion message only if configured
         String messagePath = "quest.quest" + quest + ".step" + step;
-        plugin.getMessageManager().sendRaw(player, messagePath);
+        if (plugin.getMessageManager().has(messagePath)) {
+            plugin.getMessageManager().sendRaw(player, messagePath);
+        } else {
+            plugin.debug("[QuestManager] Missing message path: " + messagePath + " - skipping message send.");
+        }
         
         // Play sound
         if (plugin.getConfigManager().isSoundsEnabled()) {

@@ -77,7 +77,7 @@ quest:
   
   # Quest 5: Quest Menu Tutorial
   quest5:
-    step1: "&#55FFFF➤ &#FFFFFFOpen the quest menu and click the emerald icon!"
+    step1: "&#55FFFF➤ &#FFFFFFOpen the quest menu and click the emerald icon when you mined 5 stone!"
     complete: "&#55FF55&l✓ &#55FF55Perfect! You know how to use the quest menu now!"
     instruction: "&#FFD700&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     instruction-detail: "&#55FF55&l✓ &#55FF55Click the glowing emerald icon above to complete this quest!"
