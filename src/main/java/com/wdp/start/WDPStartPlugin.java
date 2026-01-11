@@ -17,7 +17,7 @@ import com.wdp.start.player.PlayerDataManager;
 import com.wdp.start.quest.QuestManager;
 import com.wdp.start.shop.SimpleShopMenu;
 import com.wdp.start.storage.DatabaseManager;
-import com.wdp.start.ui.QuestMenu;
+import com.wdp.start.ui.menu.QuestMenuCoordinator;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -43,7 +43,7 @@ public class WDPStartPlugin extends JavaPlugin {
     private PlayerDataManager playerDataManager;
     private DatabaseManager databaseManager;
     private QuestManager questManager;
-    private QuestMenu questMenu;
+    private QuestMenuCoordinator questMenuCoordinator;
     private SimpleShopMenu simpleShopMenu;
     private PathGuideManager pathGuideManager;
     private PortalZoneManager portalZoneManager;
@@ -147,7 +147,7 @@ public class WDPStartPlugin extends JavaPlugin {
         questManager = new QuestManager(this);
         
         // Quest menu
-        questMenu = new QuestMenu(this);
+        questMenuCoordinator = new QuestMenuCoordinator(this);
         
         // Simple shop menu (for Quest 3 & 4)
         simpleShopMenu = new SimpleShopMenu(this);
@@ -334,8 +334,8 @@ public class WDPStartPlugin extends JavaPlugin {
         return questManager;
     }
     
-    public QuestMenu getQuestMenu() {
-        return questMenu;
+    public QuestMenuCoordinator getQuestMenuCoordinator() {
+        return questMenuCoordinator;
     }
     
     public SimpleShopMenu getSimpleShopMenu() {

@@ -262,7 +262,7 @@ public class WDPStartAPI {
      */
     public static void openSimplifiedQuestMenu(Player player) {
         if (!isAvailable()) return;
-        plugin.getQuestMenu().openSimplifiedQuestView(player);
+        plugin.getQuestMenuCoordinator().openQuest5View(player);
     }
     
     // ==================== ADMIN ====================

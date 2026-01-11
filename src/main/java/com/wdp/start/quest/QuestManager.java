@@ -81,7 +81,7 @@ public class QuestManager {
             }
             
             // Open the quest menu
-            plugin.getQuestMenu().openMainMenu(player);
+            plugin.getQuestMenuCoordinator().openMainMenu(player);
             return;
         }
         
@@ -109,7 +109,7 @@ public class QuestManager {
                 }
                 
                 // Open the quest menu
-                plugin.getQuestMenu().openMainMenu(player);
+                plugin.getQuestMenuCoordinator().openMainMenu(player);
                 return;
             }
         }

@@ -39,7 +39,7 @@ public class QuestCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             
-            plugin.getQuestMenu().openMainMenu(player);
+            plugin.getQuestMenuCoordinator().openMainMenu(player);
             return true;
         }
         

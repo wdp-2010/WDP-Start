@@ -29,7 +29,7 @@ public class QuestMenuListener implements Listener {
         Inventory inv = event.getInventory();
 
         // Only handle quest menus
-        if (!plugin.getQuestMenu().isQuestMenu(inv)) {
+        if (!plugin.getQuestMenuCoordinator().isQuestMenu(inv)) {
             return;
         }
 
@@ -40,7 +40,7 @@ public class QuestMenuListener implements Listener {
             return;
         }
 
-        plugin.getQuestMenu().handleClick(player, event.getRawSlot(), inv);
+        plugin.getQuestMenuCoordinator().handleClick(player, event.getRawSlot(), inv);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -50,8 +50,8 @@ public class QuestMenuListener implements Listener {
         }
 
         // Only handle quest menus
-        if (plugin.getQuestMenu().isQuestMenu(event.getInventory())) {
-            plugin.getQuestMenu().handleClose(player);
+        if (plugin.getQuestMenuCoordinator().isQuestMenu(event.getInventory())) {
+            plugin.getQuestMenuCoordinator().handleClose(player);
         }
     }
 }

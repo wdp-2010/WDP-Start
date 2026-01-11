@@ -229,7 +229,7 @@ public class QuestListener implements Listener {
                 
                 // Open WDP-Quest style simplified menu
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    plugin.getQuestMenu().openSimplifiedQuestView(player);
+                    plugin.getQuestMenuCoordinator().openQuest5View(player);
                 });
                 
                 return;
