@@ -16,32 +16,104 @@ softdepend:
 
 commands:
   start:
-    description: Open the get started menu
-    usage: /<command> [cancel|help|reload]
+    description: Open the get started tutorial menu
+    usage: /<command> [cancel|help|reload|reset|complete|setquest|debug]
     aliases: [quests, quest, getstarted, wdpstart]
 
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              PERMISSIONS SYSTEM
+# ═══════════════════════════════════════════════════════════════════════════════
+# Comprehensive permission nodes for fine-grained control over plugin features
+# ═══════════════════════════════════════════════════════════════════════════════
+
 permissions:
+  # ─── Player Permissions ───
   wdpstart.use:
-    description: Allows access to the quest system
+    description: Base permission to use the quest system
     default: true
+    children:
+      wdpstart.menu: true
+      wdpstart.cancel: true
+  
   wdpstart.menu:
-    description: Allows opening the quest menu
+    description: Open the quest menu with /start
     default: true
+  
+  wdpstart.start:
+    description: Start the tutorial quest chain
+    default: true
+  
   wdpstart.cancel:
-    description: Allows cancelling the quest chain
+    description: Cancel the quest chain and get refunds
     default: true
+  
+  wdpstart.bypass.cooldown:
+    description: Bypass quest cooldowns (if implemented)
+    default: op
+  
+  wdpstart.bypass.requirements:
+    description: Bypass quest requirements (level, progress, etc.)
+    default: op
+  
+  # ─── Admin Permissions ───
   wdpstart.admin:
-    description: Admin permissions for WDP-Start
+    description: Full admin access to all WDP-Start features
     default: op
+    children:
+      wdpstart.admin.reload: true
+      wdpstart.admin.reset: true
+      wdpstart.admin.complete: true
+      wdpstart.admin.setquest: true
+      wdpstart.admin.debug: true
+      wdpstart.admin.viewdata: true
+      wdpstart.admin.forcestart: true
+      wdpstart.bypass.cooldown: true
+      wdpstart.bypass.requirements: true
+  
   wdpstart.admin.reload:
-    description: Allows reloading the plugin
+    description: Reload plugin configuration and messages
     default: op
+  
   wdpstart.admin.reset:
-    description: Allows resetting player progress
+    description: Reset a player's quest progress
     default: op
+  
   wdpstart.admin.complete:
-    description: Allows force-completing quests
+    description: Force-complete a specific quest for a player
     default: op
+  
+  wdpstart.admin.setquest:
+    description: Set a player to a specific quest number
+    default: op
+  
   wdpstart.admin.debug:
-    description: Allows viewing debug information
+    description: View debug information and particle zones
     default: op
+  
+  wdpstart.admin.viewdata:
+    description: View detailed player quest data
+    default: op
+  
+  wdpstart.admin.forcestart:
+    description: Force-start tutorial for experienced players
+    default: op
+  
+  # ─── Notification Permissions ───
+  wdpstart.notify:
+    description: Receive notifications for all quest events
+    default: op
+    children:
+      wdpstart.notify.start: true
+      wdpstart.notify.complete: true
+      wdpstart.notify.cancel: true
+  
+  wdpstart.notify.start:
+    description: Notified when players start quests
+    default: op
+  
+  wdpstart.notify.complete:
+    description: Notified when players complete quests
+    default: op
+  
+  wdpstart.notify.cancel:
+    description: Notified when players cancel quests

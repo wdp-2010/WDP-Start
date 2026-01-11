@@ -1,31 +1,34 @@
 # ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║                           WDP-Start Configuration                          ║
-# ║              Professional Get Started Quest System v1.0.0                  ║
+# ║              Professional Get Started Quest System v2.0.0                  ║
+# ║                                                                            ║
+# ║  NOTE: ALL MESSAGES ARE IN messages.yml - NOT HERE!                       ║
+# ║        This file contains ONLY settings and configuration values.         ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
 # Configuration version - DO NOT EDIT
-config-version: 3
+config-version: 4
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            General Settings                                  │
 # └─────────────────────────────────────────────────────────────────────────────┘
 general:
-  # Show welcome message with /quests highlight to new players
+  # Show welcome message to new players (message content in messages.yml)
   welcome-message: true
   
-  # Quests do NOT auto-start - players must opt-in via /quests
+  # Auto-start quests when player joins (false = manual opt-in via /start)
   auto-start: false
   
-  # Play sounds on quest events
+  # Sound effects on quest events
   enable-sounds: true
   
-  # Particle effects on completion
+  # Particle effects on quest completion
   enable-particles: true
   
-  # Broadcast quest completions to server
+  # Broadcast quest completions to all players on server
   broadcast-completions: false
   
-  # Debug mode for development
+  # Debug mode (shows additional info in console for development)
   debug: false
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -148,79 +151,83 @@ rtp:
 # │         Player levels Foraging from 0 to 1 - earns SkillCoins reward        │
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest2:
-  # Target skill level (reach level 1, from 0)
+  # Target skill level (reach level 1, from level 0)
   target-level: 1
   
-  # Skill name (AuraSkills)
+  # Skill name from AuraSkills plugin
   skill: "foraging"
   
-  # Override default AuraSkills level up message - use our own
+  # Override AuraSkills default level up message with our custom one
   override-reward: true
   
-  # Rewards (given when reaching level 1) - teaches skill leveling
+  # Rewards (given when reaching level 1)
   rewards:
     skillcoins: 20
-  
-  # These are used in the AuraSkills-style override message
-  completion-message: "Use your SkillCoins in the shop!"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                       Quest 3: Shop Tutorial                                │
-# │         Player uses /shop to open simplified shop and buys an item          │
+# │         Player uses /shop to open shop and buys an item                     │
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest3:
-  # Minimum item cost (player must have enough money)
+  # Minimum item cost in SkillCoins (ensures player learns about prices)
   min-item-cost: 10
   
-  # Ensure player has enough money to buy something
+  # Auto top-up if player doesn't have enough coins
   ensure-balance: true
+  ensure-balance-amount: 35  # Player should have ~35 from Quest 1+2
   
-  # Minimum balance to ensure (player already has ~35 from Q1+Q2)
-  ensure-balance-amount: 35
-  
-  # Rewards after completing shop purchase - reward for learning shop
+  # Rewards after shop purchase
   rewards:
     skillcoins: 25
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                       Quest 4: Token Exchange                               │
-# │         Player learns about the token system (1 token = 500 coins)          │
+# │         Player learns about premium token currency (1 token = 500 coins)    │
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest4:
-  # Minimum tokens to purchase (can buy more)
+  # Number of tokens required to purchase (minimum)
   tokens-required: 1
   
-  # Cost per token - 1 Token = 500 Coins (premium currency ratio)
+  # Cost per token in SkillCoins
   token-cost: 500
   
-  # Auto top-up if player doesn't have enough coins
+  # Auto top-up player balance if insufficient
   auto-topup: true
   
-  # Rewards after purchasing - teaches token value
+  # Rewards after token purchase
   rewards:
     skillcoins: 30
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                      Quest 5: Quest Menu Tutorial                           │
-# │         Player uses /quests to see simplified quest view                    │
+# │         Player uses /quest to see the WDP-Quest menu system                 │
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest5:
-  # Simplified quest objective to display
+  # Simple objective text shown in quest menu
   objective: "Complete this simple task!"
   
-  # Rewards - introduces daily quest system
+  # Rewards for finishing quest menu tutorial
   rewards:
     skillcoins: 15
+  
+  # Reminder timing (in seconds) - when to remind player to complete the quest
+  # Set to 0 to disable reminders
+  reminder-delay: 10     # First reminder at 10 seconds
+  final-reminder-delay: 30  # Second/final reminder at 30 seconds
+  
+  # Auto-complete delay (in seconds) - automatically complete if not done
+  # Set to 0 to disable auto-complete
+  auto-complete-delay: 0  # Disabled by default (was 35 seconds)
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                       Quest 6: Community Support                            │
+# │         Final quest - encourages joining Discord community                  │
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest6:
-  # Discord invite link
+  # Discord invite link (shown in final quest)
   discord-link: "https://dsc.gg/wdp-server"
   
-  # Final rewards for completing all tutorial quests
-  # Generous to give players a head start in the economy
+  # Generous final rewards for completing ALL tutorial quests
   final-rewards:
     skillcoins: 500
     skilltokens: 25
@@ -228,6 +235,15 @@ quest6:
       - "DIAMOND:3"
       - "IRON_INGOT:16"
       - "BREAD:32"
+  
+  # Reminder timing (in seconds) - when to remind player to complete the quest
+  # Set to 0 to disable reminders
+  reminder-delay: 10     # First reminder at 10 seconds
+  final-reminder-delay: 30  # Second/final reminder at 30 seconds
+  
+  # Auto-complete delay (in seconds) - automatically complete if not done
+  # Set to 0 to disable auto-complete
+  auto-complete-delay: 0  # Disabled by default (was 35 seconds)
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                          Cancellation & Refunds                             │
@@ -247,17 +263,17 @@ cancellation:
 # │                              GUI Settings                                    │
 # └─────────────────────────────────────────────────────────────────────────────┘
 gui:
-  # Update interval in ticks (20 ticks = 1 second)
+  # GUI update interval in ticks (20 ticks = 1 second)
   update-interval: 20
   
-  # Colors (hex codes)
+  # Color scheme (hex codes for consistent theming)
   colors:
-    primary: "#FFD700"      # Gold
-    secondary: "#55FFFF"    # Cyan
-    success: "#55FF55"      # Green
-    warning: "#FFFF55"      # Yellow
-    error: "#FF5555"        # Red
-    info: "#AAAAAA"         # Gray
+    primary: "#FFD700"      # Gold - Main theme color
+    secondary: "#55FFFF"    # Cyan - Accents
+    success: "#55FF55"      # Green - Completed tasks
+    warning: "#FFFF55"      # Yellow - In progress
+    error: "#FF5555"        # Red - Locked/errors
+    info: "#AAAAAA"         # Gray - Information text
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                               Storage                                        │

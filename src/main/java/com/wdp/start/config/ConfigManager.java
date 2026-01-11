@@ -222,6 +222,18 @@ public class ConfigManager {
         return config.getInt("quest5.rewards.skillcoins", 50);
     }
     
+    public int getQuest5ReminderDelay() {
+        return config.getInt("quest5.reminder-delay", 10);
+    }
+    
+    public int getQuest5FinalReminderDelay() {
+        return config.getInt("quest5.final-reminder-delay", 30);
+    }
+    
+    public int getQuest5AutoCompleteDelay() {
+        return config.getInt("quest5.auto-complete-delay", 0);
+    }
+    
     // ==================== QUEST 6: DISCORD ====================
     
     public String getDiscordLink() {
@@ -238,6 +250,18 @@ public class ConfigManager {
     
     public List<String> getQuest6Items() {
         return config.getStringList("quest6.final-rewards.items");
+    }
+    
+    public int getQuest6ReminderDelay() {
+        return config.getInt("quest6.reminder-delay", 10);
+    }
+    
+    public int getQuest6FinalReminderDelay() {
+        return config.getInt("quest6.final-reminder-delay", 30);
+    }
+    
+    public int getQuest6AutoCompleteDelay() {
+        return config.getInt("quest6.auto-complete-delay", 0);
     }
     
     // ==================== CANCELLATION ====================

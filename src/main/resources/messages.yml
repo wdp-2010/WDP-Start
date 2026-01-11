@@ -1,16 +1,18 @@
 # ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║                         WDP-Start Messages                                  ║
 # ║                    Supports hex colors: &#RRGGBB                            ║
+# ║                     ALL MESSAGES IN ONE FILE                                ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
 # Language version - DO NOT EDIT unless updating translations
-language-version: "1.0.0"
+language-version: "2.0.0"
 
 # Prefix for all messages
 prefix: "&#FFD700[WDP-Start]&#FFFFFF "
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                           Welcome Message                                    │
+# │                  (Shown to new players on first join)                        │
 # └─────────────────────────────────────────────────────────────────────────────┘
 welcome:
   enabled: true
@@ -19,89 +21,101 @@ welcome:
     - ""
     - "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     - ""
-    - "        &#FFFFFF&lWelcome to WDP Server!"
+    - "        &#FFFFFF&lWelcome to the WDP Server!"
     - ""
     - "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     - ""
-    - "    &#AAAAAANew here? Start your adventure!"
+    - "    &#AAAAAAFirst time here? Let's get started!"
     - ""
-    - "         &#55FFFF&l▶ /start"
+    - "         &#55FFFF&l▶ Type: /start"
     - ""
-    - "    &#AAAAAAComplete quests to earn rewards"
-    - "    &#AAAAAAand learn about the server!"
+    - "    &#AAAAAAYou'll learn how to:"
+    - "    &#FFFFFF• Explore and travel around the world"
+    - "    &#FFFFFF• Level up your skills (like chopping trees)"
+    - "    &#FFFFFF• Use the shop to buy items"
+    - "    &#FFFFFF• Earn SkillCoins currency"
     - ""
     - "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     - ""
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            Quest Messages                                   │
+# │              (Messages shown during quest progression)                      │
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest:
   # Starting quests
-  started: "&aQuest chain started! Complete each quest in order."
-  already-started: "&cYou've already started the quest chain!"
-  already-completed: "&aYou've already completed all quests!"
-  next-started: "&aStarted Quest {quest}! Check your quest menu for details."
-  already-experienced: "&cYou are already experienced! No need for starter quests."
+  started: "&aYou've started the tutorial quests! Follow each step to learn the basics."
+  already-started: "&cYou've already started the tutorial!"
+  already-completed: "&aYou've already finished all tutorial quests!"
+  next-started: "&aQuest {quest} started! Open your menu with /start to see details."
+  already-experienced: "&cYou've already completed the tutorial! No need to do it again."
   
-  # Progress
+  # Progress updates
   objective-complete: "&#55FF55&l✓ &#55FF55{objective}"
   quest-complete: "&#FFD700&l★ &#FFD700Quest Complete: &#FFFFFF{quest}"
   
-  # Specific quest messages
+  # Quest 1: Leave Spawn Area
   quest1:
-    step1: "&#55FFFF➤ &#FFFFFFStep into the wild..."
-    step2: "&#55FFFF➤ &#FFFFFFYou're being teleported to safety!"
-    complete: "&#55FF55&l✓ &#55FF55Welcome to the wilderness! Your adventure begins."
+    step1: "&#55FFFF➤ &#FFFFFFWalk toward the exit to leave spawn..."
+    step2: "&#55FFFF➤ &#FFFFFFTeleporting you to a safe location in the wilderness!"
+    complete: "&#55FF55&l✓ &#55FF55Welcome to the wild! Your journey begins now."
   
+  # Quest 2: Learn About Skills
   quest2:
     progress: "&#FFFF55➤ &#FFFFFFForaging Level: &#55FFFF{level}&#FFFFFF/&#55FFFF1"
-    complete: "&#55FF55&l✓ &#55FF55Foraging level reached!"
+    complete: "&#55FF55&l✓ &#55FF55Great job! You reached Foraging level 1!"
   
+  # Quest 3: Use The Shop
   quest3:
-    topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} ⛃ &#FFFFFFto buy items!"
-    complete: "&#55FF55&l✓ &#55FF55Item purchased! You know how to use the shop!"
+    topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} ⛃&#FFFFFF to spend in the shop!"
+    complete: "&#55FF55&l✓ &#55FF55Item purchased! Now you know how to use the shop."
   
+  # Quest 4: Currency Upgrade
   quest4:
-    topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} ⛃ &#FFFFFFto complete your purchase!"
-    complete: "&#55FF55&l✓ &#55FF55Token purchased! You can now buy skill upgrades."
+    topup: "&#FFD700➤ &#FFFFFFYou received &#55FF55{amount} ⛃&#FFFFFF to buy tokens!"
+    complete: "&#55FF55&l✓ &#55FF55Token purchased! Tokens unlock powerful skill upgrades."
   
+  # Quest 5: Quest Menu Tutorial
   quest5:
-    complete: "&#55FF55&l✓ &#55FF55You've learned how the quest menu works!"
+    step1: "&#55FFFF➤ &#FFFFFFOpen the quest menu and click the emerald icon!"
+    complete: "&#55FF55&l✓ &#55FF55Perfect! You know how to use the quest menu now!"
     instruction: "&#FFD700&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    instruction-detail: "&#FFFF55&l➤ CLICK THE EMERALD ICON &#FFFF55to complete!"
-    reminder-10s: "&#FFFF55⚠ Don't forget to click the &#FFD700&lSimplified Quest Menu&#FFFF55 icon!"
-    reminder-30s: "&#FF5555⚠ Last chance! Click the &#FFD700&lSimplified Quest Menu&#FF5555 icon to finish!"
-    auto-complete: "&#55FF55&l✓ Quest auto-completed! Moving on!"
+    instruction-detail: "&#55FF55&l✓ &#55FF55Click the glowing emerald icon above to complete this quest!"
+    reminder-10s: "&#55FF55💡 Friendly reminder: Click the &#FFD700emerald icon&#55FF55 in the menu above!"
+    reminder-30s: "&#55FFFF💡 Still there? Just click the &#FFD700glowing emerald&#55FFFF to continue!"
+    auto-complete: "&#55FF55&l✓ Great! Moving to the next quest!"
   
+  # Quest 6: Final Quest - Join Community
   quest6:
-    complete: "&#55FF55&l✓ &#55FF55All quests complete! Good luck on your adventure!"
+    complete: "&#55FF55&l✓ &#55FF55All done! Good luck on your adventure!"
     instruction: "&#FFD700&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    instruction-detail: "&#FFFF55&l➤ CLICK THE GLOWING QUEST ICON &#FFFF55to complete!"
-    reminder-10s: "&#FFFF55⚠ Don't forget to click the &#FFD700&lGood Luck!&#FFFF55 quest icon!"
-    reminder-30s: "&#FF5555⚠ Last chance! Click the &#FFD700&lGood Luck!&#FF5555 quest icon to finish!"
-    auto-complete: "&#55FF55&l✓ Quest auto-completed! You're all set!"
+    instruction-detail: "&#55FF55&l✓ &#55FF55Click the glowing quest icon above to finish the tutorial!"
+    reminder-10s: "&#55FF55💡 Almost done! Click the &#FFD700Good Luck!&#55FF55 icon above to complete!"
+    reminder-30s: "&#55FFFF💡 You're so close! Just click the &#FFD700glowing icon&#55FFFF to finish!"
+    auto-complete: "&#55FF55&l✓ Tutorial complete! You're ready to play!"
   
-  # All complete
+  # All quests complete - BIG celebration message
   all-complete:
     - ""
-    - "&#FFD700&l★═══════════════════════════════════════★"
+    - "&#FFD700&l★══════════════════════════════★"
     - "&#FFFFFF&l     CONGRATULATIONS!"
-    - "&#FFD700&l★═══════════════════════════════════════★"
+    - "&#FFFFFF&l     Tutorial Complete!"
+    - "&#FFD700&l★══════════════════════════════★"
     - ""
-    - "&#55FF55  You've completed all starter quests!"
+    - "&#55FF55  You've finished all tutorial quests!"
+    - "&#FFFFFF  You're now ready to explore the server!"
     - ""
-    - "&#FFFFFF  Final Rewards:"
+    - "&#FFFFFF  Your Completion Rewards:"
     - "&#FFD700  ✦ 500 ⛃ SkillCoins"
     - "&#FF55FF  ✦ 25 🎟 SkillTokens"
     - "&#55FFFF  ✦ 3x Diamond"
     - "&#AAAAAA  ✦ 16x Iron Ingot"
     - "&#FFFF55  ✦ 32x Bread"
     - ""
-    - "&#AAAAAAJoin our Discord for help:"
+    - "&#AAAAAANeed help? Join our Discord:"
     - "&#55FFFF{discord}"
     - ""
-    - "&#FFD700&l★═══════════════════════════════════════★"
+    - "&#FFD700&l★══════════════════════════════★"
     - ""
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -170,38 +184,40 @@ errors:
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                              Menu Messages                                  │
+# │               (Text shown in the quest menu interface)                      │
 # └─────────────────────────────────────────────────────────────────────────────┘
 menu:
   # Main menu title
-  title: "&#FFD700✦ &#FFFFFFGet Started Quests &#FFD700✦"
+  title: "&#FFD700✦ &#FFFFFFGet Started Tutorial &#FFD700✦"
   
-  # Welcome menu (for players who haven't started)
+  # Welcome menu (for players who haven't started yet)
   welcome:
-    title: "&#FFD700&l✦ &#FFFFFF&lWelcome to WDP! &#FFD700&l✦"
+    title: "&#FFD700&l✦ &#FFFFFF&lWelcome to WDP Server! &#FFD700&l✦"
     description:
       - " "
-      - "&#AAAAAATake your first steps on the server"
-      - "&#AAAAAAby completing starter quests!"
+      - "&#AAAAAANever played here before? No problem!"
+      - "&#AAAAAAComplete these simple tutorial quests"
+      - "&#AAAAAAto learn the basics."
       - " "
       - "&#55FF55You'll learn about:"
-      - "&#FFFFFF• Exploration & Teleportation"
-      - "&#FFFFFF• Skills & Leveling"
-      - "&#FFFFFF• Progress Tracking"
-      - "&#FFFFFF• Economy & Shopping"
+      - "&#FFFFFF• How to leave spawn and explore"
+      - "&#FFFFFF• Leveling up your skills (like Mining)"
+      - "&#FFFFFF• Using the shop to buy items"
+      - "&#FFFFFF• Currency system (Coins & Tokens)"
       - " "
-      - "&#FFD700&lRewards:"
-      - "&#FFD700✦ 300 ⛃"
-      - "&#FF55FF✦ 10 🎟"
-      - "&#55FFFF✦ Starter Items"
+      - "&#FFD700&lCompletion Rewards:"
+      - "&#FFD700✦ 300 ⛃ SkillCoins"
+      - "&#FF55FF✦ 10 🎟 SkillTokens"
+      - "&#55FFFF✦ Starter Items (Diamonds, Iron, Food)"
       - " "
     start-button:
-      name: "&#55FF55&l▶ START QUESTS"
+      name: "&#55FF55&l▶ START TUTORIAL"
       lore:
         - " "
-        - "&#AAAAAAClick to begin your adventure!"
+        - "&#AAAAAAClick here to begin the tutorial!"
         - " "
-        - "&#FFFF55Tip: You can cancel anytime"
-        - "&#FFFFFFwith /quest cancel"
+        - "&#FFFF55Tip: You can cancel anytime with"
+        - "&#FFFFFF/start cancel"
         - " "
   
   # Progress overview
@@ -588,51 +604,58 @@ items:
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                        Quest Definitions                                    │
+# │             (Names, descriptions, and hints for each quest)                 │
 # └─────────────────────────────────────────────────────────────────────────────┘
 quests:
   names:
-    quest1: "Leave Spawn"
-    quest2: "Foraging Kickstart"
-    quest3: "Shop Tutorial"
-    quest4: "Token Exchange"
-    quest5: "Quest Menu"
-    quest6: "Good Luck!"
-    unknown: "Unknown"
+    quest1: "Leave Spawn Area"
+    quest2: "Learn About Skills"
+    quest3: "Use The Shop"
+    quest4: "Currency Upgrade"
+    quest5: "Quest Menu Tutorial"
+    quest6: "You're Ready!"
+    unknown: "Unknown Quest"
+  
   descriptions:
-    # Single-line format (simple description)
-    quest1: "Leave spawn and get teleported to the wild"
+    # Quest 1: Simple exit tutorial
+    quest1: "Walk to the spawn exit and get teleported to the wilderness"
     
-    # Multi-line format (list of lines)
+    # Quest 2: First skill level
     quest2:
-      - "Reach Foraging level 1"
-      - "&#AAAAAAChop trees to gain XP!"
+      - "Reach Foraging level 1 by chopping trees"
+      - "&#AAAAAAHit trees with an axe to gain XP!"
     
-    # Single-line
-    quest3: "Open /shop and buy an item"
+    # Quest 3: Economy introduction
+    quest3: "Open the shop menu with /shop and purchase any item"
     
-    # Multi-line example with colors
+    # Quest 4: Premium currency
     quest4:
-      - "Convert SkillCoins to Tokens"
-      - "&#FFD700Tokens unlock skill upgrades!"
+      - "Exchange SkillCoins for Tokens in the shop"
+      - "&#FFD700Tokens let you buy powerful skill upgrades!"
     
-    quest5: "Open /quest and complete the task"
+    # Quest 5: Menu system
+    quest5: "Open /quest menu and complete the objective inside"
+    
+    # Quest 6: Community support
     quest6: 
-      - "Join Discord for help!"
-      - "Click this icon to finish your tutorial"
-    unknown: "Unknown"
+      - "Join our Discord for help and updates!"
+      - "Click this quest icon to complete the tutorial"
+    unknown: "Unknown Quest"
+  
   hints:
-    quest1: "Walk towards the spawn exit to begin!"
-    quest2: "Chop trees to reach Foraging level 1!"
-    quest3: "Type /shop to open the shop and buy an item!"
-    quest4: "Type /shop to open the token exchange!"
-    quest5: "Type /quest to see the quest menu!"
-    default: "Keep going!"
+    quest1: "Look for the exit portal and walk through it!"
+    quest2: "Find some trees and chop them with an axe to level up Foraging!"
+    quest3: "Type /shop to open the shop, then buy any item you can afford!"
+    quest4: "Open /shop again and look for the Token Exchange option!"
+    quest5: "Type /quest to open the quest menu and see your task!"
+    default: "Follow the quest instructions to proceed!"
+  
   next-objectives:
     quest2: "Chop trees to reach Foraging level 1"
-    quest3: "Open /shop and buy an item"
-    quest4: "Open /shop and exchange tokens"
-    quest5: "Open /quest to see your progress"
-    quest6: "Click to complete and join Discord!"
+    quest3: "Open the shop with /shop and buy something"
+    quest4: "Exchange SkillCoins for Tokens in the shop"
+    quest5: "Open /quest to see the quest menu"
+    quest6: "Click the quest icon to finish the tutorial!"
     default: "Continue your adventure!"
   
   # Level up message (AuraSkills-style)

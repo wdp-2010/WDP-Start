@@ -18,16 +18,27 @@ NC='\033[0m' # No Color
 
 # Configuration
 PLUGIN_NAME="WDP-Start"
-PLUGIN_VERSION="1.0.0"
+PLUGIN_VERSION="2.0.5"
 JAR_NAME="WDP-Start-${PLUGIN_VERSION}.jar"
-CONTAINER_ID="b8f24891-b5be-4847-a96e-c705c500aece"
+CONTAINER_ID_DEV="b8f24891-b5be-4847-a96e-c705c500aece"
+CONTAINER_ID_MAIN="27298ea1-0c1b-4b41-a5aa-a7d29ff04566"
+
+# Determine which server to deploy to
+if [ "$1" == "main" ] || [ "$1" == "production" ] || [ "$1" == "prod" ]; then
+    CONTAINER_ID="$CONTAINER_ID_MAIN"
+    SERVER_NAME="MAIN"
+else
+    CONTAINER_ID="$CONTAINER_ID_DEV"
+    SERVER_NAME="DEV"
+fi
+
 SERVER_DIR="/var/lib/pterodactyl/volumes/${CONTAINER_ID}"
 PLUGIN_DIR="${SERVER_DIR}/plugins"
 
 # Header
 echo -e "${CYAN}"
 echo "╔═══════════════════════════════════════════════════════════════════════════╗"
-echo "║                         WDP-Start Deploy Script                            ║"
+echo "║                    WDP-Start Deploy Script (${SERVER_NAME})                        ║"
 echo "║                        Version: ${PLUGIN_VERSION}                                     ║"
 echo "╚═══════════════════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"

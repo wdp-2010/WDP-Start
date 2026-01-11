@@ -151,6 +151,40 @@ public class QuestMenu {
         inv.setItem(33, createQuestItem(6, data));
         
         // Bottom row (45-53) is handled by universal navbar
+        
+        // Cancel and restart animation for Quest 5 if it's the current quest and not completed
+        if (data.getCurrentQuest() == 5 && !data.isQuestCompleted(5)) {
+            // Make sure any old animation is cancelled
+            UUID uuid = player.getUniqueId();
+            if (blinkingTasks.containsKey(uuid)) {
+                try {
+                    plugin.getServer().getScheduler().cancelTask(blinkingTasks.get(uuid));
+                } catch (Exception e) {
+                    // Ignore errors when cancelling old task
+                }
+                blinkingTasks.remove(uuid);
+            }
+            
+            triggerQuest5Reminders(player);
+            startBlinkingAnimation(player, 31); // Blink slot 31 (Quest 5)
+        }
+        
+        // Cancel and restart animation for Quest 6 if it's the current quest and not completed
+        if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
+            // Make sure any old animation is cancelled
+            UUID uuid = player.getUniqueId();
+            if (blinkingTasks.containsKey(uuid)) {
+                try {
+                    plugin.getServer().getScheduler().cancelTask(blinkingTasks.get(uuid));
+                } catch (Exception e) {
+                    // Ignore errors when cancelling old task
+                }
+                blinkingTasks.remove(uuid);
+            }
+            
+            triggerQuest6Reminders(player);
+            startBlinkingAnimation(player, 33); // Blink slot 33 (Quest 6)
+        }
     }
     
     /**
@@ -814,9 +848,29 @@ public class QuestMenu {
     private void showQuestDetails(Player player, int quest) {
         player.closeInventory();
         
+        PlayerData data = plugin.getPlayerDataManager().getData(player);
+        
+        // Quest 5: Complete the quest (opens quest menu tutorial)
+        if (quest == 5) {
+            PlayerData.QuestProgress progress = data.getQuestProgress(5);
+            
+            // Prevent multiple completions
+            if (progress.isCompleted()) {
+                player.sendMessage(hex(plugin.getMessageManager().get("quest.already-completed")));
+                player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                return;
+            }
+            
+            // Complete Quest 5 when they click the icon
+            plugin.getQuestManager().completeQuest(player, 5);
+            
+            // Cancel any pending reminder tasks
+            cancelQuest5Reminders(player);
+            return;
+        }
+        
         // Quest 6: Check if already completed to prevent multiple rewards
         if (quest == 6) {
-            PlayerData data = plugin.getPlayerDataManager().getData(player);
             PlayerData.QuestProgress progress = data.getQuestProgress(6);
             
             // Prevent multiple completions
@@ -874,9 +928,18 @@ public class QuestMenu {
      * Handle menu close
      */
     public void handleClose(Player player) {
-        openMenus.remove(player.getUniqueId());
-        // Cancel Quest 6 reminders when menu is closed
+        UUID uuid = player.getUniqueId();
+        openMenus.remove(uuid);
+        
+        // Cancel reminders when menu is closed
+        cancelQuest5Reminders(player);
         cancelQuest6Reminders(player);
+        
+        // Cancel blinking animation
+        if (blinkingTasks.containsKey(uuid)) {
+            plugin.getServer().getScheduler().cancelTask(blinkingTasks.get(uuid));
+            blinkingTasks.remove(uuid);
+        }
     }
     
     /**
@@ -887,48 +950,72 @@ public class QuestMenu {
         cancelQuest6Reminders(player);
         
         UUID uuid = player.getUniqueId();
+        PlayerData playerData = plugin.getPlayerDataManager().getData(player);
         
-        // Send immediate instruction
-        player.sendMessage(hex(plugin.getMessageManager().get("quest6.instruction")));
-        player.sendMessage(hex(plugin.getMessageManager().get("quest6.instruction-detail")));
+        // GUARD: Only show instructions if Quest 6 is the current quest AND not completed
+        if (playerData.getCurrentQuest() != 6 || playerData.isQuestCompleted(6)) {
+            plugin.debug("[Quest6] Skipping reminders - not current quest or already completed");
+            return;
+        }
         
-        // Schedule reminder at 10 seconds
-        int task1 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            if (player.isOnline()) {
-                PlayerData data = plugin.getPlayerDataManager().getData(player);
-                if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
-                    player.sendMessage(hex(plugin.getMessageManager().get("quest6.reminder-10s")));
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.7f, 1.5f);
+        // Send immediate instruction (only once per quest activation)
+        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest6.instruction")));
+        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest6.instruction-detail")));
+        
+        // Get configurable timing from config
+        int reminderDelay = plugin.getConfigManager().getQuest6ReminderDelay();
+        int finalReminderDelay = plugin.getConfigManager().getQuest6FinalReminderDelay();
+        int autoCompleteDelay = plugin.getConfigManager().getQuest6AutoCompleteDelay();
+        
+        // Schedule reminder at configurable time (if enabled)
+        if (reminderDelay > 0) {
+            int task1 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) {
+                    PlayerData data = plugin.getPlayerDataManager().getData(player);
+                    if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
+                        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest6.reminder-10s")));
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.7f, 1.5f);
+                    }
                 }
-            }
-        }, 200L).getTaskId(); // 10 seconds
+            }, reminderDelay * 20L).getTaskId(); // Convert seconds to ticks
+            
+            quest6ReminderTasks.put(uuid, task1);
+        }
         
-        // Schedule reminder at 30 seconds
-        int task2 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            if (player.isOnline()) {
-                PlayerData data = plugin.getPlayerDataManager().getData(player);
-                if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
-                    player.sendMessage(hex(plugin.getMessageManager().get("quest6.reminder-30s")));
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.7f);
+        // Schedule final reminder at configurable time (if enabled)
+        if (finalReminderDelay > 0) {
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) {
+                    PlayerData data = plugin.getPlayerDataManager().getData(player);
+                    if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
+                        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest6.reminder-30s")));
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.7f);
+                    }
                 }
-            }
-        }, 600L).getTaskId(); // 30 seconds
+            }, finalReminderDelay * 20L).getTaskId(); // Convert seconds to ticks
+        }
         
-        // Schedule auto-complete at 35 seconds
-        int task3 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            if (player.isOnline()) {
-                PlayerData data = plugin.getPlayerDataManager().getData(player);
-                if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
-                    player.sendMessage(hex(plugin.getMessageManager().get("quest6.auto-complete")));
-                    plugin.getQuestManager().completeQuest(player, 6);
-                    player.closeInventory();
+        // Schedule auto-complete at configurable time (if enabled and > 0)
+        if (autoCompleteDelay > 0) {
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) {
+                    PlayerData data = plugin.getPlayerDataManager().getData(player);
+                    if (data.getCurrentQuest() == 6 && !data.isQuestCompleted(6)) {
+                        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest6.auto-complete")));
+                        plugin.getQuestManager().completeQuest(player, 6);
+                        player.closeInventory();
+                    }
                 }
+                quest6ReminderTasks.remove(uuid);
+            }, autoCompleteDelay * 20L).getTaskId(); // Convert seconds to ticks
+        } else {
+            // If no auto-complete, still clean up the task ID after final reminder
+            if (finalReminderDelay > 0) {
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                    quest6ReminderTasks.remove(uuid);
+                }, (finalReminderDelay + 5) * 20L); // Clean up 5 seconds after final reminder
             }
-            quest6ReminderTasks.remove(uuid);
-        }, 700L).getTaskId(); // 35 seconds
-        
-        // Store the tasks for later cancellation
-        quest6ReminderTasks.put(uuid, task1); // We'll cancel all scheduled tasks below
+        }
     }
     
     /**
@@ -955,48 +1042,72 @@ public class QuestMenu {
         cancelQuest5Reminders(player);
         
         UUID uuid = player.getUniqueId();
+        PlayerData playerData = plugin.getPlayerDataManager().getData(player);
         
-        // Send immediate instruction
-        player.sendMessage(hex(plugin.getMessageManager().get("quest5.instruction")));
-        player.sendMessage(hex(plugin.getMessageManager().get("quest5.instruction-detail")));
+        // GUARD: Only show instructions if Quest 5 is the current quest AND not completed
+        if (playerData.getCurrentQuest() != 5 || playerData.isQuestCompleted(5)) {
+            plugin.debug("[Quest5] Skipping reminders - not current quest or already completed");
+            return;
+        }
         
-        // Schedule reminder at 10 seconds
-        int task1 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            if (player.isOnline()) {
-                PlayerData data = plugin.getPlayerDataManager().getData(player);
-                if (data.getCurrentQuest() == 5 && !data.isQuestCompleted(5)) {
-                    player.sendMessage(hex(plugin.getMessageManager().get("quest5.reminder-10s")));
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.7f, 1.5f);
+        // Send immediate instruction (only once per quest activation)
+        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest5.instruction")));
+        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest5.instruction-detail")));
+        
+        // Get configurable timing from config
+        int reminderDelay = plugin.getConfigManager().getQuest5ReminderDelay();
+        int finalReminderDelay = plugin.getConfigManager().getQuest5FinalReminderDelay();
+        int autoCompleteDelay = plugin.getConfigManager().getQuest5AutoCompleteDelay();
+        
+        // Schedule reminder at configurable time (if enabled)
+        if (reminderDelay > 0) {
+            int task1 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) {
+                    PlayerData data = plugin.getPlayerDataManager().getData(player);
+                    if (data.getCurrentQuest() == 5 && !data.isQuestCompleted(5)) {
+                        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest5.reminder-10s")));
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.7f, 1.5f);
+                    }
                 }
-            }
-        }, 200L).getTaskId(); // 10 seconds
+            }, reminderDelay * 20L).getTaskId(); // Convert seconds to ticks
+            
+            quest5ReminderTasks.put(uuid, task1);
+        }
         
-        // Schedule reminder at 30 seconds
-        int task2 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            if (player.isOnline()) {
-                PlayerData data = plugin.getPlayerDataManager().getData(player);
-                if (data.getCurrentQuest() == 5 && !data.isQuestCompleted(5)) {
-                    player.sendMessage(hex(plugin.getMessageManager().get("quest5.reminder-30s")));
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.7f);
+        // Schedule final reminder at configurable time (if enabled)
+        if (finalReminderDelay > 0) {
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) {
+                    PlayerData data = plugin.getPlayerDataManager().getData(player);
+                    if (data.getCurrentQuest() == 5 && !data.isQuestCompleted(5)) {
+                        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest5.reminder-30s")));
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.7f);
+                    }
                 }
-            }
-        }, 600L).getTaskId(); // 30 seconds
+            }, finalReminderDelay * 20L).getTaskId(); // Convert seconds to ticks
+        }
         
-        // Schedule auto-complete at 35 seconds
-        int task3 = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            if (player.isOnline()) {
-                PlayerData data = plugin.getPlayerDataManager().getData(player);
-                if (data.getCurrentQuest() == 5 && !data.isQuestCompleted(5)) {
-                    player.sendMessage(hex(plugin.getMessageManager().get("quest5.auto-complete")));
-                    plugin.getQuestManager().completeQuest(player, 5);
-                    player.closeInventory();
+        // Schedule auto-complete at configurable time (if enabled and > 0)
+        if (autoCompleteDelay > 0) {
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) {
+                    PlayerData data = plugin.getPlayerDataManager().getData(player);
+                    if (data.getCurrentQuest() == 5 && !data.isQuestCompleted(5)) {
+                        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest5.auto-complete")));
+                        plugin.getQuestManager().completeQuest(player, 5);
+                        player.closeInventory();
+                    }
                 }
+                quest5ReminderTasks.remove(uuid);
+            }, autoCompleteDelay * 20L).getTaskId(); // Convert seconds to ticks
+        } else {
+            // If no auto-complete, still clean up the task ID after final reminder
+            if (finalReminderDelay > 0) {
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                    quest5ReminderTasks.remove(uuid);
+                }, (finalReminderDelay + 5) * 20L); // Clean up 5 seconds after final reminder
             }
-            quest5ReminderTasks.remove(uuid);
-        }, 700L).getTaskId(); // 35 seconds
-        
-        // Store the tasks for later cancellation
-        quest5ReminderTasks.put(uuid, task1);
+        }
     }
     
     /**
@@ -1013,6 +1124,96 @@ public class QuestMenu {
             
             quest5ReminderTasks.remove(uuid);
         }
+    }
+    
+    // Map to track blinking animation tasks
+    private final Map<UUID, Integer> blinkingTasks = new HashMap<>();
+    
+    /**
+     * Start blinking animation for a specific slot
+     * Pattern: I . I . I . . . . . . I . I . I . . . . . .
+     * Where I = no glow, . = glowing
+     */
+    private void startBlinkingAnimation(Player player, int slot) {
+        UUID uuid = player.getUniqueId();
+        
+        // Cancel any existing blinking task FIRST
+        if (blinkingTasks.containsKey(uuid)) {
+            try {
+                plugin.getServer().getScheduler().cancelTask(blinkingTasks.get(uuid));
+            } catch (Exception e) {
+                // Task already cancelled or invalid
+            }
+            blinkingTasks.remove(uuid);
+        }
+        
+        // Define the blinking pattern (true = glow, false = no glow)
+        // Blink 3 times, then pause: I . I . I . . . . . . I . I . I . . . . . .
+        boolean[] pattern = {false, true, false, true, false, true, true, true, true, true, true, false, true, false, true, false, true, true, true, true, true};
+        
+        // Start the blinking animation
+        int taskId = plugin.getServer().getScheduler().runTaskTimer(plugin, new Runnable() {
+            int tick = 0;
+            
+            @Override
+            public void run() {
+                try {
+                    if (!player.isOnline()) {
+                        // Player went offline - cancel animation
+                        if (blinkingTasks.containsKey(uuid)) {
+                            plugin.getServer().getScheduler().cancelTask(blinkingTasks.get(uuid));
+                            blinkingTasks.remove(uuid);
+                        }
+                        return;
+                    }
+                    
+                    Inventory topInv = player.getOpenInventory().getTopInventory();
+                    if (!isQuestMenu(topInv)) {
+                        // Player closed menu - cancel animation
+                        if (blinkingTasks.containsKey(uuid)) {
+                            plugin.getServer().getScheduler().cancelTask(blinkingTasks.get(uuid));
+                            blinkingTasks.remove(uuid);
+                        }
+                        return;
+                    }
+                    
+                    PlayerData data = plugin.getPlayerDataManager().getData(player);
+                    
+                    // Get current pattern state
+                    boolean shouldGlow = pattern[tick % pattern.length];
+                    
+                    // Create the quest item
+                    int quest = slot == 31 ? 5 : 6;
+                    ItemStack item = createQuestItem(quest, data);
+                    
+                    // Add glow based on pattern
+                    if (shouldGlow) {
+                        addGlow(item);
+                    }
+                    
+                    // Update the item in the inventory
+                    topInv.setItem(slot, item);
+                    
+                    // CRITICAL: Update player's inventory view to refresh client-side display
+                    player.updateInventory();
+                    
+                    tick++;
+                } catch (Exception e) {
+                    plugin.debug("Blinking animation error: " + e.getMessage());
+                    // Silently fail if there's an error
+                    if (blinkingTasks.containsKey(uuid)) {
+                        try {
+                            plugin.getServer().getScheduler().cancelTask(blinkingTasks.get(uuid));
+                        } catch (Exception ex) {
+                            // Already cancelled
+                        }
+                        blinkingTasks.remove(uuid);
+                    }
+                }
+            }
+        }, 0L, 3L).getTaskId(); // Update every 3 ticks (0.15 seconds) for smoother animation
+        
+        blinkingTasks.put(uuid, taskId);
     }
     
     // ==================== UTILITY METHODS ====================

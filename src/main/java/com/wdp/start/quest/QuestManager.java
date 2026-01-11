@@ -247,23 +247,8 @@ public class QuestManager {
                 checkAndCompleteQuest2IfReady(player, data);
             }
             
-            // Special handling: if quest 4 just completed, start quest 5 reminders
-            if (quest == 4) {
-                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                    if (player.isOnline()) {
-                        plugin.getQuestMenu().triggerQuest5Reminders(player);
-                    }
-                }, 20L); // 1 second delay
-            }
-            
-            // Special handling: if quest 5 just completed, start quest 6 reminders
-            if (quest == 5) {
-                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                    if (player.isOnline()) {
-                        plugin.getQuestMenu().triggerQuest6Reminders(player);
-                    }
-                }, 20L); // 1 second delay
-            }
+            // NOTE: Quest 5 and 6 reminders are now triggered from the menu itself
+            // when the player opens it, not automatically after previous quest completion
         } else {
             // All quests complete!
             data.setCompleted(true);
@@ -320,11 +305,11 @@ public class QuestManager {
      * Handle all quests complete
      */
     private void onAllQuestsComplete(Player player) {
-        // Send completion messages
+        // Send completion messages (already includes rewards)
         String discord = plugin.getConfigManager().getDiscordLink();
         plugin.getMessageManager().sendList(player, "quest.all-complete", "discord", discord);
         
-        // Give final rewards
+        // Give final rewards (silently - don't show individual messages since all-complete already shows them)
         int coins = plugin.getConfigManager().getQuest6SkillCoins();
         int tokens = plugin.getConfigManager().getQuest6SkillTokens();
         
@@ -337,9 +322,9 @@ public class QuestManager {
             plugin.getAuraSkillsIntegration().giveSkillTokens(player, tokens);
         }
         
-        // Give items
+        // Give items (silently - don't send individual item messages)
         for (String itemStr : plugin.getConfigManager().getQuest6Items()) {
-            giveItem(player, itemStr);
+            giveItemSilent(player, itemStr);
         }
         
         // Play fanfare
@@ -384,6 +369,30 @@ public class QuestManager {
                 "amount", String.valueOf(amount),
                 "item", formatMaterialName(mat));
                 
+        } catch (Exception e) {
+            plugin.logError("Failed to give item: " + itemStr, e);
+        }
+    }
+    
+    /**
+     * Give an item silently without sending a message
+     * Used when items are already listed in a completion message
+     */
+    private void giveItemSilent(Player player, String itemStr) {
+        try {
+            String[] parts = itemStr.split(":");
+            Material mat = Material.valueOf(parts[0].toUpperCase());
+            int amount = parts.length > 1 ? Integer.parseInt(parts[1]) : 1;
+            
+            ItemStack item = new ItemStack(mat, amount);
+            
+            // Try to add to inventory, drop if full
+            if (player.getInventory().firstEmpty() != -1) {
+                player.getInventory().addItem(item);
+            } else {
+                player.getWorld().dropItem(player.getLocation(), item);
+            }
+            
         } catch (Exception e) {
             plugin.logError("Failed to give item: " + itemStr, e);
         }

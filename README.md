@@ -24,12 +24,35 @@ WDP-Start is a focused New Player Onboarding plugin for Paper/Spigot servers. It
 
 ## 📋 Commands
 
-- `/start` (aliases: `quests`, `quest`, `getstarted`, `wdpstart`) — Open the onboarding menu
-- `/start cancel` — Cancel current onboarding (prompts)
-- `/start reload` — Reload plugin config (admin)
-- `/start reset <player>` — Reset a player's onboarding (admin)
+### Player Commands
+- `/start` (aliases: `quests`, `quest`, `getstarted`, `wdpstart`) — Open the tutorial menu
+- `/start cancel` — Cancel current tutorial (with refund confirmation)
 
-> NOTE: Command/permission names are defined in `src/main/resources/plugin.yml` — use those exact values for automations.
+### Admin Commands
+- `/start reload` — Reload plugin configuration and messages
+- `/start reset <player>` — Reset a player's tutorial progress
+- `/start complete <player> <quest>` — Force-complete a specific quest
+- `/start setquest <player> <quest>` — Set player to specific quest number
+- `/start debug <player>` — View debug information and visualize zones
+
+## 🔐 Permissions
+
+WDP-Start uses a comprehensive permission system for fine-grained control. For complete documentation, see [PERMISSIONS.md](PERMISSIONS.md).
+
+### Quick Reference
+
+**Player Permissions:**
+- `wdpstart.use` - Base access to tutorial system (default: true)
+- `wdpstart.menu` - Open quest menu (default: true)
+- `wdpstart.cancel` - Cancel quest chain (default: true)
+
+**Admin Permissions:**
+- `wdpstart.admin` - Full admin access (default: op)
+- `wdpstart.admin.reload` - Reload configuration (default: op)
+- `wdpstart.admin.reset` - Reset player progress (default: op)
+- `wdpstart.admin.complete` - Force-complete quests (default: op)
+
+**Full documentation:** See [PERMISSIONS.md](PERMISSIONS.md) for all permissions, examples, and best practices.
 
 ## 🧩 Integration / API
 
