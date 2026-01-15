@@ -274,7 +274,7 @@ public class ShopMenuBuilder {
         
         // Back button (slot 53)
         ItemStack back = createItem(Material.SPYGLASS,
-            hex(plugin.getMessageManager().get("shop.token-exchange.back.name")),
+            hex(plugin.getMessageManager().get("common.back-button")),
             plugin.getMessageManager().getList("shop.token-exchange.back.lore")
                 .stream().map(MenuUtils::hex).toArray(String[]::new)
         );
@@ -356,7 +356,7 @@ public class ShopMenuBuilder {
         
         // Back button (slot 53)
         inv.setItem(53, createItem(Material.SPYGLASS,
-            hex(plugin.getMessageManager().get("shop.transaction.back.name"))
+            hex(plugin.getMessageManager().get("common.back-button"))
         ));
         
         return inv;

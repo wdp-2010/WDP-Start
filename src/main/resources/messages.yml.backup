@@ -10,40 +10,20 @@ language-version: "2.0.0"
 # Prefix for all messages
 prefix: "&#FFD700[WDP-Start]&#FFFFFF "
 
-# -------------------------------------------------------------------------------
-# Common reusable messages
-# -------------------------------------------------------------------------------
-common:
-  horizontal-line-thin: &horizontal-line-thin "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  horizontal-line-thick: &horizontal-line-thick "&#FFD700&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  horizontal-line-stars: &horizontal-line-stars "&#FFD700&l★══════════════════════════════★"
-  horizontal-line-long: &horizontal-line-long "&#FFD700&l═══════════════════════════════════════"
-  discord-link: &discord-link "&#55FFFF{discord}"
-  total-cost: &total-cost "&#FFD700Total Cost: &#FFFFFF{total} Coins"
-  plus-one: &plus-one "&#55FF55▲ +1"
-  quantity-display: &quantity-display "&#FFFF55Quantity: &#FFFFFF{quantity}"
-  confirm-purchase: &confirm-purchase "&#55FF55✔ CONFIRM PURCHASE"
-  cannot-purchase: &cannot-purchase "&#FF5555✖ Cannot Purchase"
-  insufficient-funds: &insufficient-funds "&#FF5555Insufficient coins!"
-  your-balance: &your-balance "&#FFD700⬥ Your Balance"
-  back-button: &back-button "&#FF5555← Back"
-  click-to-confirm: &click-to-confirm "&#55FF55▸ Click to confirm!"
-  cost-lore: &cost-lore "&#AAAAAACost: &#FFD700{total} Coins"
-  mine-5-stone-lore: &mine-5-stone-lore "&#AAAAAAMine 5 stone blocks to complete this quest"
-
 # ┌─────────────────────────────────────────────────────────────────────────────┐
-# │                           Welcome Message                                   │
+# │                           Welcome Message                                    │
+# │                  (Shown to new players on first join)                        │
 # └─────────────────────────────────────────────────────────────────────────────┘
 welcome:
   enabled: true
   delay-ticks: 60  # 3 seconds after join
   messages:
     - ""
-    - *horizontal-line-thin
+    - "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     - ""
     - "        &#FFFFFF&lWelcome to the WDP Server!"
     - ""
-    - *horizontal-line-thin
+    - "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     - ""
     - "    &#AAAAAAFirst time here? Let's get started!"
     - ""
@@ -55,19 +35,20 @@ welcome:
     - "    &#FFFFFF• Use the shop to buy items"
     - "    &#FFFFFF• Earn SkillCoins currency"
     - ""
-    - *horizontal-line-thin
+    - "&#FFD700━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     - ""
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            Quest Messages                                   │
+# │              (Messages shown during quest progression)                      │
 # └─────────────────────────────────────────────────────────────────────────────┘
 quest:
   # Starting quests
-  started: "&#55FF55You've started the tutorial quests! Follow each step to learn the basics."
-  already-started: "&#FF5555You've already started the tutorial!"
-  already-completed: "&#55FF55You've already finished all tutorial quests!"
-  next-started: "&#55FF55Quest {quest} started! Open your menu with /start to see details."
-  already-experienced: "&#FF5555You've already completed the tutorial! No need to do it again."
+  started: "&aYou've started the tutorial quests! Follow each step to learn the basics."
+  already-started: "&cYou've already started the tutorial!"
+  already-completed: "&aYou've already finished all tutorial quests!"
+  next-started: "&aQuest {quest} started! Open your menu with /start to see details."
+  already-experienced: "&cYou've already completed the tutorial! No need to do it again."
   
   # Progress updates
   objective-complete: "&#55FF55&l✓ &#55FF55{objective}"
@@ -98,7 +79,7 @@ quest:
   quest5:
     step1: "&#55FFFF➤ &#FFFFFFOpen the quest menu and click the emerald icon when you mined 5 stone!"
     complete: "&#55FF55&l✓ &#55FF55Perfect! You know how to use the quest menu now!"
-    instruction: *horizontal-line-thick
+    instruction: "&#FFD700&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     instruction-detail: "&#55FF55&l✓ &#55FF55Click the glowing emerald icon above to complete this quest!"
     reminder-10s: "&#55FF55💡 Friendly reminder: Click the &#FFD700emerald icon&#55FF55 in the menu above!"
     reminder-30s: "&#55FFFF💡 Still there? Just click the &#FFD700glowing emerald&#55FFFF to continue!"
@@ -107,7 +88,7 @@ quest:
   # Quest 6: Final Quest - Join Community
   quest6:
     complete: "&#55FF55&l✓ &#55FF55All done! Good luck on your adventure!"
-    instruction: *horizontal-line-thick
+    instruction: "&#FFD700&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     instruction-detail: "&#55FF55&l✓ &#55FF55Click the glowing quest icon above to finish the tutorial!"
     reminder-10s: "&#55FF55💡 Almost done! Click the &#FFD700Good Luck!&#55FF55 icon above to complete!"
     reminder-30s: "&#55FFFF💡 You're so close! Just click the &#FFD700glowing icon&#55FFFF to finish!"
@@ -116,10 +97,10 @@ quest:
   # All quests complete - BIG celebration message
   all-complete:
     - ""
-    - *horizontal-line-stars
+    - "&#FFD700&l★══════════════════════════════★"
     - "&#FFFFFF&l     CONGRATULATIONS!"
     - "&#FFFFFF&l     Tutorial Complete!"
-    - *horizontal-line-stars
+    - "&#FFD700&l★══════════════════════════════★"
     - ""
     - "&#55FF55  You've finished all tutorial quests!"
     - "&#FFFFFF  You're now ready to explore the server!"
@@ -132,20 +113,19 @@ quest:
     - "&#FFFF55  ✦ 32x Bread"
     - ""
     - "&#AAAAAANeed help? Join our Discord:"
-    - *discord-link
+    - "&#55FFFF{discord}"
     - ""
-    - *horizontal-line-stars
+    - "&#FFD700&l★══════════════════════════════★"
     - ""
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                          Cancellation Messages                              │
 # └─────────────────────────────────────────────────────────────────────────────┘
 cancel:
-  confirm: "&#FFFF55Are you sure you want to cancel? Type &#FF5555/start cancel confirm &#FFFF55to confirm."
-  cancelled: "&#FF5555Quest chain cancelled."
-  refunded: "&#55FF55Refunded &#FFFF55{amount} SkillCoins &#55FF55that were not spent."
-  no-refund: "&#AAAAAANo SkillCoins to refund."
-
+  confirm: "&eAre you sure you want to cancel? Type &c/start cancel confirm &eto confirm."
+  cancelled: "&cQuest chain cancelled."
+  refunded: "&aRefunded &e{amount} SkillCoins &athat were not spent."
+  no-refund: "&7No SkillCoins to refund."
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                             Reward Messages                                 │
 # └─────────────────────────────────────────────────────────────────────────────┘
@@ -154,16 +134,15 @@ rewards:
   skillcoins: "&#FFD700  + {amount} ⛃"
   skilltokens: "&#FF55FF  + {amount} 🎟"
   item: "&#55FFFF  + {amount}x {item}"
-
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            Command Messages                                 │
 # └─────────────────────────────────────────────────────────────────────────────┘
 commands:
   help:
     - ""
-    - *horizontal-line-long
+    - "&#FFD700&l═══════════════════════════════════════"
     - "&#FFFFFF&l  WDP-Start Commands"
-    - *horizontal-line-long
+    - "&#FFD700&l═══════════════════════════════════════"
     - ""
     - "&#55FFFF/start &#AAAAAA- Open quest menu"
     - "&#55FFFF/start cancel &#AAAAAA- Cancel quest chain"
@@ -171,37 +150,37 @@ commands:
     - "&#55FFFF/start start force &#AAAAAA- Force start (OP only)"
     - "&#55FFFF/start help &#AAAAAA- Show this help"
     - ""
-    - *horizontal-line-long
+    - "&#FFD700&l═══════════════════════════════════════"
     - ""
   
-  no-permission: "&#FF5555You don't have permission to use this command!"
-  player-only: "&#FF5555This command can only be used by players!"
-  unknown: "&#FF5555Unknown subcommand. Use &#FFFF55/start help &#FF5555for help."
+  no-permission: "&cYou don't have permission to use this command!"
+  player-only: "&cThis command can only be used by players!"
+  unknown: "&cUnknown subcommand. Use &e/start help &cfor help."
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            Admin Messages                                   │
 # └─────────────────────────────────────────────────────────────────────────────┘
 admin:
-  reload: "&#55FF55Configuration reloaded successfully!"
-  reset: "&#55FF55Reset quest progress for &#FFFF55{player}&#55FF55."
-  complete: "&#55FF55Force completed quest &#FFFF55{quest} &#55FF55for &#FFFF55{player}&#55FF55."
-  setquest: "&#55FF55Set &#FFFF55{player}&#55FF55 to quest &#FFFF55{quest} &#55FF55({quest_name})"
-  setquest-target: "&#FFFF55Admin set your quest to: &#FFFFFF{quest_name}"
-  player-not-found: "&#FF5555Player not found: &#FFFF55{player}"
-  invalid-quest: "&#FF5555Invalid quest number: &#FFFF55{quest} &#FF5555(must be 1-6)"
+  reload: "&aConfiguration reloaded successfully!"
+  reset: "&aReset quest progress for &e{player}&a."
+  complete: "&aForce completed quest &e{quest} &afor &e{player}&a."
+  setquest: "&aSet &e{player}&a to quest &e{quest} &a({quest_name})"
+  setquest-target: "&eAdmin set your quest to: &f{quest_name}"
+  player-not-found: "&cPlayer not found: &e{player}"
+  invalid-quest: "&cInvalid quest number: &e{quest} &c(must be 1-6)"
   usage:
-    reset: "&#FF5555Usage: /start reset <player>"
-    complete: "&#FF5555Usage: /start complete <player> <quest>"
-    setquest: "&#FF5555Usage: /start setquest <player> <quest>\n&#AAAAAA7Sets the player to start at a specific quest (1-6)"
-    debug: "&#FF5555Usage: /start debug <player>"
+    reset: "&cUsage: /start reset <player>"
+    complete: "&cUsage: /start complete <player> <quest>"
+    setquest: "&cUsage: /start setquest <player> <quest>\n&7Sets the player to start at a specific quest (1-6)"
+    debug: "&cUsage: /start debug <player>"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                             Error Messages                                  │
 # └─────────────────────────────────────────────────────────────────────────────┘
 errors:
-  generic: "&#FF5555An error occurred. Please contact an administrator."
-  not-started: "&#FF5555You haven't started the quest chain yet! Use &#FFFF55/start &#FF5555to begin."
-  quest-locked: "&#FF5555This quest is locked. Complete the previous quest first!"
+  generic: "&cAn error occurred. Please contact an administrator."
+  not-started: "&cYou haven't started the quest chain yet! Use &e/start &cto begin."
+  quest-locked: "&cThis quest is locked. Complete the previous quest first!"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                              Menu Messages                                  │
@@ -289,7 +268,7 @@ menu:
       - "&#FFFFFF/quest cancel &#AAAAAA- Cancel quests"
       - " "
       - "&#AAAAAANeed more help?"
-      - *discord-link
+      - "&#55FFFF{discord}"
       - " "
   
   # Navbar messages (for consistency)
@@ -299,12 +278,12 @@ menu:
       lore:
         - " "
         - "&#FFD700SkillCoins: &#FFD700{coins} ⛃"
-        - "&#FF55FFTokens: &#55FFFF{tokens} 🎟"
+        - "&#55FF55Tokens: &#00FFFF{tokens} 🎟"
     back:
       name: "&#FF5555&l← Back"
       lore:
         - ""
-        - "&#AAAAAAReturn to previous menu"
+        - "&#AAAAAReturn to previous menu"
         - ""
     close:
       name: "&#FF5555&l✗ Close"
@@ -313,23 +292,23 @@ menu:
         - "&#AAAAAAClose this menu"
         - ""
     previous:
-      name: "&#FFFF55&l← Previous"
+      name: "&#FFFF00&l← Previous"
       lore:
         - ""
         - "&#AAAAAAGo to page {page}"
         - ""
     next:
-      name: "&#FFFF55&lNext →"
+      name: "&#FFFF00&lNext →"
       lore:
         - ""
         - "&#AAAAAAGo to page {page}/{total}"
         - ""
     page:
-      name: "&#FFFF55&lPage &#FFFFFF&l{page} &#AAAAAA/ {total}"
+      name: "&#FFFF00&lPage &#FFFFFF&l{page} &#555555/ {total}"
       lore:
         - ""
-        - "&#AAAAAACurrent page: {page}"
-        - "&#AAAAAATotal pages: {total}"
+        - "&#808080Current page: {page}"
+        - "&#808080Total pages: {total}"
         - ""
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -338,151 +317,151 @@ menu:
 shop:
   # Main shop menu
   main:
-    title: "&#55FFFF❖ &#FFFFFFSkillCoins Shop"
+    title: "&#00FFFF❖ &#FFFFFFSkillCoins Shop"
     player-head:
-      name: "&#55FFFF⛃ Shop &#FFD700♦ {player}"
+      name: "&#00FFFF⛃ Shop &#FFD700♦ {player}"
       lore:
         - ""
-        - "&#AAAAAAWelcome to the ⛃ Shop!"
-        - "&#AAAAAABrowse categories below to buy"
-        - "&#AAAAAAand sell items using your earnings."
+        - "&#808080Welcome to the ⛃ Shop!"
+        - "&#808080Browse categories below to buy"
+        - "&#808080and sell items using your earnings."
         - ""
-        - "&#55FFFF▸ Your balance is on the right →"
+        - "&#00FFFF▸ Your balance is on the right →"
     balance:
-      name: *your-balance
+      name: "&#FFD700⬥ Your Balance"
       lore:
         - ""
         - "&#FFD700⛃: &#FFFFFF{coins} ⛃"
         - ""
-        - "&#AAAAAAEarn more by leveling skills"
-        - "&#AAAAAAand completing objectives!"
+        - "&#808080Earn more by leveling skills"
+        - "&#808080and completing objectives!"
     token-exchange:
-      name: "&#55FFFF🎟 Token Exchange"
+      name: "&#00FFFF🎟 Token Exchange"
       lore:
         - ""
-        - "&#AAAAAAExchange your ⛃ SkillCoins"
-        - "&#AAAAAAfor powerful 🎟 SkillTokens!"
+        - "&#808080Exchange your ⛃ SkillCoins"
+        - "&#808080for powerful 🎟 SkillTokens!"
         - ""
         - "&#55FF55Tokens unlock skill upgrades"
         - "&#55FF55and special abilities!"
         - ""
-        - "&#FFFF55▸ Click to exchange!"
+        - "&#FFFF00▸ Click to exchange!"
     close:
       name: "&#FF5555✖ Close"
       lore:
         - ""
-        - "&#AAAAAAClose this menu"
+        - "&#808080Close this menu"
   
   # Shop section menu
   section:
     back:
-      name: *back-button
+      name: "&#FF5555← Back"
       lore:
         - ""
-        - "&#AAAAAAReturn to main shop menu"
+        - "&#808080Return to main shop menu"
   
   # Category display
   category:
-    description: "&#AAAAAA{description}"
-    items-count: "&#AAAAAAItems: &#FFFFFF{count}"
-    click-to-open: "&#FFFF55▸ Click to open!"
+    description: "&#808080{description}"
+    items-count: "&#808080Items: &#FFFFFF{count}"
+    click-to-open: "&#FFFF00▸ Click to open!"
     not-available: "&#777777✖ Not available during tutorial"
   
   # Item display
   item:
-    buy: "&#55FF55● Buy: &#FFFFFF{price}&#FFD700 Coins"
-    buy-action: "&#AAAAAA  └ &#FFFF55Left Click&#AAAAAA to purchase"
-    sell: "&#FFD700● Sell: &#FFFFFF{price}&#FFD700 Coins"
-    sell-action: "&#AAAAAA  └ &#FFFF55Right Click&#AAAAAA to sell"
+    buy: "&#55FF55● Buy: &#FFFFFF{price}&#FFFF00 Coins"
+    buy-action: "&#808080  └ &#FFFF00Left Click&#808080 to purchase"
+    sell: "&#FFD700● Sell: &#FFFFFF{price}&#FFFF00 Coins"
+    sell-action: "&#808080  └ &#FFFF00Right Click&#808080 to sell"
   
   # Transaction menu
   transaction:
     title-buy: "&#55FF55Buy: &#FFFFFF{item}"
     title-sell: "&#FFD700Sell: &#FFFFFF{item}"
-    quantity: "&#AAAAAAQuantity: &#FFFFFF{quantity}"
-    price-per: "&#AAAAAAPrice per item: &#FFD700{price}"
-    total-cost: *total-cost
+    quantity: "&#808080Quantity: &#FFFFFF{quantity}"
+    price-per: "&#808080Price per item: &#FFD700{price}"
+    total-cost: "&#FFD700Total Cost: &#FFFFFF{total} Coins"
     sufficient-funds: "&#55FF55✔ Sufficient Funds"
-    insufficient-funds: *insufficient-funds
+    insufficient-funds: "&#FF5555✖ Insufficient Funds"
     plus-one:
-      name: *plus-one
+      name: "&#55FF55▲ +1"
       lore:
         - ""
-        - "&#AAAAAAAdd 1 item"
-        - "&#AAAAAA(Max: 3)"
+        - "&#808080Add 1 item"
+        - "&#808080(Max: 3)"
     minus-one:
       name: "&#FF5555▼ -1"
       lore:
         - ""
-        - "&#AAAAAARemove 1 item"
+        - "&#808080Remove 1 item"
     quantity-display:
-      name: *quantity-display
+      name: "&#FFFF00Quantity: &#FFFFFF{quantity}"
     confirm:
       can-buy:
-        name: *confirm-purchase
+        name: "&#55FF55✔ CONFIRM PURCHASE"
         lore:
           - ""
-          - "&#AAAAAAPurchase &#FFFFFF{quantity}x {item}"
-          - *cost-lore
+          - "&#808080Purchase &#FFFFFF{quantity}x {item}"
+          - "&#808080Cost: &#FFD700{total} Coins"
           - ""
-          - *click-to-confirm
+          - "&#55FF55▸ Click to confirm!"
       cannot-buy:
-        name: *cannot-purchase
+        name: "&#FF5555✖ Cannot Purchase"
         lore:
           - ""
-          - *insufficient-funds
+          - "&#FF5555Insufficient coins!"
     back:
-      name: *back-button
+      name: "§c§l← Back"
   
   # Token exchange
   token-exchange:
     title: "&#55FF55✦ &#FFFFFFToken Exchange"
     token-display:
-      name: "&#55FFFF✦ Skill Tokens"
+      name: "&#00FFFF✦ Skill Tokens"
       lore:
         - ""
-        - "&#AAAAAATokens to Purchase: &#FFFFFF{quantity}"
-        - "&#AAAAAAExchange Rate: &#FFD700{cost} coins&#AAAAAA = &#55FFFF1 token"
+        - "&#808080Tokens to Purchase: &#FFFFFF{quantity}"
+        - "&#808080Exchange Rate: &#FFD700{cost} coins&#808080 = &#00FFFF1 token"
         - ""
-        - *total-cost
+        - "&#FFD700Total Cost: &#FFFFFF{total} Coins"
         - ""
     plus-one:
-      name: *plus-one
+      name: "&#55FF55▲ +1"
       lore:
         - ""
-        - "&#AAAAAAAdd 1 token"
-        - "&#AAAAAA(Tutorial: Max 1)"
+        - "&#808080Add 1 token"
+        - "&#808080(Tutorial: Max 1)"
     quantity-display:
-      name: *quantity-display
+      name: "&#FFFF00Quantity: &#FFFFFF{quantity}"
       lore:
         - ""
-        - "&#AAAAAATokens to purchase"
+        - "&#808080Tokens to purchase"
     confirm:
       can-buy:
-        name: *confirm-purchase
+        name: "&#55FF55✔ CONFIRM PURCHASE"
         lore:
           - ""
-          - "&#AAAAAAPurchase &#55FFFF{quantity}&#AAAAAA token"
-          - *cost-lore
+          - "&#808080Purchase &#00FFFF{quantity}&#808080 token"
+          - "&#808080Cost: &#FFD700{total} Coins"
           - ""
-          - *click-to-confirm
+          - "&#55FF55▸ Click to confirm!"
       cannot-buy:
-        name: *cannot-purchase
+        name: "&#FF5555✖ Cannot Purchase"
         lore:
           - ""
-          - *insufficient-funds
+          - "&#FF5555Insufficient coins!"
     balance:
-      name: *your-balance
+      name: "&#FFD700⬥ Your Balance"
       lore:
         - ""
         - "&#FFD700Coins: &#FFFFFF{coins}"
         - ""
-        - "&#AAAAAARequired: &#FFFFFF{required} coins"
+        - "&#808080Required: &#FFFFFF{required} coins"
     back:
-      name: *back-button
+      name: "&#FF5555← Back"
       lore:
         - ""
-        - "&#AAAAAAReturn to shop
+        - "&#808080Return to shop"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                           Quest View Messages                               │
@@ -492,39 +471,39 @@ quest-view:
   player-head:
     name: "&#FFD700{player}"
     lore:
-      - "&#AAAAAAWelcome to the quest menu!"
+      - "&#808080Welcome to the quest menu!"
       - ""
-      - "&#FFD700Coins: &#FFFF55{coins}"
-      - "&#FF55FFTokens: &#55FF55{tokens}"
+      - "&#FFD700Coins: &#FFFF00{coins}"
+      - "&#55FF55Tokens: &#00FF00{tokens}"
   title-item:
-    name: "&#FFD700&lQuest Menu"
+    name: "&#FFD700§lQuest Menu"
     lore:
       - ""
-      - "&#AAAAAAComplete quests to earn rewards!"
+      - "&#808080Complete quests to earn rewards!"
       - ""
   progress-item:
-    name: "&#55FFFF&lProgress"
+    name: "&#00FFFF§lProgress"
     lore:
       - ""
-      - "&#FFFF55Overall Progress: &#FFFFFF{progress}%"
+      - "&#FFFF00Overall Progress: &#FFFFFF{progress}%"
       - ""
-      - "&#AAAAAAComplete quests to level up!"
+      - "&#808080Complete quests to level up!"
   quest-icon:
     complete:
       name: "&#55FF55✓ &#FFD700Quest Menu Tutorial"
     incomplete:
-      name: "&#FFFF55● &#FFD700Quest Menu Tutorial"
+      name: "&#FFFF00● &#FFD700Quest Menu Tutorial"
     lore:
       - ""
-      - *mine-5-stone-lore
+      - "&#808080Mine 5 stone blocks to complete this quest"
       - ""
-      - "&#AAAAAAProgress: &#FFFF55{current}/{total} Stone"
+      - "&#808080Progress: &#FFFF00{current}/{total} Stone"
   details-button:
-    name: "&#55FFFF&lQuest Details"
+    name: "&#00FFFF§lQuest Details"
     lore:
       - ""
-      - "&#AAAAAAView detailed information"
-      - "&#AAAAAAabout this quest"
+      - "&#808080View detailed information"
+      - "&#808080about this quest"
       - ""
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -535,97 +514,212 @@ quest-detail:
   quest-icon:
     lore:
       - ""
-      - *mine-5-stone-lore
+      - "&#808080Mine 5 stone blocks to complete this quest"
       - " "
-      - "&#AAAAAARequired Progress: &#FFFF55{required}%"
+      - "&#808080Required Progress: &#FFFF00{required}%"
       - "&#55FF55Repeatable: No"
   status:
     completed:
-      name: "&#55FF55&lCOMPLETED"
+      name: "§a§lCOMPLETED"
     active:
-      name: "&#FFFF55&lACTIVE"
+      name: "§e§lACTIVE"
     lore:
       - ""
-      - "&#AAAAAAQuest Status"
+      - "&#808080Quest Status"
   objectives:
-    title: "&#FFD700&lObjectives"
-    subtitle: "&#AAAAAAComplete all to finish"
-    complete: "&#55FF55✓ &#FFFFFF{objective}"
-    incomplete: "&#777777○ &#FFFFFF{objective}"
-    progress-complete: "&#55FF55Complete!"
-    progress-incomplete: "&#AAAAAA{current}§8/§AAAAAA{total}"
+    title: "&#FFD700§lObjectives"
+    subtitle: "&#808080Complete all to finish"
+    complete: "§a✓ §f{objective}"
+    incomplete: "§7○ §f{objective}"
+    progress-complete: "§aComplete!"
+    progress-incomplete: "§7{current}§8/§7{total}"
   rewards:
-    title: "&#FFD700&lRewards"
-    subtitle: "&#AAAAAAWhat you'll receive"
+    title: "&#FFD700§lRewards"
+    subtitle: "&#808080What you'll receive"
     skillcoins:
-      name: "&#FFD700{amount} SkillCoins"
+      name: "&#FFFF00{amount} SkillCoins"
       lore:
         - ""
-        - "&#AAAAAACurrency for the shop"
+        - "&#808080Currency for the shop"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            Global Items                                     │
 # └─────────────────────────────────────────────────────────────────────────────┘
 items:
   close:
-    name: "&#FF5555&l✗ Close"
+    name: "§c§l✗ Close"
     lore:
       - ""
-      - "&#AAAAAAClick to close this menu"
+      - "§7Click to close this menu"
       - ""
   back:
-    name: "&#FF5555&l← Back"
-    lore: "&#AAAAAAReturn to {menu}"
+    name: "§c§l← Back"
+    lore: "§7Return to {menu}"
   back-to-main:
-    name: "&#FF5555&l← Back&#AAAAAA to Main"
+    name: "§c§l← Back§7 to Main"
     lore:
       - ""
-      - "&#AAAAAAReturn to main menu"
+      - "§7Return to main menu"
       - ""
   previous-page:
-    name: "&#FFFF55&l← Previous"
+    name: "§e§l← Previous"
     lore:
       - ""
-      - "&#AAAAAAGo to page {page}"
+      - "§7Go to page {page}"
       - ""
   next-page:
-    name: "&#FFFF55&lNext →"
+    name: "§e§lNext →"
     lore:
       - ""
-      - "&#AAAAAAGo to page {page}/{total}"
+      - "§7Go to page {page}/{total}"
       - ""
   page-info:
-    name: "&#55FFFF&lPage {current}/{total}"
+    name: "§b§lPage {current}/{total}"
     lore:
       - ""
-      - "&#AAAAAACurrent page: {current}"
-      - "&#AAAAAATotal pages: {total}"
+      - "§7Current page: {current}"
+      - "§7Total pages: {total}"
       - ""
   stats:
-    name: "&#FFFF55&l{player}"
+    name: "§e§l{player}"
     lore:
       - ""
-      - "&#AAAAAAProgress: &#55FF55{progress}%"
+      - "§7Progress: §a{progress}%"
       - ""
-      - "&#AAAAAAClick to view details"
+      - "§7Click to view details"
   quest-info:
-    name: "&#FFD700&lQuest Progress"
+    name: "§6§lQuest Progress"
     lore:
       - ""
-      - "&#AAAAAACurrent: &#FFFF55{quest}"
-      - "&#AAAAAACompleted: &#55FF55{completed}&#AAAAAA/&#55FF55{total}"
+      - "§7Current: §e{quest}"
+      - "§7Completed: §a{completed}§7/§a{total}"
       - ""
-      - "&#AAAAAAClick to view details"
+      - "§7Click to view details"
   base-info:
-    name: "&#FFD700&l{base}"
+    name: "§6§l{base}"
     lore:
       - ""
-      - "&#AAAAAATrusted players: &#FFFF55{trusted}"
+      - "§7Trusted players: §e{trusted}"
       - ""
-      - "&#AAAAAAClick to manage"
+      - "§7Click to manage"
   balance-display:
-    name: "&#FFD700Balance:"
+    name: "§6Balance:"
     lore:
       - " "
-      - "&#FFD700SkillCoins: &#FFD700{coins} ⛃"
-      - "&#FF55FFTokens: &#55FF55{tokens} 🎟"
+      - "§eSkillCoins: §6{coins} ⛃"
+      - "§aTokens: §2{tokens} 🎟"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                        Quest Definitions                                    │
+# │             (Names, descriptions, and hints for each quest)                 │
+# └─────────────────────────────────────────────────────────────────────────────┘
+quests:
+  names:
+    quest1: "Leave Spawn Area"
+    quest2: "Learn About Skills"
+    quest3: "Use The Shop"
+    quest4: "Currency Upgrade"
+    quest5: "Quest Menu Tutorial"
+    quest6: "You're Ready!"
+    unknown: "Unknown Quest"
+  
+  descriptions:
+    # Quest 1: Simple exit tutorial
+    quest1: "Walk to the spawn exit and get teleported to the wilderness"
+    
+    # Quest 2: First skill level
+    quest2:
+      - "Reach Foraging level 1 by chopping trees"
+      - "&#AAAAAAHit trees with an axe to gain XP!"
+    
+    # Quest 3: Economy introduction
+    quest3: "Open the shop menu with /shop and purchase any item"
+    
+    # Quest 4: Premium currency
+    quest4:
+      - "Exchange SkillCoins for Tokens in the shop"
+      - "&#FFD700Tokens let you buy powerful skill upgrades!"
+    
+    # Quest 5: Menu system
+    quest5: "Open /quest menu and complete the objective inside"
+    
+    # Quest 6: Community support
+    quest6: 
+      - "Join our Discord for help and updates!"
+      - "Click this quest icon to complete the tutorial"
+    unknown: "Unknown Quest"
+  
+  hints:
+    quest1: "Look for the exit portal and walk through it!"
+    quest2: "Find some trees and chop them with an axe to level up Foraging!"
+    quest3: "Type /shop to open the shop, then buy any item you can afford!"
+    quest4: "Open /shop again and look for the Token Exchange option!"
+    quest5: "Type /quest to open the quest menu and see your task!"
+    default: "Follow the quest instructions to proceed!"
+  
+  next-objectives:
+    quest2: "Chop trees to reach Foraging level 1"
+    quest3: "Open the shop with /shop and buy something"
+    quest4: "Exchange SkillCoins for Tokens in the shop"
+    quest5: "Open /quest to see the quest menu"
+    quest6: "Click the quest icon to finish the tutorial!"
+    default: "Continue your adventure!"
+  
+  # Level up message (AuraSkills-style)
+  level-up:
+    header: "&#3CB371▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    skill-level-up: "  &#FFFFFF&l{skill} &#55FF55&lLEVEL UP"
+    skill-progress: "  &#AAAAAA{skill} &#FFFFFF{prev} &#AAAAAA→ &#55FF55{current}"
+    quest-complete: "  &#FFD700✦ &#55FF55&lQUEST COMPLETE: &#FFFFFFForaging Kickstart"
+    reward-earned: "  &#AAAAAAYou earned &#FFD700{amount} ⛃&#AAAAAA!"
+    next-objective-header: "  &#55FFFF&l➤ NEXT OBJECTIVE"
+    next-objective-quest3: "  &#FFFFFFOpen &#FFFF55/shop &#FFFFFFand buy an item"
+    next-objective-hint: "  &#AAAAAASpend Skillcoins in the shop!"
+  
+  # Complete message format
+  complete-message:
+    header: "&#3CB371▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    quest-complete: "  &#FFD700✦ &#55FF55&lQUEST COMPLETE"
+    quest-name: "  &#FFFFFF{name}"
+    reward: "  &#AAAAAAYou earned &#FFD700{amount} ⛃&#AAAAAA!"
+    next-header: "  &#55FFFF&l➤ NEXT OBJECTIVE"
+    next-content: "  &#FFFFFF{objective}"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                        Listener Messages                                    │
+# └─────────────────────────────────────────────────────────────────────────────┘
+listener:
+  stone-mined: "&#55FF55⛏ Stone Mined: &#FFFFFF{current}/5"
+  objective-complete:
+    title: "&#FFD700§l✓ Objective Complete!"
+    instruction: "&#FFFFFFType &#55FF55/quest&#FFFFFF to complete Quest 5!"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                        Quest Progress Messages                              │
+# └─────────────────────────────────────────────────────────────────────────────┘
+quest-progress:
+  stone-progress: "&#55FFFF⛏ Stone Progress: &#FFFFFF{current}/{required}"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                        Success Messages                                     │
+# └─────────────────────────────────────────────────────────────────────────────┘
+success:
+  purchased-item: "&#55FF55✓ Purchased {quantity}x {item} for &#FFD700{cost} SkillCoins&#55FF55!"
+  purchased-token: "&#55FF55✓ Token exchange complete! Check /quest for your next objective."
+  quest-complete: "&#55FF55&l✓ &#55FF55Quest completed! Type /start to continue your journey!"
+  quest-complete-welcome: "&#55FF55&l✓ Quest completed! Welcome to the server!"
+  quest-hint: "&#FFD700&l➤ &#FFFFFF{hint}"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                        Additional Error Messages                            │
+# └─────────────────────────────────────────────────────────────────────────────┘
+errors:
+  generic: "&cAn error occurred. Please contact an administrator."
+  not-started: "&cYou haven't started the quest chain yet! Use &e/start &cto begin."
+  quest-locked: "&cThis quest is locked. Complete the previous quest first!"
+  not-enough-coins: "&#FF5555✗ Not enough SkillCoins! You need &#FFD700{amount}"
+  inventory-full: "&#FFAA00⚠ Your inventory was full! Some items may have dropped on the ground."
+  token-not-available: "&#777777✖ Token exchange is not available during this tutorial."
+  feature-not-available: "&#777777✖ This feature is not available during this tutorial."
+  section-not-available: "&#777777✖ This section is not available during the tutorial."
+  mine-stone-first: "&#FF5555✖ You must mine 5 stone first! ({current}/5)"

@@ -391,10 +391,10 @@ public class SimpleShopMenu {
         }
         
         // Quantity display (slot 22 - center)
-        // Use paper ONLY if item is unstackable (max stack size <= 16)
+        // Use paper ONLY if item is unstackable (max stack size < 64)
         int maxStackSize = item.getMaterial().getMaxStackSize();
         ItemStack qtyDisplay;
-        if (maxStackSize <= 16) {
+        if (maxStackSize < 64) {
             // Unstackable or low-stack item - use paper with quantity
             qtyDisplay = new ItemStack(Material.PAPER, Math.min(quantity, 64));
             ItemMeta qtyMeta = qtyDisplay.getItemMeta();
@@ -411,7 +411,7 @@ public class SimpleShopMenu {
             }
             inv.setItem(22, qtyDisplay);
         }
-        // For stackable items (maxStackSize > 16), don't show the paper display
+        // For stackable items (maxStackSize >= 64), don't show the paper display
         // Slot 22 stays as border (black glass pane)
         
         // +1 button (slot 24) - Max 3 items

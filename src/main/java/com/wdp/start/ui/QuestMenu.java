@@ -959,7 +959,7 @@ public class QuestMenu {
         }
         
         // Send immediate instruction (only once per quest activation)
-        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest6.instruction")));
+        player.sendMessage(hex(plugin.getMessageManager().get("common.horizontal-line-thick")));
         player.sendMessage(hex(plugin.getMessageManager().get("quest.quest6.instruction-detail")));
         
         // Get configurable timing from config
@@ -1051,7 +1051,7 @@ public class QuestMenu {
         }
         
         // Send immediate instruction (only once per quest activation)
-        player.sendMessage(hex(plugin.getMessageManager().get("quest.quest5.instruction")));
+        player.sendMessage(hex(plugin.getMessageManager().get("common.horizontal-line-thick")));
         player.sendMessage(hex(plugin.getMessageManager().get("quest.quest5.instruction-detail")));
         
         // Get configurable timing from config
@@ -1723,10 +1723,10 @@ public class QuestMenu {
             inv.setItem(20, minus1);
         }
         
-        // Quantity display (slot 22) - Show PAPER only for unstackable items (max stack <= 16)
+        // Quantity display (slot 22) - Show PAPER only for unstackable items (max stack < 64)
         int maxStackSize = item.material.getMaxStackSize();
         ItemStack qtyDisplay;
-        if (maxStackSize <= 16) {
+        if (maxStackSize < 64) {
             // Unstackable or low-stack item - show paper with quantity
             qtyDisplay = new ItemStack(Material.PAPER, Math.min(quantity, 64));
             ItemMeta qtyMeta = qtyDisplay.getItemMeta();
@@ -1768,7 +1768,7 @@ public class QuestMenu {
         ItemStack back = new ItemStack(Material.SPYGLASS);
         ItemMeta backMeta = back.getItemMeta();
         if (backMeta != null) {
-            backMeta.setDisplayName(hex(plugin.getMessageManager().get("shop.transaction.back.name")));
+            backMeta.setDisplayName(hex(plugin.getMessageManager().get("common.back-button")));
             back.setItemMeta(backMeta);
         }
         inv.setItem(53, back);
