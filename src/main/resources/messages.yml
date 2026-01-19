@@ -138,6 +138,52 @@ quest:
     - ""
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                            Bossbar Messages                                 │
+# └─────────────────────────────────────────────────────────────────────────────┘
+bossbar:
+  quest1: "Leave Spawn Area"
+  quest2: "Reach Foraging Level 1 - Progress: {progress}%"
+  quest3: "Use The Shop"
+  quest4: "Buy SkillTokens"
+  quest5: "Mine 5 Stone Blocks - Progress: {current}/5"
+  quest5-completed: "Open /quests and click the emerald until it glows!"
+  quest6: "Join Community"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                          Quest Progress Messages                            │
+# └─────────────────────────────────────────────────────────────────────────────┘
+quest-progress:
+  stone-progress: "&#55FF55Stone Progress: {current}/{required}"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                            Quest Hints                                     │
+# └─────────────────────────────────────────────────────────────────────────────┘
+quests:
+  hints:
+    default: "&#55FF55Complete this quest to continue your tutorial!"
+    quest1: "&#55FF55Walk towards the exit to leave spawn and explore the wilderness!"
+    quest2: "&#55FF55Chop down trees to level up your Foraging skill!"
+    quest3: "&#55FF55Use the shop to buy items with your SkillCoins!"
+    quest4: "&#55FF55Buy SkillTokens to unlock powerful skill upgrades!"
+    quest5: "&#55FF55Mine 5 stone blocks and click the emerald icon to complete!"
+    quest6: "&#55FF55Click the glowing quest icon to finish the tutorial!"
+  
+  # Quest descriptions for menu display
+  descriptions:
+    quest1:
+      - "&#FFFFFFLeave spawn and explore the wilderness"
+    quest2:
+      - "&#FFFFFFReach Foraging level 2 by chopping trees"
+    quest3:
+      - "&#FFFFFFOpen the shop and purchase any item"
+    quest4:
+      - "&#FFFFFFBuy SkillTokens from the shop"
+    quest5:
+      - "&#FFFFFFMine 5 stone blocks to complete"
+    quest6:
+      - "&#FFFFFFComplete the tutorial journey"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                          Cancellation Messages                              │
 # └─────────────────────────────────────────────────────────────────────────────┘
 cancel:
@@ -154,6 +200,13 @@ rewards:
   skillcoins: "&#FFD700  + {amount} ⛃"
   skilltokens: "&#FF55FF  + {amount} 🎟"
   item: "&#55FFFF  + {amount}x {item}"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                            Success Messages                                 │
+# └─────────────────────────────────────────────────────────────────────────────┘
+success:
+  purchased-item: "&#55FF55Successfully purchased {quantity}x {item} for {cost} SkillCoins!"
+  quest-hint: "&#55FF55Hint: {hint}"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                            Command Messages                                 │
@@ -202,6 +255,21 @@ errors:
   generic: "&#FF5555An error occurred. Please contact an administrator."
   not-started: "&#FF5555You haven't started the quest chain yet! Use &#FFFF55/start &#FF5555to begin."
   quest-locked: "&#FF5555This quest is locked. Complete the previous quest first!"
+  feature-not-available: "&#FF5555This feature is not available during the tutorial."
+  inventory-full: "&#FF5555Your inventory is full! Please make space and try again."
+  mine-stone-first: "&#FF5555You need to mine {current}/5 stone blocks first!"
+  not-enough-coins: "&#FF5555You don't have enough SkillCoins! You need {amount} more."
+  section-not-available: "&#FF5555This shop section is not available."
+  token-not-available: "&#FF5555Token purchases are not available during the tutorial."
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                            Listener Messages                                │
+# └─────────────────────────────────────────────────────────────────────────────┘
+listener:
+  objective-complete:
+    title: "&#55FF55&l✓ Objective Complete!"
+    instruction: "&#55FF55Click the glowing emerald icon in your quest menu to continue!"
+  stone-mined: "&#55FF55Stone mined: {current}/5"
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                              Menu Messages                                  │
@@ -227,9 +295,9 @@ menu:
       - "&#FFFFFF• Currency system (Coins & Tokens)"
       - " "
       - "&#FFD700&lCompletion Rewards:"
-      - "&#FFD700✦ 300 ⛃ SkillCoins"
-      - "&#FF55FF✦ 10 🎟 SkillTokens"
-      - "&#55FFFF✦ Starter Items (Diamonds, Iron, Food)"
+      - "&#FFD700+ 300 ⛃ SkillCoins"
+      - "&#FF55FF+ 10 🎟 SkillTokens"
+      - "&#55FFFF+ Starter Items (Diamonds, Iron, Food)"
       - " "
     start-button:
       name: "&#55FF55&l▶ START TUTORIAL"
@@ -352,7 +420,7 @@ shop:
       name: *your-balance
       lore:
         - ""
-        - "&#FFD700⛃: &#FFFFFF{coins} ⛃"
+        - "&#FFD700SkillCoins: &#FFFFFF{coins} ⛃"
         - ""
         - "&#AAAAAAEarn more by leveling skills"
         - "&#AAAAAAand completing objectives!"
@@ -360,8 +428,8 @@ shop:
       name: "&#55FFFF🎟 Token Exchange"
       lore:
         - ""
-        - "&#AAAAAAExchange your ⛃ SkillCoins"
-        - "&#AAAAAAfor powerful 🎟 SkillTokens!"
+        - "&#AAAAAAExchange your &#FFD700SkillCoins"
+        - "&#AAAAAAfor powerful &#55FFFFSkillTokens!"
         - ""
         - "&#55FF55Tokens unlock skill upgrades"
         - "&#55FF55and special abilities!"
@@ -482,7 +550,8 @@ shop:
       name: *back-button
       lore:
         - ""
-        - "&#AAAAAAReturn to shop
+        - "&#AAAAAAReturn to shop"
+        - ""
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                           Quest View Messages                               │

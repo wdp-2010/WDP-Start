@@ -2,6 +2,7 @@ package com.wdp.start.quest;
 
 import com.wdp.start.WDPStartPlugin;
 import com.wdp.start.player.PlayerData;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -80,6 +81,9 @@ public class QuestManager {
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
             }
             
+            // Update boss bar
+            plugin.getBossBarManager().updateBossBar(player);
+            
             // Open the quest menu
             plugin.getQuestMenuCoordinator().openMainMenu(player);
             return;
@@ -107,6 +111,9 @@ public class QuestManager {
                 if (plugin.getConfigManager().isSoundsEnabled()) {
                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
                 }
+                
+                // Update boss bar
+                plugin.getBossBarManager().updateBossBar(player);
                 
                 // Open the quest menu
                 plugin.getQuestMenuCoordinator().openMainMenu(player);
@@ -224,9 +231,14 @@ public class QuestManager {
         // Give rewards
         int reward = giveQuestRewards(player, quest);
         
-        // Play sound
+        // Play levelup sound combination (like AuraSkills)
         if (plugin.getConfigManager().isSoundsEnabled()) {
-            player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 0.5f);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 0.5f);
+                }
+            }, 4L); // 0.2 seconds delay
         }
         
         // Stop particle path guide when Quest 1 is completed
@@ -266,6 +278,9 @@ public class QuestManager {
         // Debug
         plugin.debug("[QuestManager] " + player.getName() + 
             " COMPLETED Quest " + quest + ". Progress saved to database.");
+        
+        // Update boss bar (will hide if all quests complete)
+        plugin.getBossBarManager().updateBossBar(player);
         
         plugin.debug("Player " + player.getName() + " completed quest " + quest);
     }
@@ -631,13 +646,17 @@ public class QuestManager {
         double progress = (double) newLevel / targetLevel * 100;
         data.getQuestProgress(2).setData("level_progress", Math.min(progress, 100));
         
+        // Update boss bar
+        plugin.getBossBarManager().updateBossBar(player);
+        
         if (newLevel >= targetLevel) {
-            // Temporarily suppress AuraSkills' own messages to avoid race conditions
+            // Temporarily suppress AuraSkills' own messages and bossbar to avoid race conditions
             data.setSuppressLevelUpUntil(System.currentTimeMillis() + 2000);
+            data.setSuppressBossBarUntil(System.currentTimeMillis() + 2000);
             // Clear suppression after a short delay to avoid lingering state
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                 data.clearSuppressLevelUp();
-                plugin.getPlayerDataManager().saveData(data);
+                data.clearSuppressBossBar();
             }, 40L); // 40 ticks = 2 seconds
 
             // Complete Quest 2

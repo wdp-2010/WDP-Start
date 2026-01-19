@@ -15,6 +15,7 @@ import com.wdp.start.path.PortalZoneManager;
 import com.wdp.start.path.RTPManager;
 import com.wdp.start.player.PlayerDataManager;
 import com.wdp.start.quest.QuestManager;
+import com.wdp.start.quest.BossBarManager;
 import com.wdp.start.shop.SimpleShopMenu;
 import com.wdp.start.storage.DatabaseManager;
 import com.wdp.start.ui.menu.QuestMenuCoordinator;
@@ -43,6 +44,7 @@ public class WDPStartPlugin extends JavaPlugin {
     private PlayerDataManager playerDataManager;
     private DatabaseManager databaseManager;
     private QuestManager questManager;
+    private BossBarManager bossBarManager;
     private QuestMenuCoordinator questMenuCoordinator;
     private SimpleShopMenu simpleShopMenu;
     private PathGuideManager pathGuideManager;
@@ -119,6 +121,11 @@ public class WDPStartPlugin extends JavaPlugin {
             playerDataManager.saveAll();
         }
         
+        // Clean up boss bars
+        if (bossBarManager != null) {
+            bossBarManager.cleanup();
+        }
+        
         getLogger().info("WDP-Start has been disabled.");
     }
     
@@ -145,6 +152,9 @@ public class WDPStartPlugin extends JavaPlugin {
         
         // Quest manager
         questManager = new QuestManager(this);
+        
+        // Boss bar manager
+        bossBarManager = new BossBarManager(this);
         
         // Quest menu
         questMenuCoordinator = new QuestMenuCoordinator(this);
@@ -332,6 +342,10 @@ public class WDPStartPlugin extends JavaPlugin {
     
     public QuestManager getQuestManager() {
         return questManager;
+    }
+    
+    public BossBarManager getBossBarManager() {
+        return bossBarManager;
     }
     
     public QuestMenuCoordinator getQuestMenuCoordinator() {

@@ -54,11 +54,17 @@ public class PlayerListener implements Listener {
         }
         
         plugin.debug("Player " + player.getName() + " joined. Quest started: " + data.isStarted());
+        
+        // Update boss bar if player has active quests
+        plugin.getBossBarManager().updateBossBar(player);
     }
     
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        
+        // Hide boss bar
+        plugin.getBossBarManager().hideBossBar(player);
         
         // Save and unload player data
         plugin.getPlayerDataManager().unloadData(player.getUniqueId());

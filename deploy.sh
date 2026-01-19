@@ -32,8 +32,37 @@ else
     SERVER_NAME="DEV"
 fi
 
+# Restart behavior: by default do NOT restart MAIN server unless --restart is passed
+FORCE_RESTART=false
+for arg in "$@"; do
+    if [ "$arg" == "--restart" ] || [ "$arg" == "-r" ]; then
+        FORCE_RESTART=true
+        break
+    fi
+done
+
+SKIP_RESTART=false
+if [ "$SERVER_NAME" == "MAIN" ] && [ "$FORCE_RESTART" == "false" ]; then
+    SKIP_RESTART=true
+    echo -e "\033[1;33m⚠ Detected MAIN server. By default this script will NOT restart the server. Use --restart to force a restart.\033[0m"
+fi
+
 SERVER_DIR="/var/lib/pterodactyl/volumes/${CONTAINER_ID}"
 PLUGIN_DIR="${SERVER_DIR}/plugins"
+
+ask_overwrite() {
+    local path="$1"
+    local question="$2"
+    if [ -e "$path" ]; then
+        read -p "$question [y/N]: " resp
+        if [[ "$resp" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+            return 0
+        else
+            return 1
+        fi
+    fi
+    return 0
+}
 
 # Header
 echo -e "${CYAN}"
@@ -87,53 +116,61 @@ fi
 print_success "Build completed: target/${JAR_NAME}"
 
 # Step 2: Stop the server container
-print_step "Stopping server container..."
-
-# Find the actual running container by the pterodactyl container ID
-CONTAINER_FULL_ID=$(docker ps -a --filter "name=b8f24891-b5be-4847-a96e-c705c500aece" --format "{{.ID}}" | head -1)
-
-if [ -z "$CONTAINER_FULL_ID" ]; then
-    print_error "Could not find container!"
-    exit 1
-fi
-
-print_step "Found container: $CONTAINER_FULL_ID"
-
-# Stop the container
-docker stop "$CONTAINER_FULL_ID" 2>/dev/null
-STOP_EXIT=$?
-
-if [ $STOP_EXIT -eq 0 ]; then
-    print_step "Waiting for container to stop..."
-    WAIT_COUNT=0
-    while docker ps -q --filter "id=$CONTAINER_FULL_ID" 2>/dev/null | grep -q . 2>/dev/null; do
-        sleep 1
-        WAIT_COUNT=$((WAIT_COUNT + 1))
-        if [ $WAIT_COUNT -ge 15 ]; then
-            print_warning "Container slow to stop, killing..."
-            docker kill "$CONTAINER_FULL_ID" 2>/dev/null
-            sleep 2
-            break
-        fi
-    done
-    print_success "Container stopped (took ${WAIT_COUNT}s)"
+if [ "$SKIP_RESTART" == "true" ]; then
+    print_warning "Skipping container stop for MAIN server (use --restart to force)"
 else
-    print_warning "Container stop command failed, but continuing..."
-fi
+    print_step "Stopping server container..."
 
-# Safety wait for file handles
-sleep 2
+    # Find the actual running container by the pterodactyl container ID
+    CONTAINER_FULL_ID=$(docker ps -a --filter "name=b8f24891-b5be-4847-a96e-c705c500aece" --format "{{.ID}}" | head -1)
+
+    if [ -z "$CONTAINER_FULL_ID" ]; then
+        print_error "Could not find container!"
+        exit 1
+    fi
+
+    print_step "Found container: $CONTAINER_FULL_ID"
+
+    # Stop the container
+    docker stop "$CONTAINER_FULL_ID" 2>/dev/null
+    STOP_EXIT=$?
+
+    if [ $STOP_EXIT -eq 0 ]; then
+        print_step "Waiting for container to stop..."
+        WAIT_COUNT=0
+        while docker ps -q --filter "id=$CONTAINER_FULL_ID" 2>/dev/null | grep -q . 2>/dev/null; do
+            sleep 1
+            WAIT_COUNT=$((WAIT_COUNT + 1))
+            if [ $WAIT_COUNT -ge 15 ]; then
+                print_warning "Container slow to stop, killing..."
+                docker kill "$CONTAINER_FULL_ID" 2>/dev/null
+                sleep 2
+                break
+            fi
+        done
+        print_success "Container stopped (took ${WAIT_COUNT}s)"
+    else
+        print_warning "Container stop command failed, but continuing..."
+    fi
+
+    # Safety wait for file handles
+    sleep 2
+fi
 
 # Step 3: Remove old plugin if exists
 if [ -f "${PLUGIN_DIR}/${JAR_NAME}" ]; then
     rm -f "${PLUGIN_DIR}/${JAR_NAME}"
 fi
 
-# Step 3.5: Remove old shop directory to ensure fresh deployment
+# Step 3.5: Remove old shop directory to ensure fresh deployment (prompt before overwrite)
 if [ -d "${PLUGIN_DIR}/${PLUGIN_NAME}/SkillCoinsShop" ]; then
-    print_step "Removing old SkillCoinsShop directory..."
-    rm -rf "${PLUGIN_DIR}/${PLUGIN_NAME}/SkillCoinsShop"
-    print_success "Old shop removed"
+    if ask_overwrite "${PLUGIN_DIR}/${PLUGIN_NAME}/SkillCoinsShop" "Directory exists: ${PLUGIN_DIR}/${PLUGIN_NAME}/SkillCoinsShop. Remove and overwrite?"; then
+        print_step "Removing old SkillCoinsShop directory..."
+        rm -rf "${PLUGIN_DIR}/${PLUGIN_NAME}/SkillCoinsShop"
+        print_success "Old shop removed"
+    else
+        print_warning "Skipping SkillCoinsShop removal"
+    fi
 fi
 
 # Step 4: Copy new JAR
@@ -148,20 +185,41 @@ if [ ! -d "${CONFIG_DIR}" ]; then
     mkdir -p "${CONFIG_DIR}"
 fi
 
-# Copy default configs if they don't exist
+# Copy default configs if they don't exist; if they exist, prompt before overwriting
 if [ ! -f "${CONFIG_DIR}/config.yml" ]; then
     print_step "Copying default config.yml..."
     cp "src/main/resources/config.yml" "${CONFIG_DIR}/"
+else
+    if ask_overwrite "${CONFIG_DIR}/config.yml" "Config exists: ${CONFIG_DIR}/config.yml. Overwrite?"; then
+        print_step "Overwriting config.yml..."
+        cp "src/main/resources/config.yml" "${CONFIG_DIR}/"
+    else
+        print_warning "Skipping overwriting config.yml"
+    fi
 fi
 
 if [ ! -f "${CONFIG_DIR}/messages.yml" ]; then
     print_step "Copying default messages.yml..."
     cp "src/main/resources/messages.yml" "${CONFIG_DIR}/"
+else
+    if ask_overwrite "${CONFIG_DIR}/messages.yml" "File exists: ${CONFIG_DIR}/messages.yml. Overwrite?"; then
+        print_step "Overwriting messages.yml..."
+        cp "src/main/resources/messages.yml" "${CONFIG_DIR}/"
+    else
+        print_warning "Skipping overwriting messages.yml"
+    fi
 fi
 
 if [ ! -f "${CONFIG_DIR}/navbar.yml" ]; then
     print_step "Copying default navbar.yml..."
     cp "src/main/resources/navbar.yml" "${CONFIG_DIR}/"
+else
+    if ask_overwrite "${CONFIG_DIR}/navbar.yml" "File exists: ${CONFIG_DIR}/navbar.yml. Overwrite?"; then
+        print_step "Overwriting navbar.yml..."
+        cp "src/main/resources/navbar.yml" "${CONFIG_DIR}/"
+    else
+        print_warning "Skipping overwriting navbar.yml"
+    fi
 fi
 
 # Copy SkillCoinsShop directory (always fresh)
@@ -175,14 +233,19 @@ chown -R pterodactyl:pterodactyl "${PLUGIN_DIR}/${JAR_NAME}" 2>/dev/null || true
 chown -R pterodactyl:pterodactyl "${CONFIG_DIR}" 2>/dev/null || true
 
 # Step 7: Start the server
-print_step "Starting server container..."
+if [ "$SKIP_RESTART" == "true" ]; then
+    print_warning "Skipping server start for MAIN server (use --restart to force)."
+    print_step "Please start the server manually from the Pterodactyl panel when ready."
+else
+    print_step "Starting server container..."
 
-# Start container using the full container ID we found earlier
-docker start "$CONTAINER_FULL_ID" 2>&1
-START_EXIT=$?
+    # Start container using the full container ID we found earlier
+    docker start "$CONTAINER_FULL_ID" 2>&1
+    START_EXIT=$?
 
-if [ $START_EXIT -ne 0 ]; then
-    print_warning "Start command returned error code $START_EXIT, but checking if running anyway..."
+    if [ $START_EXIT -ne 0 ]; then
+        print_warning "Start command returned error code $START_EXIT, but checking if running anyway..."
+    fi
 fi
 
 # Wait for container to actually start

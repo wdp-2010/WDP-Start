@@ -114,6 +114,27 @@ public class PlayerData {
         return System.currentTimeMillis() < suppressLevelUpUntil;
     }
 
+    /**
+     * Suppress AuraSkills boss bar updates until the specified epoch millis.
+     * This is used to avoid a race where AuraSkills shows its own boss bar
+     * while WDP-Start is showing the tutorial boss bar (Quest 2 / Quest 5).
+     */
+    private long suppressBossBarUntil = 0;
+
+    public void setSuppressBossBarUntil(long untilMillis) {
+        this.suppressBossBarUntil = untilMillis;
+        this.lastUpdated = System.currentTimeMillis();
+    }
+
+    public void clearSuppressBossBar() {
+        this.suppressBossBarUntil = 0;
+        this.lastUpdated = System.currentTimeMillis();
+    }
+
+    public boolean isSuppressBossBarActive() {
+        return System.currentTimeMillis() < suppressBossBarUntil;
+    }
+
     // ==================== SETTERS ====================
     
     public void setPlayerName(String playerName) {

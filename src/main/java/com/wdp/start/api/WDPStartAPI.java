@@ -233,6 +233,43 @@ public class WDPStartAPI {
             return false;
         }
     }
+
+    /**
+     * Check if AuraSkills (or any other plugin) should suppress its bossbar
+     * when WDP-Start is displaying the tutorial bossbar (Quest 2 / Quest 5).
+     * Uses the same pattern as shouldSuppressLevelUpMessages.
+     */
+    public static boolean shouldSuppressBossBar(Player player) {
+        if (!isAvailable()) {
+            plugin.debug("WDP-Start API: Not available");
+            return false;
+        }
+
+        try {
+            PlayerData data = plugin.getPlayerDataManager().getData(player);
+            boolean transientSuppress = data.isSuppressBossBarActive();
+            if (transientSuppress) {
+                plugin.debug("WDP-Start API: Transient bossbar suppression active for " + player.getName());
+            }
+
+            // Suppress bossbar while player is on Quest 2 (Foraging) or Quest 5 (Mine 5 Stone)
+            boolean shouldSuppress = transientSuppress || (data.isStarted() && 
+                    (data.getCurrentQuest() == 2 || data.getCurrentQuest() == 5) && 
+                    !data.isQuestCompleted(data.getCurrentQuest()));
+
+            plugin.debug("WDP-Start API: Bossbar check for " + player.getName() + 
+                    " - Quest: " + data.getCurrentQuest() + ", Suppress: " + shouldSuppress);
+
+            if (shouldSuppress) {
+                plugin.debug("WDP-Start API: Suppressing bossbar for " + player.getName());
+            }
+
+            return shouldSuppress;
+        } catch (Exception e) {
+            plugin.getLogger().warning("WDP-Start API: Error checking bossbar suppression for " + player.getName() + ": " + e.getMessage());
+            return false;
+        }
+    }
     
     /**
      * Open the simplified shop menu for Quest 4

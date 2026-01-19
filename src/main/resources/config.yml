@@ -162,7 +162,7 @@ quest2:
   
   # Rewards (given when reaching level 1)
   rewards:
-    skillcoins: 20
+    skillcoins: 200
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                       Quest 3: Shop Tutorial                                │
@@ -178,7 +178,7 @@ quest3:
   
   # Rewards after shop purchase
   rewards:
-    skillcoins: 25
+    skillcoins: 250
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                       Quest 4: Token Exchange                               │
@@ -196,7 +196,7 @@ quest4:
   
   # Rewards after token purchase
   rewards:
-    skillcoins: 30
+    skillcoins: 300
 
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                      Quest 5: Quest Menu Tutorial                           │
@@ -208,7 +208,7 @@ quest5:
   
   # Rewards for finishing quest menu tutorial
   rewards:
-    skillcoins: 15
+    skillcoins: 150
   
   # Reminder timing (in seconds) - when to remind player to complete the quest
   # Set to 0 to disable reminders
@@ -259,7 +259,7 @@ quest6:
   # Generous final rewards for completing ALL tutorial quests
   final-rewards:
     skillcoins: 500
-    skilltokens: 25
+    skilltokens: 10
     items:
       - "DIAMOND:3"
       - "IRON_INGOT:16"

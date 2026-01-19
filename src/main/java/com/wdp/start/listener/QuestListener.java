@@ -369,12 +369,22 @@ public class QuestListener implements Listener {
         progress.incrementCounter("stone_mined", 1);
         int newCount = currentCount + 1;
         
+        // Update boss bar
+        plugin.getBossBarManager().updateBossBar(player);
+        
         // Send progress message
         player.sendMessage(plugin.getMessageManager().get("listener.stone-mined", "current", String.valueOf(newCount)));
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.2f);
         
         // Complete when reached 5
         if (newCount >= 5) {
+            // Suppress AuraSkills bossbar briefly to avoid UI race
+            data.setSuppressBossBarUntil(System.currentTimeMillis() + 2000);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                data.clearSuppressBossBar();
+                plugin.getPlayerDataManager().saveData(data);
+            }, 40L);
+
             // Complete the step
             plugin.getQuestManager().completeStep(player, 5, 1, "mined_stone");
             
@@ -382,7 +392,14 @@ public class QuestListener implements Listener {
             player.sendMessage(plugin.getMessageManager().get("listener.objective-complete.title"));
             player.sendMessage(plugin.getMessageManager().get("listener.objective-complete.instruction"));
             player.sendMessage("");
-            player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+            
+            // Play levelup sound combination (like AuraSkills)
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 0.5f);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 0.5f);
+                }
+            }, 4L); // 0.2 seconds delay
         }
     }
 }
